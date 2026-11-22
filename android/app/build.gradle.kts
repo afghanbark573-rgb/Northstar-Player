@@ -11,8 +11,37 @@ android {
         applicationId = "com.northstar.player"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0-native"
+        versionCode = 2
+        versionName = "0.1.1-native"
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+            val keystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            val keyAliasValue = System.getenv("ANDROID_KEY_ALIAS")
+            val keyPasswordValue = System.getenv("ANDROID_KEY_PASSWORD")
+
+            if (!keystorePath.isNullOrBlank()) {
+                storeFile = file(keystorePath)
+            }
+            if (!keystorePassword.isNullOrBlank()) {
+                storePassword = keystorePassword
+            }
+            if (!keyAliasValue.isNullOrBlank()) {
+                keyAlias = keyAliasValue
+            }
+            if (!keyPasswordValue.isNullOrBlank()) {
+                keyPassword = keyPasswordValue
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+        }
     }
 
     compileOptions {
