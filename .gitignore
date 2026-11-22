@@ -1,0 +1,10 @@
+# Android / Gradle outputs
+.gradle/
+**/build/
+local.properties
+
+# Signing material — never commit private release keys
+*.jks
+*.keystore
+*.p12
+*.pfx
