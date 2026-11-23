@@ -47,7 +47,7 @@ object LibraryBrowser {
         val normalizedQuery = query.trim().lowercase(Locale.ROOT)
 
         fun normalizedPath(path: String): String =
-            path.trimEnd('/').replace('\\\\', '/')
+            path.trimEnd('/').replace('\\', '/')
 
         fun matchesFolder(folder: FolderEntity): Boolean =
             normalizedQuery.isEmpty() ||
