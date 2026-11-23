@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -13,6 +14,7 @@ android {
         targetSdk = 35
         versionCode = 3
         versionName = "0.1.2-native"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -21,19 +23,10 @@ android {
             val keystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
             val keyAliasValue = System.getenv("ANDROID_KEY_ALIAS")
             val keyPasswordValue = System.getenv("ANDROID_KEY_PASSWORD")
-
-            if (!keystorePath.isNullOrBlank()) {
-                storeFile = file(keystorePath)
-            }
-            if (!keystorePassword.isNullOrBlank()) {
-                storePassword = keystorePassword
-            }
-            if (!keyAliasValue.isNullOrBlank()) {
-                keyAlias = keyAliasValue
-            }
-            if (!keyPasswordValue.isNullOrBlank()) {
-                keyPassword = keyPasswordValue
-            }
+            if (!keystorePath.isNullOrBlank()) storeFile = file(keystorePath)
+            if (!keystorePassword.isNullOrBlank()) storePassword = keystorePassword
+            if (!keyAliasValue.isNullOrBlank()) keyAlias = keyAliasValue
+            if (!keyPasswordValue.isNullOrBlank()) keyPassword = keyPasswordValue
         }
     }
 
@@ -52,6 +45,17 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+}
+
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+    }
 }
 
 dependencies {
@@ -59,4 +63,11 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.11.0")
     implementation("androidx.media3:media3-exoplayer:1.11.1")
     implementation("androidx.media3:media3-ui:1.11.1")
+
+    implementation("androidx.room:room-runtime:2.8.5")
+    implementation("androidx.room:room-ktx:2.8.5")
+    kapt("androidx.room:room-compiler:2.8.5")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    testImplementation("junit:junit:4.13.2")
 }
