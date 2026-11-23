@@ -565,3 +565,12 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Wrapped the test body in `runBlocking` so it can invoke Room suspend APIs correctly.
 - The prior workflow run [45175159918](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45175159918) had passed JVM unit tests and release signing but remained at the emulator instrumentation step at the last check. Its instrumentation result is not accepted as passed.
 - This fix triggers a fresh full validation run. Folder creation remains gated on the fresh emulator migration test.
+
+
+## Emulator CI boot configuration fix — 2026-11-23
+
+- Inspected the failed emulator job logs from run [45173392724](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45173392724). The emulator did not boot because the hosted Linux runner had no hardware CPU acceleration; the emulator explicitly reported software CPU emulation was disabled and ADB could not connect to port 5554.
+- Configured the emulator step with `ANDROID_I_WANT_MY_TCG=yes`, the emulator's documented opt-in for TCG software CPU emulation when hardware acceleration is unavailable.
+- The migration test now also runs inside `runBlocking` because its Room DAO lookup is suspend.
+- Fresh run [45175664390](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45175664390) was queued before this emulator configuration fix and should not be treated as the final gate.
+- This commit triggers a new validation run. The emulator test must complete successfully before folder creation is implemented.
