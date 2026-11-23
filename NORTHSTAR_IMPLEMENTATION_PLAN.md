@@ -418,7 +418,7 @@ Preserve the active sort/filter order. Define behavior when a queue item becomes
 - Tune the threshold, hold duration, cancellation, and gesture arbitration to avoid accidental activation during ordinary refresh, scrolling, or folder navigation.
 - The gesture is available on the main library and folder pages, not inside the video player.
 
-### 8.3 PIN, biometrics, and recovery
+### 8.4 PIN, biometrics, and recovery
 
 - Require PIN and support biometric unlock.
 - Rate-limit repeated PIN failures and avoid revealing whether a PIN guess is close.
@@ -432,7 +432,7 @@ Preserve the active sort/filter order. Define behavior when a queue item becomes
 - Recovery remains local-first, with no server-based recovery or automatic cloud upload.
 - The exact key hierarchy, answer normalization, secure answer processing, rate-limiting, lockout policy, and recovery-key wrapping mechanism remain engineering design work and require security review before implementation.
 
-### 8.4 Threat and privacy review
+### 8.5 Threat and privacy review
 
 Before release, review:
 - Rooted/compromised device limitations.
@@ -669,23 +669,176 @@ These are development milestones, not separate product releases.
 
 ---
 
-## 14. Product decisions still requiring user confirmation
+## 14. Resolved product decisions and remaining engineering gates
 
-These are the only currently identified product choices that should be returned to the user. Do not reopen already locked decisions.
+All currently identified user-facing product decisions are resolved and recorded in `NORTHSTAR_PRODUCT_SPEC.md`. This section is a continuity checklist, not a list of questions to reopen.
 
-1. **Private import behavior — RESOLVED:** Move only. No Copy option and no separate Delete action. Use the safe staged-transfer procedure in Section 8.2; if Android prevents source removal, report the move as incomplete and preserve the original.
-2. **Private recovery experience — RESOLVED:** curated Northstar-provided question bank; user selects any three and answers all three. No user-created questions. Cryptographic recovery implementation remains an engineering/security design task, not a further product choice at this stage.
-3. **Nested View interaction — RESOLVED:** normal folder-opening navigation with a folder page, Back control, breadcrumb path, Create Folder icon, compact unified controls icon for Sort/View Mode/Layout, and pull-to-refresh. No expandable/inline tree.
-4. **Sorting options — RESOLVED:** provide separate Date Added and Date Modified options (both newest first), alongside A–Z and Largest. Use source-provided dates where reliable; do not invent missing dates.
-5. **Player gesture arrangement — RESOLVED:** left vertical = brightness; right vertical = volume; left double-tap = seek backward; right double-tap = seek forward; press-and-hold = temporary 2× playback.
-6. **Top navigation — RESOLVED:** Northstar title on the left; Profile/You, unified Library Controls, and Search icons on the right, in that order. The unified controls icon is between Profile/You and Search and contains all Sort, View Mode, and Layout options. Do not add bottom navigation. Detailed visual styling remains a design task.
-7. **Background audio and PiP — RESOLVED:** the headphone icon is a temporary session-based toggle: it arms audio-only background behavior without closing the video/player, and the same icon disarms it while the user is in the video. The video remains visible while the user stays in the video; when the user goes Home or leaves the video with the mode armed, audio continues without floating video. Completely closing/terminating the app ends the mode and its background playback; it is not restored on the next launch and starts off until the user activates it again. The dedicated PiP icon is always visible/available and always works. Settings only toggles automatic PiP on Home-button press; disabling it does not affect the icon. Keep audio-only playback and PiP as separate modes.
+1. **Private import — RESOLVED:** Move only. No Copy option and no separate Delete action. Use the safe staged-transfer procedure in Section 8.2; if Android prevents source removal, report the move as incomplete and preserve the original.
+2. **Private recovery experience — RESOLVED:** curated Northstar-provided question bank; user selects any three and answers all three. No user-created questions. Cryptographic recovery remains an engineering/security design task.
+3. **Nested View — RESOLVED:** normal folder-opening navigation with folder page, Back, breadcrumb, Create Folder, unified controls, and pull-to-refresh. No expandable/inline tree.
+4. **Sorting — RESOLVED:** Date Added and Date Modified (both newest first), A–Z, and Largest. Use provider values where reliable; never invent dates.
+5. **Player gestures — RESOLVED:** left vertical swipe = brightness; right vertical swipe = volume; left double-tap = backward seek; right double-tap = forward seek; press-and-hold = temporary 2×.
+6. **Top navigation — RESOLVED:** Northstar title on the left; Profile/You, unified Library Controls, Search on the right in that order; no bottom navigation.
+7. **Headphone Mode and PiP — RESOLVED:** Headphone Mode is a session-only toggle, reset off on next launch; its icon arms/disarms audio-only continuation. Completely closing/terminating the app ends background playback. Dedicated PiP always works; Settings controls only automatic Home-button PiP.
 
-Technical engine choice, encryption implementation, schema details, and exact scan strategy are engineering decisions to be justified by tests; they do not need to be presented as product questionnaires unless they change the user experience or data-loss risk.
+### Engineering gates to close in the design and validation work
 
----
+- Playback-engine benchmark and final engine selection.
+- Security-reviewed Private Library key hierarchy and three-answer recovery design.
+- Room schema, stable media identity, migrations, scan reconciliation, and NEW-indicator acknowledgement behavior.
+- USB/SD disconnect/reconnect and permission-revocation behavior.
+- Resume completion threshold, progress-save interval, and Previous/Next queue ordering.
+- Headphone Mode task-removal/process-death/force-stop behavior and PiP lifecycle validation.
+- Detailed visual specifications, screen layouts, accessibility, and acceptance tests.
 
-## 15. Approval and implementation status
+These are engineering tasks. Do not turn them into a questionnaire unless investigation reveals a genuine product choice or a material risk to user data/security.
+## 15. Screen-by-screen UX blueprint and system flows
+
+This is a structural wireframe specification, not a final pixel design. It fixes hierarchy and navigation while leaving spacing, icon artwork, typography scale, and animation tuning to the visual design pass.
+
+### 15.1 Main Library — default Video Folders mode
+
+```text
+┌──────────────────────────────────────────┐
+│ Northstar                 You  Controls  Search │
+├──────────────────────────────────────────┤
+│ [Folder list or grid]                    │
+│                                          │
+│  Folder name                 NEW • count │
+│  Folder name                       count │
+│  Folder name                       count │
+│                                          │
+│  (No bottom navigation)                  │
+└──────────────────────────────────────────┘
+```
+
+- Title stays left; right-side actions are You, unified controls, Search in that order.
+- Folder content is the primary screen. No Favorites/History dashboard sections.
+- Unified controls opens a compact grouped menu for Sort, View Mode, and Layout.
+- Search opens a focused search experience; results show filename and containing folder.
+- Loading, empty, permission-denied, partial-access, and scan-error states are distinct.
+
+### 15.2 Video Folders and folder page
+
+- Video Folders lists only folders containing accessible videos.
+- Opening a folder navigates to a folder page; it does not expand an inline tree.
+- Folder page toolbar: Back, compact breadcrumb, Create Folder, unified controls.
+- The content area shows child folders and videos for the current location.
+- Pull-to-refresh refreshes the current folder. The separate pull-past-threshold-and-hold shortcut opens only Private Library authentication.
+
+### 15.3 Files Only
+
+- Reuses the same top navigation and unified controls.
+- Displays video files directly, with List/Grid layout and all four sort choices.
+- Each search/result row identifies its containing folder.
+- Starting playback captures the visible result order as the Previous/Next queue.
+
+### 15.4 Nested View
+
+- Shows the complete folder hierarchy, including empty folders.
+- Folder rows navigate into their own folder page.
+- Breadcrumb ancestors navigate directly to the selected ancestor.
+- Do not flatten the hierarchy or implement an expandable/inline tree.
+
+### 15.5 You page
+
+```text
+┌──────────────────────────────────────────┐
+│ ← You                                    │
+├──────────────────────────────────────────┤
+│ Favorites                                │
+│ Watch History                            │
+│ Private Library                          │
+│ Settings                                 │
+└──────────────────────────────────────────┘
+```
+
+- Private Library is a visible destination, not a hidden gesture-only feature.
+- Opening it always requires PIN or biometric authentication.
+- Settings includes automatic Home-button PiP only; it does not control the dedicated PiP icon.
+
+### 15.6 Player
+
+- Full-screen video is the primary surface.
+- Controls overlay includes Back, title, headphone toggle, dedicated PiP icon, playback controls, timeline/time display, speed, tracks/subtitles, orientation, and fullscreen as supported by the chosen engine.
+- Headphone Mode has an unmistakable armed indicator and can be disarmed from the player.
+- The dedicated PiP icon is always available regardless of the automatic-PiP setting.
+- Gestures follow the locked left/right convention and are arbitrated against taps, holds, and system navigation.
+
+### 15.7 Private Library
+
+- Authentication gate precedes all private content.
+- Private file-manager view supports folder/subfolder navigation, create-folder, and Move to Private Library.
+- Import progress and failure states distinguish destination verification from source-removal success.
+- PIN setup includes selection of three questions from Northstar's curated list.
+- Recovery answers are never shown or stored as plaintext; private media and metadata stay outside public library/search/history/diagnostics.
+
+### 15.8 USB/SD access
+
+- External-storage entry point explains that Android may require the user to select a folder.
+- After grant, browse the selected tree with source identity clearly distinguished from internal storage.
+- Disconnected/revoked sources show an unavailable state and a route to reconnect/reselect; internal library remains usable.
+
+### 15.9 Permission and media discovery flow
+
+```mermaid
+flowchart TD
+ A[App opens] --> B[Inspect current media permission]
+ B --> C{Permission scope?}
+ C -->|Full| D[Query accessible MediaStore items]
+ C -->|Partial| E[Query selected accessible items]
+ C -->|Denied| F[Explain and request permission]
+ F --> B
+ D --> G[Reconcile records in Room]
+ E --> G
+ G --> H[Publish library state]
+ H --> I[Observe media changes / refresh]
+ I --> J[Incremental reconciliation]
+ J --> G
+```
+
+A failed or interrupted scan must never replace the last known-good library snapshot.
+
+### 15.10 Playback and Headphone Mode lifecycle
+
+```mermaid
+flowchart TD
+ A[Video playing in player] --> B{Headphone icon tapped?}
+ B -->|Yes| C[Headphone Mode armed]
+ C --> D[Video remains visible and plays normally]
+ D --> E{User leaves video or presses Home?}
+ E -->|Yes| F[Continue audio only; no floating video]
+ E -->|No| D
+ F --> G{Return to player?}
+ G -->|Yes| H[Player shows armed state; icon can disarm]
+ H --> D
+ F --> I{App task closed / playback explicitly stopped?}
+ I -->|Yes| J[Stop service and clear session mode]
+ J --> K[Next launch starts with mode off]
+```
+
+Engineering must distinguish leaving the Activity (which may preserve service playback) from removing the app task, explicit stop, process death, and Android force-stop. The session flag must not be persisted as a preference or restored after a new app launch. Android may not provide a graceful callback for every process-kill/force-stop path; design the service and session token so playback cannot be resurrected on next launch, and verify task-removal behavior on device.
+
+### 15.11 Private move flow
+
+```mermaid
+flowchart TD
+ A[User selects Move to Private Library] --> B[Read source through granted URI]
+ B --> C[Encrypt and stage private destination]
+ C --> D{Integrity and readability verified?}
+ D -->|No| E[Keep original; clean or quarantine incomplete stage]
+ D -->|Yes| F[Commit verified private destination]
+ F --> G[Request source removal]
+ G --> H{Android confirms removal?}
+ H -->|Yes| I[Report move complete]
+ H -->|No| J[Report incomplete; original remains; preserve verified private copy for retry]
+```
+
+### 15.12 Approval boundary
+
+The wireframes and flows above define the structure and system behavior for review. The engine benchmark, security design, schema/migrations, permission matrix, and device acceptance evidence remain engineering gates. No source-code changes or APK release are authorized by this design document alone.
+
+## 16. Approval and implementation status
 
 - [x] Eight product discussions completed and recorded.
 - [x] Master product specification saved in GitHub.
@@ -693,9 +846,10 @@ Technical engine choice, encryption implementation, schema details, and exact sc
 - [x] Initial gap assessment recorded.
 - [x] Integrated implementation plan drafted.
 - [ ] User reviews and approves this implementation plan.
-- [ ] Resolve the product decisions in Section 14.
-- [ ] Prepare detailed screen-by-screen wireframes and data/permission flow diagrams.
+- [x] Consolidate all currently identified product decisions as resolved in Section 14.
+- [x] Prepare structural screen-by-screen wireframes and core data/permission/playback flow diagrams.
+- [ ] Complete visual-detail review and engineering risk review.
 - [ ] Begin implementation only after approval.
 - [ ] Deliver one coordinated, tested product release.
 
-**Current status: planning only. No application code was changed as part of this plan.**
+**Current status: design and readiness review. Product decisions are resolved; this integrated plan and its wireframes await the user's explicit approval before any application-code changes. No application code was changed as part of this plan.**
