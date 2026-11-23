@@ -392,3 +392,14 @@ The approved implementation plan is now in active development on `phase-0/releas
 2. Verify generated Room schema output and commit the v1 schema artifact; add migration coverage before schema changes.
 3. Locate and inspect the existing test source tree before adding scanner batching, cancellation, failure-state and FULL/PARTIAL reconciliation tests.
 4. Review WorkManager concurrency and scan reconciliation before advancing to more UI work.
+
+
+## CI validation improvement — 2026-11-23
+
+- Updated `.github/workflows/android-build.yml` in commit `bef7aa8475e51e82087cd6d3ce78b54faa6ee364`.
+- The debug job now runs `:app:testDebugUnitTest` before `:app:assembleDebug`.
+- The workflow now uploads generated Room schema JSON as a separate `northstar-room-schema` artifact and fails if no schema JSON is produced. This turns schema generation into an explicit CI gate rather than relying on an unverified local assumption.
+- The previous confirmed run `45153766356` for commit `7051f7b92cb31f6abe236c6ff88551297ad86d12` completed successfully: debug APK and signed release APK both built, release keystore restore succeeded, apksigner verification succeeded, and both APK artifacts were uploaded. This run did not run the newly added unit-test/schema-artifact steps.
+- New validation run `45154832966` was triggered by the workflow change on current native branch head `bef7aa8475e51e82087cd6d3ce78b54faa6ee364`. At the time of this update, both jobs were still in progress; do not claim the new unit tests or schema artifact succeeded until the run completes.
+- Existing unit tests found in the branch: five permission resolver tests and three folder-indexer tests. No scanner batching/cancellation or Room repository reconciliation tests were found in the inspected test directories.
+- No APK was delivered to the user and no Xiaomi 14 runtime test is claimed.
