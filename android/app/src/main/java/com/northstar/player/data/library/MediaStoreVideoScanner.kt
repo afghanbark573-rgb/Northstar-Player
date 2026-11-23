@@ -53,6 +53,7 @@ class MediaStoreVideoScanner(
             try {
                 val count = queryAndPersist()
                 val completedAt = clock()
+                repository.refreshFolderIndex(sourceKey, permissionScope, completedAt)
                 repository.saveScanState(
                     ScanStateEntity(
                         sourceKey = sourceKey,
