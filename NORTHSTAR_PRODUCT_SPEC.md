@@ -34,7 +34,7 @@ Guiding principles:
 
 **Folder hierarchy:** preserve the actual parent-child structure and include empty folders in Nested View.
 
-**Private Library quick access gesture:** On the main library and folder pages, a normal pull-down followed by release refreshes the current page. Pulling beyond the normal refresh threshold and holding briefly activates a distinct Private Library access gesture. This opens only the Private Library authentication screen; PIN or biometric authentication remains mandatory and the gesture never bypasses it. The gesture is not available inside the video player. The gesture must have clear visual feedback and be tuned to avoid accidental activation during ordinary refresh. It does not apply inside the video player.
+**Private Library quick access gesture:** On the main library and folder pages, a normal pull-down followed by release refreshes the current page. Pulling beyond the normal refresh threshold and holding briefly activates a distinct Private Library access gesture. This opens only the Private Library authentication screen; PIN or biometric authentication remains mandatory and the gesture never bypasses it. The gesture is not available inside the video player. It must have clear visual feedback and be tuned to avoid accidental activation during ordinary refresh.
 
 4. **Search:** search videos by filename.
 5. **Sorting:** Date Added, Date Modified, A–Z, and Largest. Date Added and Date Modified are separate sort options; both show newest first. Date Added uses the storage provider's added/indexed date where available. Date Modified uses the file's last-modified date where available. If a source does not provide a reliable date, handle that item consistently without inventing a timestamp.
@@ -70,10 +70,10 @@ Sort, View Mode, and Layout must be together in one single, easy-to-find control
 3. **Home screen:** folder-focused library.
 4. **Secondary options:** no scattered menus. The Profile/You icon opens the **You** page. Settings and all other secondary options belong there. The adjacent unified Library Controls icon opens one compact menu containing all Sort, View Mode, and Layout options.
 5. **You page destinations:** show clear, directly accessible entries for Favorites, Watch History, Private Library, and Settings. Private Library must be visibly listed as a normal destination in You; the pull-and-hold gesture is an additional shortcut, never the only discovery or access method.
-5. **Consistency:** consistent visual language across the library, folders, You page, and player.
-6. **Feedback:** clear loading, empty, permission, and error states.
-7. **Animations:** subtle and smooth, never distracting.
-8. **Accessibility:** readable text and comfortable touch targets.
+6. **Consistency:** consistent visual language across the library, folders, You page, and player.
+7. **Feedback:** clear loading, empty, permission, and error states.
+8. **Animations:** subtle and smooth, never distracting.
+9. **Accessibility:** readable text and comfortable touch targets.
 
 **Precedence:** This AMOLED black-and-white theme is the latest user-approved visual direction and supersedes the older Graphite Orange proposal in earlier project notes.
 
@@ -198,22 +198,22 @@ Recorded successful signed CI run: https://github.com/afghanbark573-rgb/Northsta
 
 The existing native app is a starting foundation, not the completed product. The new discussions describe the target product and do not mean these features already exist. Before implementation, re-check the live branch and source because repository state may have changed since this snapshot.
 
-## 12. Important distinctions and unresolved implementation details
+## 12. Remaining engineering design and validation gates
 
-These details require technical design or explicit user approval before implementation:
-- Exact visual styling and detailed interaction of the unified Sort / View Mode / Layout menu remain design tasks. Its top-bar placement and order are locked: Profile/You, unified Library Controls, Search.
-- Whether Private Library import copies, moves, or lets the user choose.
-- Exact forgotten-PIN recovery method and consequences for encrypted data.
-- Exact behavior when a USB/SD device disconnects during browsing or playback.
-- Exact rules for what counts as a newly discovered folder/video and when NEW indicators clear.
-- Exact fallback behavior when a storage provider does not expose a reliable Date Added or Date Modified value.
-- Duplicate detection strategy and whether it is metadata-only or content-hash based.
-- Playback engine benchmark results and format/subtitle compatibility.
-- Whether all external subtitle formats and embedded tracks can be supported by the selected engine.
-- Exact navigation/context behavior for Previous/Next when playback starts from Files Only or search results.
-- Acceptance criteria and UI layouts for each requirement.
+The following are engineering decisions or validation tasks, not unresolved product choices. They must be documented and tested before implementation or release as appropriate:
 
-Do not treat these open implementation details as reasons to reopen already locked product decisions. Resolve them in the specification/technical design phase, asking the user only where a genuine product choice is needed.
+- **Library presentation:** finalize visual styling and detailed interaction polish for the unified Sort / View Mode / Layout menu while preserving its locked placement and contents.
+- **Media discovery:** define stable identity across MediaStore and SAF, source reconciliation, duplicate handling, and behavior for missing/unreliable provider dates.
+- **NEW indicators:** specify the discovery/acknowledgement state machine and verify it survives restarts without false positives.
+- **External storage:** define user-facing behavior for USB/SD disconnects, revoked grants, unavailable files, and reconnect/reselection.
+- **Playback engine:** benchmark Media3, LibVLC, and mpv against the agreed corpus; document codec, subtitle, track, performance, licensing, and maintenance evidence before selecting an engine.
+- **Playback queue:** implement Previous/Next using the active folder, Files Only result set, or search result set, preserving the order from which playback began.
+- **Resume/history:** choose and test the completion threshold and progress-save interval; ensure private playback never enters public history.
+- **Private Library security:** complete a threat model and security review for encryption, Keystore key hierarchy, recovery-answer processing, offline-guessing resistance, lockout/rate limiting, biometric invalidation, and interrupted move recovery.
+- **Android lifecycle:** validate background playback, task removal, process death, force-stop behavior, session-only Headphone Mode, and the independent PiP entry paths across supported Android versions and Xiaomi 14.
+- **Acceptance and design:** finish screen layouts, accessibility/touch-target checks, data-flow diagrams, and test cases before the implementation plan is approved.
+
+Do not return already locked product decisions to the user as unresolved questions. Ask only if a technical finding exposes a genuine change to the agreed user experience or a material data-loss/security risk.
 
 ## 13. Continuity rules for every future Northstar session
 
