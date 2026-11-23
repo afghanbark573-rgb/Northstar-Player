@@ -526,3 +526,15 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Stale staging generations are cleared before a new scan after their generation timestamp has been considered, so a retry always uses a newer generation.
 - Database version is now 2, with explicit `MIGRATION_1_2` creating the staging table and its indexes. The migration is registered in the database builder; destructive fallback is not enabled.
 - This is an application data-model migration and must be verified by CI Room schema export and migration validation before proceeding to folder creation. Physical-device upgrade testing remains required.
+
+
+## SAF staging-table follow-up and CI checkpoint — 2026-11-23
+
+- Confirmed CI run [45171712123](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45171712123) completed successfully for commit `704f89b4d4f03215f3d5235e2b1749b2b157ff89`: JVM unit tests, debug APK, Room schema artifact, signed release APK and apksigner verification all passed.
+- A deeper review then found that staging rows inside the canonical `media_items` table could replace an existing row with the same stable media key before the new scan completed. This was corrected in commit `d3ec19628b529da7df3f48c10d2edf7c553c22a7`.
+- Added a dedicated `saf_staged_media` table. SAF batches now write to this isolated table. The final Room transaction copies the complete generation to canonical media, retires missing records, replaces folders, updates grant availability and scan state, and clears staging.
+- Added Room database version 2 and explicit migration `MIGRATION_1_2`; the migration creates the staging table and indexes without destructive fallback.
+- Updated scan-generation unit test parameter names in commit `c103832dead2cfb4bc0b15770f3b757c3bcaf0e8`.
+- CI run [45172461382](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45172461382) tested the pre-test-fix commit `d3ec196`; its debug unit-test compilation failed only because the tests still used the old named parameter. The release job is separate. This run does not validate the current head.
+- CI run [45172696168](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45172696168) is the validation run for current code commit `c103832dead2cfb4bc0b15770f3b757c3bcaf0e8`; at checkpoint update it was still running. Do not claim migration/schema/build success until it completes.
+- Next gate: confirm Room v2 schema export and both CI jobs. Then add a real migration test before relying on v1-to-v2 upgrade behavior; provider/device tests remain outstanding. Do not distribute intermediate APKs.
