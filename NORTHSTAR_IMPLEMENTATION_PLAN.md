@@ -244,8 +244,9 @@ MediaStore and SAF may expose different URI formats and metadata. Use a source-a
 ### 6.1 Main shell
 
 - Launch into the folder-focused library.
-- Top navigation contains the frequently used navigation controls; the exact final item set and order must be finalized in the screen design.
-- A profile icon opens the **You** page.
+- Top navigation: Northstar title on the left; Profile/You icon, unified Library Controls icon, and Search icon on the right, in that exact left-to-right order.
+- The Profile/You icon opens the **You** page.
+- The single Library Controls icon sits between Profile/You and Search. It opens one compact menu containing all three control groups: Sort (Date Added, Date Modified, A–Z, Largest), View Mode (Video Folders, Files Only, Nested View), and Layout (List, Grid). Each option/group is presented with a simple icon and text label. Do not add separate top-bar buttons for these controls.
 - Keep the bottom area free of bottom-navigation controls.
 - Keep the player hidden until a video is selected.
 - Keep the home screen focused on folders; do not add Favorites, History, Recently Added, or Smart Collections as home sections.
@@ -666,7 +667,7 @@ These are the only currently identified product choices that should be returned 
 3. **Nested View interaction — RESOLVED:** normal folder-opening navigation with a folder page, Back control, breadcrumb path, Create Folder icon, compact unified controls icon for Sort/View Mode/Layout, and pull-to-refresh. No expandable/inline tree.
 4. **Sorting options — RESOLVED:** provide separate Date Added and Date Modified options (both newest first), alongside A–Z and Largest. Use source-provided dates where reliable; do not invent missing dates.
 5. **Player gesture arrangement — RESOLVED:** left vertical = brightness; right vertical = volume; left double-tap = seek backward; right double-tap = seek forward; press-and-hold = temporary 2× playback.
-6. **Top navigation:** The You/profile entry is locked. The remaining top-level navigation items and exact order should be settled in the screen mockup. Do not add bottom navigation.
+6. **Top navigation — RESOLVED:** Northstar title on the left; Profile/You, unified Library Controls, and Search icons on the right, in that order. The unified controls icon is between Profile/You and Search and contains all Sort, View Mode, and Layout options. Do not add bottom navigation. Detailed visual styling remains a design task.
 7. **Background playback:** Audio playback outside the app is locked. Confirm whether it should continue automatically when the user leaves the app, or only after the user explicitly enables/starts background audio. Do not add Picture-in-Picture unless separately approved.
 
 Technical engine choice, encryption implementation, schema details, and exact scan strategy are engineering decisions to be justified by tests; they do not need to be presented as product questionnaires unless they change the user experience or data-loss risk.
