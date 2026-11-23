@@ -34,6 +34,8 @@ Guiding principles:
 
 **Folder hierarchy:** preserve the actual parent-child structure and include empty folders in Nested View.
 
+**Private Library quick access gesture:** On the main library and folder pages, a normal pull-down followed by release refreshes the current page. Pulling beyond the normal refresh threshold and holding briefly activates a distinct Private Library access gesture. This only opens the Private Library authentication screen; it never bypasses PIN or biometric authentication. The gesture must have clear visual feedback and be tuned to avoid accidental activation during ordinary refresh. It does not apply inside the video player.
+
 4. **Search:** search videos by filename.
 5. **Sorting:** Date Added, Date Modified, A–Z, and Largest. Date Added and Date Modified are separate sort options; both show newest first. Date Added uses the storage provider's added/indexed date where available. Date Modified uses the file's last-modified date where available. If a source does not provide a reliable date, handle that item consistently without inventing a timestamp.
 6. **New content:** small NEW indicators on relevant folders.
