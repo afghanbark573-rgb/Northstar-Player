@@ -359,7 +359,7 @@ Required:
 - Per-video resume offer.
 - Previous/Next follows the active folder or selected library context.
 
-Gesture zones and conflict rules (for example, swipe versus double-tap versus hold) must be designed and tested to avoid accidental actions. Proposed convention: left-side vertical swipe for brightness, right-side vertical swipe for volume, and left/right double-tap zones for seeking; confirm in player UX design.
+Approved gesture convention (23 November 2026): left-side vertical swipe controls brightness; right-side vertical swipe controls volume; double-tap left side seeks backward and double-tap right side seeks forward; press-and-hold temporarily switches to 2× and restores the prior speed on release/cancel. Design gesture zones and conflict handling so swipes, taps, and holds do not trigger accidentally; validate on the user's Xiaomi 14.
 
 ### 7.3 Playback service and lifecycle
 
@@ -655,7 +655,7 @@ These are the only currently identified product choices that should be returned 
 2. **Private recovery experience — RESOLVED:** curated Northstar-provided question bank; user selects any three and answers all three. No user-created questions. Cryptographic recovery implementation remains an engineering/security design task, not a further product choice at this stage.
 3. **Nested View interaction — RESOLVED:** normal folder-opening navigation with a folder page, Back control, breadcrumb path, Create Folder icon, compact unified controls icon for Sort/View Mode/Layout, and pull-to-refresh. No expandable/inline tree.
 4. **Sorting options — RESOLVED:** provide separate Date Added and Date Modified options (both newest first), alongside A–Z and Largest. Use source-provided dates where reliable; do not invent missing dates.
-5. **Swipe gestures:** Recommended left-side vertical swipe = brightness; right-side vertical swipe = volume. Confirm or change.
+5. **Player gesture arrangement — RESOLVED:** left vertical = brightness; right vertical = volume; left double-tap = seek backward; right double-tap = seek forward; press-and-hold = temporary 2× playback.
 6. **Top navigation:** The You/profile entry is locked. The remaining top-level navigation items and exact order should be settled in the screen mockup. Do not add bottom navigation.
 7. **Background playback:** Audio playback outside the app is locked. Confirm whether it should continue automatically when the user leaves the app, or only after the user explicitly enables/starts background audio. Do not add Picture-in-Picture unless separately approved.
 
