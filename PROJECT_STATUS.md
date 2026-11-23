@@ -273,3 +273,11 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Provide clear threshold/hold feedback and tune gesture arbitration to avoid accidental activation during ordinary refresh, scrolling, and navigation.
 - This gesture is available on the main library and folder pages, not inside the video player.
 - Recorded in the master product specification and integrated implementation plan. No application code has been changed.
+
+
+## Private Library discoverability in You page — 2026-11-23
+
+- The You/profile page must visibly list Private Library as a normal, directly accessible destination alongside Favorites, Watch History, and Settings.
+- The pull-and-hold gesture is an additional quick-access shortcut only. It must never be the only way users can discover or open Private Library.
+- Selecting the You-page Private Library entry still requires PIN or biometric authentication.
+- Recorded in the master product specification and integrated implementation plan. No application code has been changed.
