@@ -9,6 +9,8 @@ import com.northstar.player.core.database.ScanStateEntity
 import com.northstar.player.core.permissions.VideoPermissionScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -19,7 +21,8 @@ data class MediaScanResult(
 )
 
 /**
- * Reads Android's indexed video collection. It never writes to or deletes source media.
+ * Reads Android's indexed video collection and streams bounded batches into Room.
+ * It never writes to or deletes source media.
  *
  * Partial-access scans are additive/upsert-only. A partial result is not proof that
  * unreturned media was deleted or became unavailable.
@@ -48,10 +51,7 @@ class MediaStoreVideoScanner(
             )
 
             try {
-                val found = queryVideos()
-                // Bounded batches avoid a single oversized SQLite operation for large libraries.
-                found.chunked(400).forEach { batch -> repository.saveVideos(batch) }
-
+                val count = queryAndPersist()
                 val completedAt = clock()
                 repository.saveScanState(
                     ScanStateEntity(
@@ -62,9 +62,7 @@ class MediaStoreVideoScanner(
                         lastError = null
                     )
                 )
-                Result.success(
-                    MediaScanResult(found.size, permissionScope, completedAt)
-                )
+                Result.success(MediaScanResult(count, permissionScope, completedAt))
             } catch (cancelled: CancellationException) {
                 repository.saveScanState(
                     ScanStateEntity(
@@ -90,7 +88,7 @@ class MediaStoreVideoScanner(
             }
         }
 
-    private fun queryVideos(): List<MediaItemEntity> {
+    private suspend fun queryAndPersist(): Int {
         val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
@@ -102,7 +100,8 @@ class MediaStoreVideoScanner(
             MediaStore.Video.Media.DATE_MODIFIED,
             MediaStore.Video.Media.RELATIVE_PATH
         )
-        val result = ArrayList<MediaItemEntity>()
+        var discovered = 0
+        val batch = ArrayList<MediaItemEntity>(BATCH_SIZE)
 
         resolver.query(collection, projection, null, null, null)?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
@@ -115,8 +114,9 @@ class MediaStoreVideoScanner(
             val pathColumn = cursor.getColumnIndex(MediaStore.Video.Media.RELATIVE_PATH)
 
             while (cursor.moveToNext()) {
+                currentCoroutineContext().ensureActive()
                 val uri = ContentUris.withAppendedId(collection, cursor.getLong(idColumn))
-                result += MediaItemEntity(
+                batch += MediaItemEntity(
                     mediaKey = uri.toString(),
                     uri = uri.toString(),
                     displayName = cursor.stringOrNull(nameColumn) ?: "Untitled video",
@@ -131,10 +131,17 @@ class MediaStoreVideoScanner(
                     isAvailable = true,
                     indexedAtMillis = clock()
                 )
+                discovered++
+                if (batch.size >= BATCH_SIZE) {
+                    repository.saveVideos(batch.toList())
+                    batch.clear()
+                }
             }
         } ?: throw IOException("Android MediaStore did not return a video cursor")
 
-        return result
+        currentCoroutineContext().ensureActive()
+        if (batch.isNotEmpty()) repository.saveVideos(batch)
+        return discovered
     }
 
     private fun Cursor.stringOrNull(index: Int): String? =
@@ -149,5 +156,6 @@ class MediaStoreVideoScanner(
     companion object {
         const val SOURCE_TYPE = "MEDIA_STORE"
         const val SOURCE_KEY = "mediastore:external"
+        private const val BATCH_SIZE = 400
     }
 }

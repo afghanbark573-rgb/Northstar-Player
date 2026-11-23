@@ -177,6 +177,6 @@ class MainActivity : ComponentActivity() {
     private fun releasePlayer() { playerView?.player = null; playerView = null; player?.release(); player = null }
     private fun duration(ms: Long): String { val s = ms / 1000; return "%d:%02d".format(s / 60, s % 60) }
     private fun size(bytes: Long) = when { bytes >= 1073741824 -> "%.1f GB".format(bytes / 1073741824.0); bytes >= 1048576 -> "%.1f MB".format(bytes / 1048576.0); else -> "${bytes} B" }
-    override fun onStop() { super.onStop(); player?.pause() }
+    override fun onStart() {\n        super.onStart()\n        if ((application as NorthstarApplication).videoPermissionChecker.currentScope() != com.northstar.player.core.permissions.VideoPermissionScope.DENIED) {\n            (application as NorthstarApplication).mediaLibraryScanScheduler.enqueueRefresh()\n        }\n    }\n\n    override fun onStop() { super.onStop(); player?.pause() }
     override fun onDestroy() { releasePlayer(); super.onDestroy() }
 }
