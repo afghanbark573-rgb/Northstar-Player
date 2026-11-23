@@ -538,3 +538,14 @@ The approved implementation plan is now in active development on `phase-0/releas
 - CI run [45172461382](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45172461382) tested the pre-test-fix commit `d3ec196`; its debug unit-test compilation failed only because the tests still used the old named parameter. The release job is separate. This run does not validate the current head.
 - CI run [45172696168](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45172696168) is the validation run for current code commit `c103832dead2cfb4bc0b15770f3b757c3bcaf0e8`; at checkpoint update it was still running. Do not claim migration/schema/build success until it completes.
 - Next gate: confirm Room v2 schema export and both CI jobs. Then add a real migration test before relying on v1-to-v2 upgrade behavior; provider/device tests remain outstanding. Do not distribute intermediate APKs.
+
+
+## Room migration verification coverage — 2026-11-23
+
+- CI run [45172696168](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45172696168) completed successfully for code commit `c103832dead2cfb4bc0b15770f3b757c3bcaf0e8`. Both jobs passed: JVM unit tests/debug APK/Room schema export and signed release APK/apksigner verification.
+- Inspected the uploaded Room schema artifact: it exports database version 2 and the `saf_staged_media` table with the intended composite primary key and source/generation indexes.
+- Added an Android instrumentation test that constructs the exact exported v1 table/index layout, inserts an existing video row, opens the database using the actual `MIGRATION_1_2`, and verifies the old row survives and the new staging table exists empty.
+- CI now launches an API 35 x86_64 emulator and runs `:app:connectedDebugAndroidTest` as part of the debug validation job.
+- Migration instrumentation implementation commit: `25b133cfa550163c878191702adc4b9eedd13987`.
+- Validation run [45173392724](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45173392724) is pending/in progress for the new instrumentation test and workflow. Do not treat the migration test as passed until this run completes.
+- This test validates the v1-to-v2 database migration; it does not replace physical-device SAF provider tests for USB/SD discovery, permission revocation, disconnect/reconnect, and playback.
