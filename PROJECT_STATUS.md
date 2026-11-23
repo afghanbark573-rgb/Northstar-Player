@@ -209,7 +209,7 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Status: drafted and saved for user review; not yet approved for implementation.
 - The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
 - No application source code was changed and no APK was built while preparing the plan.
-- Four product decisions remain listed in Section 14 of the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, and separate Date Added/Date Modified sorting are now resolved. Do not silently decide the remaining user-visible interaction details.
+- Three product decisions remain listed in Section 14 of the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, separate Date Added/Date Modified sorting, and player gesture arrangement are now resolved. Do not silently decide the remaining user-visible interaction details.
 - The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
 - `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
 - `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
@@ -254,3 +254,12 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Also retain A–Z and Largest.
 - If a provider does not expose a reliable date, handle the item consistently without inventing a timestamp. Folder NEW-indicator state remains separate from sorting.
 - This decision is recorded in the master product specification and implementation plan. No application code has been changed.
+
+
+## Approved player gesture arrangement — 2026-11-23
+
+- Left-side vertical swipe controls brightness.
+- Right-side vertical swipe controls volume.
+- Double-tap the left side to seek backward; double-tap the right side to seek forward.
+- Press and hold for temporary 2× playback; restore the previous speed on release or cancellation.
+- Gesture zones and conflict handling must prevent accidental triggers and be tested on the user's Xiaomi 14. The separate proposed folder-screen pull gesture for Private Library access has not been approved and is not part of this locked player gesture decision.
