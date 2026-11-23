@@ -106,6 +106,9 @@ interface MediaItemDao {
     @Query("SELECT * FROM media_items WHERE mediaKey = :mediaKey LIMIT 1")
     suspend fun findByKey(mediaKey: String): MediaItemEntity?
 
+    @Query("SELECT * FROM media_items WHERE sourceKey = :sourceKey AND isAvailable = 1")
+    suspend fun availableForSource(sourceKey: String): List<MediaItemEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<MediaItemEntity>)
 
@@ -120,6 +123,9 @@ interface MediaItemDao {
 interface FolderDao {
     @Query("SELECT * FROM folders ORDER BY relativePath COLLATE NOCASE")
     fun observeAll(): Flow<List<FolderEntity>>
+
+    @Query("SELECT * FROM folders WHERE sourceKey = :sourceKey")
+    suspend fun findForSource(sourceKey: String): List<FolderEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(folders: List<FolderEntity>)
