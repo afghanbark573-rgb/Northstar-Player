@@ -64,7 +64,7 @@ object LibraryBrowser {
             val descendants = available.filter { video ->
                 val videoPath = normalizedPath(video.relativePath.orEmpty())
                 video.sourceKey == folder.sourceKey &&
-                    (videoPath == path || videoPath.startsWith("$path/"))
+                    (path.isEmpty() || videoPath == path || videoPath.startsWith("$path/"))
             }
             folder.folderKey to FolderMetrics(
                 totalBytes = descendants.sumOf { it.sizeBytes },

@@ -21,12 +21,10 @@ class SafTreeGrantManager(
 
         // Prefer read/write so provider-backed folder creation can be supported later.
         // Some providers grant read-only access, so fall back without losing that valid access.
-        val flags = try {
+        try {
             resolver.takePersistableUriPermission(treeUri, read or write)
-            read or write
         } catch (_: SecurityException) {
             resolver.takePersistableUriPermission(treeUri, read)
-            read
         }
 
         val persisted = resolver.persistedUriPermissions.firstOrNull { it.uri == treeUri }

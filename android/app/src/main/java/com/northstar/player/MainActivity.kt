@@ -308,7 +308,7 @@ class MainActivity : ComponentActivity() {
                 textSize = 13f
                 setTextColor(0xFFFFFFFF.toInt())
                 setPadding(12, 12, 12, 12)
-                setOnClickListener { showingExternalStorage = true; render() }
+                setOnClickListener { openExternalStorage() }
             }
             content.addView(manage)
         }
@@ -358,7 +358,7 @@ class MainActivity : ComponentActivity() {
     override fun onBackPressed() {
         when {
             player != null -> { releasePlayer(); showLibrary() }
-            showingExternalStorage -> { showingExternalStorage = false; showingYou = true; render() }
+            showingExternalStorage -> { showingExternalStorage = false; render() }
             showingYou -> { showingYou = false; render() }
             viewMode == LibraryViewMode.NESTED_VIEW && currentFolderKey != null -> navigateUp()
             viewMode == LibraryViewMode.NESTED_VIEW -> setViewMode(LibraryViewMode.VIDEO_FOLDERS)
@@ -388,6 +388,14 @@ class MainActivity : ComponentActivity() {
         card.addView(line)
         content.addView(card)
         content.addView(View(this).apply { setBackgroundColor(0xFF252525.toInt()) }, LinearLayout.LayoutParams(-1, 1))
+    }
+
+    private fun openExternalStorage() {
+        showingExternalStorage = true
+        lifecycleScope.launch {
+            (application as NorthstarApplication).safTreeGrantManager.refreshGrantAvailability()
+        }
+        render()
     }
 
     private fun renderExternalStorage() {
@@ -433,7 +441,7 @@ class MainActivity : ComponentActivity() {
             textSize = 13f
             setTextColor(0xFFBBBBBB.toInt())
             setPadding(12, 18, 12, 18)
-            setOnClickListener { showingExternalStorage = false; showingYou = false; render() }
+            setOnClickListener { showingExternalStorage = false; render() }
         }
         content.addView(back)
     }
