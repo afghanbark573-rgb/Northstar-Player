@@ -35,7 +35,7 @@ Guiding principles:
 **Folder hierarchy:** preserve the actual parent-child structure and include empty folders in Nested View.
 
 4. **Search:** search videos by filename.
-5. **Sorting:** Recent, A–Z, and Largest.
+5. **Sorting:** Date Added, Date Modified, A–Z, and Largest. Date Added and Date Modified are separate sort options; both show newest first. Date Added uses the storage provider's added/indexed date where available. Date Modified uses the file's last-modified date where available. If a source does not provide a reliable date, handle that item consistently without inventing a timestamp.
 6. **New content:** small NEW indicators on relevant folders.
 7. **Recently Added:** no separate Recently Added section.
 8. **Smart Collections:** excluded from scope.
@@ -204,7 +204,7 @@ These details require technical design or explicit user approval before implemen
 - Exact forgotten-PIN recovery method and consequences for encrypted data.
 - Exact behavior when a USB/SD device disconnects during browsing or playback.
 - Exact rules for what counts as a newly discovered folder/video and when NEW indicators clear.
-- Exact definition of “Recent” sorting (e.g. file modification date versus discovery date).
+- Exact fallback behavior when a storage provider does not expose a reliable Date Added or Date Modified value.
 - Duplicate detection strategy and whether it is metadata-only or content-hash based.
 - Playback engine benchmark results and format/subtitle compatibility.
 - Whether all external subtitle formats and embedded tracks can be supported by the selected engine.
