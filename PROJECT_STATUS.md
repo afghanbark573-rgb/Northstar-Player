@@ -403,3 +403,15 @@ The approved implementation plan is now in active development on `phase-0/releas
 - New validation run `45154832966` was triggered by the workflow change on current native branch head `bef7aa8475e51e82087cd6d3ce78b54faa6ee364`. At the time of this update, both jobs were still in progress; do not claim the new unit tests or schema artifact succeeded until the run completes.
 - Existing unit tests found in the branch: five permission resolver tests and three folder-indexer tests. No scanner batching/cancellation or Room repository reconciliation tests were found in the inspected test directories.
 - No APK was delivered to the user and no Xiaomi 14 runtime test is claimed.
+
+
+## Scanner and folder-reconciliation verification — 2026-11-23
+
+- Scanner cancellation cleanup was corrected in commit `0888eb2b147249a028822484b81f3523fc92133e`: the cancellation handler now persists the cleared in-progress state inside `withContext(NonCancellable)`, preserves the prior successful-scan timestamp, records cancellation, and rethrows the cancellation.
+- CI run [45155337765](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45155337765) completed successfully for that scanner change. Both debug and signed-release jobs passed; release signature verification and artifact upload passed.
+- Added `RoomMediaLibraryRepositoryTest.kt` in commit `a718e7223f60b605829bf8702d987593d7a0c73d`. Three tests cover: partial refresh retaining unseen folders and their acknowledgement/discovery timestamps; full refresh removing folders no longer represented by available media; and empty partial refresh retaining the existing folder index.
+- CI run [45155690835](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45155690835) completed successfully for the repository tests. The debug job's `:app:testDebugUnitTest` and debug APK build passed; Room schema upload passed; signed release build and apksigner verification passed; release APK uploaded.
+- Downloaded and inspected the generated Room schema artifact from that run. It contains `com.northstar.player.core.database.NorthstarDatabase/1.json`, formatVersion 1, database version 1. The artifact is generated and retained by CI; it has not yet been committed into the repository.
+- Artifacts from run 45155690835: `northstar-room-schema`, `northstar-debug-apk`, and `northstar-release-apk`.
+- These results verify JVM unit tests and CI packaging/signing only. They do not establish device/runtime behavior, scanner integration against a real MediaStore, or Xiaomi 14 testing.
+- Remaining scan-reliability work: add direct scanner tests for null cursor/error handling, bounded 400-row batching and cancellation/failure timestamp preservation; review scan concurrency and permission reselection; then move into the approved three-mode library UX.
