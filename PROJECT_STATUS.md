@@ -303,7 +303,19 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Add a headphone control/icon in the player for audio-only background playback. This lets the user continue listening when leaving the app without keeping the video in a floating window.
 - Support Picture-in-Picture (PiP) as a separate video experience.
 - Implement both PiP activation methods: a dedicated PiP icon in the player and activation by pressing the Android Home button/leaving the app.
-- Add a Settings preference so the user can choose the active PiP activation method: **Home button** or **PiP icon**. Both paths exist in the product, while the selected preference determines which one activates PiP.
+- Settings controls only automatic PiP on Home-button press (on/off). The dedicated PiP icon remains visible and always works regardless of this setting.
 - Do not conflate the headphone/audio-only action with PiP.
 - Validate Android lifecycle/API behavior, playback continuity, PiP controls/aspect ratio/return-to-app behavior, and device compatibility during implementation and Xiaomi 14 testing.
 - This resolves the background-playback product decision. No application code has been changed.
+
+
+## Clarification: headphone behavior and automatic Home-button PiP — 2026-11-23
+
+- The headphone control does not immediately close the video, close the player, or leave the app. It arms audio-only background behavior while the video remains visible and plays normally in the player.
+- If the user goes to the Android Home screen or otherwise leaves/exits the video view while headphone mode is armed, playback continues as audio only, without a floating video window.
+- Audio-only continuation remains active until the user exits that video or stops playback. The player must clearly indicate the armed state and provide a clear way to turn it off while still in the video.
+- The dedicated PiP icon remains visible/available in the player and always enters PiP when tapped.
+- Settings controls only whether PiP starts automatically when the user presses Home: enabled = automatically enter PiP; disabled = leave the app normally without automatic PiP.
+- Disabling automatic Home-button PiP must never hide or disable the dedicated PiP icon.
+- Audio-only background behavior and PiP remain distinct modes.
+- This clarification supersedes the earlier wording that Settings selected between the Home and icon PiP activation methods. No application code has been changed.
