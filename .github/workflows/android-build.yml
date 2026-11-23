@@ -43,6 +43,7 @@ jobs:
         run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
 
       - name: Run database migration instrumentation tests
+        timeout-minutes: 25
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35

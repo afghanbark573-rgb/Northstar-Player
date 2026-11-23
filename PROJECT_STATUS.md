@@ -549,3 +549,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Migration instrumentation implementation commit: `25b133cfa550163c878191702adc4b9eedd13987`.
 - Validation run [45173392724](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45173392724) is pending/in progress for the new instrumentation test and workflow. Do not treat the migration test as passed until this run completes.
 - This test validates the v1-to-v2 database migration; it does not replace physical-device SAF provider tests for USB/SD discovery, permission revocation, disconnect/reconnect, and playback.
+
+
+## Migration test hardening — 2026-11-23
+
+- Reviewed the actual exported Room v1 and v2 schema artifacts from GitHub Actions. The v1 fixture's table columns, primary keys, and indexes match the exported v1 schema; v2 adds only `saf_staged_media`.
+- Strengthened the Android migration test to seed and verify preservation of representative rows across all existing user-data tables (media, favorites, playback progress, watch history, folders, scan state, new-content state, and external tree grants), and to include the v1 Room identity hash.
+- Added a 25-minute timeout to the emulator migration step so an unavailable or stalled emulator cannot leave the workflow indefinitely in progress.
+- Earlier migration validation run [45173392724](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45173392724) remains in progress at the last API check; its release build and JVM/debug build passed, but the emulator migration test has not reported a result. The strengthened test must pass in a fresh run before storage-write features are unblocked.

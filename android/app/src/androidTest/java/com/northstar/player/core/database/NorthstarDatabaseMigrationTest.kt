@@ -24,6 +24,8 @@ class NorthstarDatabaseMigrationTest {
             legacy.beginTransaction()
             try {
                 LEGACY_V1_SCHEMA.forEach { legacy.execSQL(it) }
+                legacy.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+                legacy.execSQL("INSERT INTO room_master_table (id, identity_hash) VALUES (42, 'dac46e644923f0530ef1f30a00e91ca1')")
                 legacy.execSQL("""
                     INSERT INTO media_items (
                         mediaKey, uri, displayName, mimeType, durationMs, sizeBytes,
@@ -36,6 +38,13 @@ class NorthstarDatabaseMigrationTest {
                         'Movies', 1, 1730000000000
                     )
                 """.trimIndent())
+                legacy.execSQL("INSERT INTO favorites (targetKey, targetType, createdAtMillis) VALUES ('favorite-1', 'VIDEO', 1000)")
+                legacy.execSQL("INSERT INTO playback_progress (mediaKey, positionMs, durationMs, isCompleted, updatedAtMillis) VALUES ('saf:test-source|document-1', 5000, 60000, 0, 2000)")
+                legacy.execSQL("INSERT INTO watch_history (mediaKey, playedAtMillis, lastPositionMs) VALUES ('saf:test-source|document-1', 3000, 5000)")
+                legacy.execSQL("INSERT INTO folders (folderKey, parentFolderKey, displayName, sourceKey, relativePath, containsVideos, videoCount, childFolderCount, discoveredAtMillis, acknowledgedAtMillis) VALUES ('folder-1', NULL, 'Movies', 'saf:test-source', 'Movies', 1, 1, 0, 1000, NULL)")
+                legacy.execSQL("INSERT INTO scan_states (sourceKey, lastSuccessfulScanMillis, permissionScope, inProgressSinceMillis, lastError) VALUES ('saf:test-source', 900, 'SAF_TREE', NULL, NULL)")
+                legacy.execSQL("INSERT INTO new_content_states (contentKey, folderKey, discoveredAtMillis, acknowledgedAtMillis) VALUES ('new-1', 'folder-1', 1100, NULL)")
+                legacy.execSQL("INSERT INTO external_tree_grants (treeUri, displayName, persistedFlags, grantedAtMillis, isAvailable) VALUES ('content://tree/test', 'USB', 1, 1000, 1)")
                 legacy.version = 1
                 legacy.setTransactionSuccessful()
             } finally {
@@ -56,10 +65,19 @@ class NorthstarDatabaseMigrationTest {
             assertEquals("content://test/video/1", row?.uri)
             assertEquals(1234L, row?.sizeBytes)
 
-            migrated.openHelper.writableDatabase.query(
+            val db = migrated.openHelper.writableDatabase
+            assertCount(db, "favorites", 1)
+            assertCount(db, "playback_progress", 1)
+            assertCount(db, "watch_history", 1)
+            assertCount(db, "folders", 1)
+            assertCount(db, "scan_states", 1)
+            assertCount(db, "new_content_states", 1)
+            assertCount(db, "external_tree_grants", 1)
+
+            db.query(
                 "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'saf_staged_media'"
             ).use { assertTrue("Staging table must exist", it.moveToFirst()) }
-            migrated.openHelper.writableDatabase.query(
+            db.query(
                 "SELECT COUNT(*) FROM saf_staged_media"
             ).use {
                 assertTrue(it.moveToFirst())
@@ -71,8 +89,15 @@ class NorthstarDatabaseMigrationTest {
         }
     }
 
+    private fun assertCount(db: androidx.sqlite.db.SupportSQLiteDatabase, table: String, expected: Int) {
+        db.query("SELECT COUNT(*) FROM `$table`").use {
+            assertTrue(it.moveToFirst())
+            assertEquals("Unexpected row count in $table", expected, it.getInt(0))
+        }
+    }
+
     private companion object {
-        // Exact version-1 table and index definitions from the previously exported Room schema.
+        // Exact version-1 table and index definitions from the exported Room schema.
         val LEGACY_V1_SCHEMA = listOf(
             "CREATE TABLE IF NOT EXISTS media_items (mediaKey TEXT NOT NULL, uri TEXT NOT NULL, displayName TEXT NOT NULL, mimeType TEXT, durationMs INTEGER NOT NULL, sizeBytes INTEGER NOT NULL, dateAddedSeconds INTEGER, dateModifiedSeconds INTEGER, sourceType TEXT NOT NULL, sourceKey TEXT NOT NULL, relativePath TEXT, isAvailable INTEGER NOT NULL, indexedAtMillis INTEGER NOT NULL, PRIMARY KEY(mediaKey))",
             "CREATE INDEX IF NOT EXISTS index_media_items_sourceKey ON media_items (sourceKey)",
