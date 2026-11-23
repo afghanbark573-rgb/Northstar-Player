@@ -58,7 +58,7 @@ Sort, View Mode, and Layout must be together in one single, easy-to-find control
 7. **Subtitles:** support embedded and external subtitle files.
 8. **Audio tracks:** allow selection among available audio tracks.
 9. **Orientation:** portrait, landscape, and automatic rotation options.
-10. **Background playback:** support audio playback outside the app where appropriate.
+10. **Background playback and PiP:** provide a headphone control in the player for audio-only background playback. Also support Picture-in-Picture (PiP) video playback with both a dedicated PiP icon and Home-button activation. In Settings, let the user choose which PiP activation method is active: Home button or the dedicated PiP icon. Both methods must be implemented; the selected preference determines the trigger.
 11. **Resume playback:** remember each video's position and offer to continue.
 12. **Next/Previous context:** navigate through videos in the current folder or selected library context.
 13. **Fullscreen:** clean viewing experience; controls hide automatically.
@@ -138,7 +138,7 @@ The Private Library should behave like its own small file manager, with folder c
 3. **Media access:** MediaStore for normal internal/shared media discovery; Storage Access Framework (SAF) for user-selected folders and external storage such as USB/SD where required.
 4. **Persistence:** Room/SQLite for persistent library information, history, favorites, and playback positions.
 5. **Private storage:** encrypted application-managed storage for the Private Library.
-6. **Background playback:** MediaSessionService where appropriate.
+6. **Background playback and PiP:** use MediaSessionService where appropriate for audio-only background playback and service-backed playback. Implement Android Picture-in-Picture with both Home-button and dedicated player-icon entry paths, controlled by the user's Settings preference.
 7. **Architecture:** separate and maintainable components for library, player, private storage, permissions, persistence, and UI.
 8. **Testing:** automated tests plus real-device testing on the user's Xiaomi 14. Never claim device testing until the user has actually tested the build.
 9. **Build and release:** GitHub Actions, permanent signing identity, and verified signed APKs. Never expose signing secrets.
