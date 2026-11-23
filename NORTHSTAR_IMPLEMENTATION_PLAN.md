@@ -278,11 +278,12 @@ A single, easy-to-find controls area contains:
 List/Grid applies to folders and video files. Do not scatter these controls into unrelated menus. The control area should remain compact and legible.
 
 Sort options:
-- Recent.
+- Date Added — newest first, using the storage provider's added/indexed date where available.
+- Date Modified — newest first, using the file's last-modified date where available.
 - A–Z.
 - Largest.
 
-The exact meaning of Recent (modified date versus discovery date) remains an implementation detail to settle. Recommended default: file modified date for file sorting, with NEW indicator state handled separately.
+Date Added and Date Modified are separate user-facing sort options; do not collapse them into a generic Recent option. The underlying date fields can differ by source (MediaStore versus SAF document provider). If a provider does not expose a reliable date, handle the item consistently and do not invent a timestamp. Keep folder NEW-indicator state separate from these sort keys.
 
 ### 6.4 Search and folder indicators
 
@@ -653,7 +654,7 @@ These are the only currently identified product choices that should be returned 
 1. **Private import behavior — RESOLVED:** Move only. No Copy option and no separate Delete action. Use the safe staged-transfer procedure in Section 8.2; if Android prevents source removal, report the move as incomplete and preserve the original.
 2. **Private recovery experience — RESOLVED:** curated Northstar-provided question bank; user selects any three and answers all three. No user-created questions. Cryptographic recovery implementation remains an engineering/security design task, not a further product choice at this stage.
 3. **Nested View interaction — RESOLVED:** normal folder-opening navigation with a folder page, Back control, breadcrumb path, Create Folder icon, compact unified controls icon for Sort/View Mode/Layout, and pull-to-refresh. No expandable/inline tree.
-4. **Recent sorting:** Recommended use file modified date for Recent sorting. Should that be the meaning of Recent?
+4. **Sorting options — RESOLVED:** provide separate Date Added and Date Modified options (both newest first), alongside A–Z and Largest. Use source-provided dates where reliable; do not invent missing dates.
 5. **Swipe gestures:** Recommended left-side vertical swipe = brightness; right-side vertical swipe = volume. Confirm or change.
 6. **Top navigation:** The You/profile entry is locked. The remaining top-level navigation items and exact order should be settled in the screen mockup. Do not add bottom navigation.
 7. **Background playback:** Audio playback outside the app is locked. Confirm whether it should continue automatically when the user leaves the app, or only after the user explicitly enables/starts background audio. Do not add Picture-in-Picture unless separately approved.
