@@ -34,7 +34,7 @@ class TestSafDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryRoots(projection: Array<out String>?): Cursor {
-        val columns = projection?.toTypedArray() ?: ROOT_COLUMNS
+        val columns = projection ?: ROOT_COLUMNS
         return MatrixCursor(columns).apply {
             val values = mapOf(
                 DocumentsContract.Root.COLUMN_ROOT_ID to ROOT_ID,
@@ -48,7 +48,7 @@ class TestSafDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor {
-        val columns = projection?.toTypedArray() ?: DOCUMENT_COLUMNS
+        val columns = projection ?: DOCUMENT_COLUMNS
         val doc = synchronized(documents) { documents[documentId] }
             ?: throw FileNotFoundException("Unknown document: $documentId")
         return MatrixCursor(columns).apply { addRow(documentValues(doc, columns)) }
@@ -104,7 +104,7 @@ class TestSafDocumentsProvider : DocumentsProvider() {
         throw FileNotFoundException("The test provider does not expose file contents")
     }
 
-    private fun documentValues(document: Document, columns: Array<String>): Array<Any?> {
+    private fun documentValues(document: Document, columns: Array<out String>): Array<Any?> {
         val values = mapOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID to document.id,
             DocumentsContract.Document.COLUMN_DISPLAY_NAME to document.name,
