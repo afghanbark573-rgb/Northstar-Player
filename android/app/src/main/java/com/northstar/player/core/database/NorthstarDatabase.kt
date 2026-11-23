@@ -109,6 +109,9 @@ interface MediaItemDao {
     @Query("SELECT * FROM media_items WHERE sourceKey = :sourceKey AND isAvailable = 1")
     suspend fun availableForSource(sourceKey: String): List<MediaItemEntity>
 
+    @Query("SELECT MAX(indexedAtMillis) FROM media_items WHERE sourceKey = :sourceKey")
+    suspend fun latestIndexedAtMillis(sourceKey: String): Long?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<MediaItemEntity>)
 

@@ -15,6 +15,8 @@ class RoomMediaLibraryRepositoryTest {
         override fun observeAvailable(): Flow<List<MediaItemEntity>> = MutableStateFlow(items.filter { it.isAvailable })
         override suspend fun findByKey(mediaKey: String) = items.find { it.mediaKey == mediaKey }
         override suspend fun availableForSource(sourceKey: String) = items.filter { it.sourceKey == sourceKey && it.isAvailable }
+        override suspend fun latestIndexedAtMillis(sourceKey: String) =
+            items.filter { it.sourceKey == sourceKey }.maxOfOrNull { it.indexedAtMillis }
         override suspend fun upsertAll(items: List<MediaItemEntity>) {
             items.forEach { item ->
                 this.items.removeAll { it.mediaKey == item.mediaKey }

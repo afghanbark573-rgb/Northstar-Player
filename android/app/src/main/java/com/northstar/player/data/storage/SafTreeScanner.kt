@@ -97,7 +97,14 @@ class SafTreeScanner(
             }
 
             val previous = scanStateDao.get(sourceKey)
-            val scanStartedAt = maxOf(clock(), (previous?.lastSuccessfulScanMillis ?: 0L) + 1L)
+            // Include timestamps of failed staged generations, so a rapid retry can never
+            // accidentally activate stale rows left by an earlier interrupted attempt.
+            val latestIndexedAt = mediaDao.latestIndexedAtMillis(sourceKey) ?: 0L
+            val scanStartedAt = maxOf(
+                clock(),
+                (previous?.lastSuccessfulScanMillis ?: 0L) + 1L,
+                latestIndexedAt + 1L
+            )
             scanStateDao.save(
                 ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
                     scanStartedAt, null)
