@@ -17,11 +17,17 @@ data class LibraryListing(
 /**
  * Pure presentation projection over persisted Room records.
  *
- * Folder ordering is alphabetical for now: FolderEntity does not yet retain aggregate
- * byte size or reliable folder-level dates, so inventing Largest/Date ordering for
- * folders would be misleading. Video ordering supports all four approved sort choices.
+ * Folder metadata is derived from available descendant videos: Largest is the sum of
+ * their byte sizes, while date sorts use the newest provider-supplied child date.
+ * Missing dates remain unknown and sort after folders with known dates.
  */
 object LibraryBrowser {
+    private data class FolderMetrics(
+        val totalBytes: Long,
+        val newestAdded: Long?,
+        val newestModified: Long?
+    )
+
     private fun compareNewest(left: Long?, right: Long?): Int = when {
         left == null && right == null -> 0
         left == null -> 1
@@ -40,6 +46,9 @@ object LibraryBrowser {
         val available = allVideos.filter { it.isAvailable }
         val normalizedQuery = query.trim().lowercase(Locale.ROOT)
 
+        fun normalizedPath(path: String): String =
+            path.trimEnd('/').replace('\\\\', '/')
+
         fun matchesFolder(folder: FolderEntity): Boolean =
             normalizedQuery.isEmpty() ||
                 folder.displayName.lowercase(Locale.ROOT).contains(normalizedQuery) ||
@@ -50,6 +59,19 @@ object LibraryBrowser {
                 video.displayName.lowercase(Locale.ROOT).contains(normalizedQuery) ||
                 video.relativePath.orEmpty().lowercase(Locale.ROOT).contains(normalizedQuery)
 
+        val folderMetrics = allFolders.associate { folder ->
+            val path = normalizedPath(folder.relativePath)
+            val descendants = available.filter { video ->
+                val videoPath = normalizedPath(video.relativePath.orEmpty())
+                videoPath == path || videoPath.startsWith("$path/")
+            }
+            folder.folderKey to FolderMetrics(
+                totalBytes = descendants.sumOf { it.sizeBytes },
+                newestAdded = descendants.mapNotNull { it.dateAddedSeconds }.maxOrNull(),
+                newestModified = descendants.mapNotNull { it.dateModifiedSeconds }.maxOrNull()
+            )
+        }
+
         val folders = when (mode) {
             LibraryViewMode.VIDEO_FOLDERS -> allFolders.filter {
                 it.parentFolderKey == null && it.videoCount > 0 && matchesFolder(it)
@@ -59,26 +81,13 @@ object LibraryBrowser {
                 it.parentFolderKey == currentFolderKey && matchesFolder(it)
             }
         }.sortedWith { left, right ->
-            val leftPath = left.relativePath.trimEnd('/').replace('\\\\', '/')
-            val rightPath = right.relativePath.trimEnd('/').replace('\\\\', '/')
-            fun contents(path: String) = available.filter { video ->
-                val videoPath = video.relativePath.orEmpty().trimEnd('/').replace('\\\\', '/')
-                videoPath == path || videoPath.startsWith("$path/")
-            }
-            val leftVideos = contents(leftPath)
-            val rightVideos = contents(rightPath)
+            val leftMetrics = folderMetrics.getValue(left.folderKey)
+            val rightMetrics = folderMetrics.getValue(right.folderKey)
             val primary = when (sort) {
-                LibrarySort.DATE_ADDED -> compareNewest(
-                    leftVideos.mapNotNull { it.dateAddedSeconds }.maxOrNull(),
-                    rightVideos.mapNotNull { it.dateAddedSeconds }.maxOrNull()
-                )
-                LibrarySort.DATE_MODIFIED -> compareNewest(
-                    leftVideos.mapNotNull { it.dateModifiedSeconds }.maxOrNull(),
-                    rightVideos.mapNotNull { it.dateModifiedSeconds }.maxOrNull()
-                )
+                LibrarySort.DATE_ADDED -> compareNewest(leftMetrics.newestAdded, rightMetrics.newestAdded)
+                LibrarySort.DATE_MODIFIED -> compareNewest(leftMetrics.newestModified, rightMetrics.newestModified)
                 LibrarySort.NAME -> left.displayName.compareTo(right.displayName, ignoreCase = true)
-                LibrarySort.LARGEST -> rightVideos.sumOf { it.sizeBytes }
-                    .compareTo(leftVideos.sumOf { it.sizeBytes })
+                LibrarySort.LARGEST -> rightMetrics.totalBytes.compareTo(leftMetrics.totalBytes)
             }
             if (primary != 0) primary
             else left.displayName.compareTo(right.displayName, ignoreCase = true)
@@ -92,8 +101,8 @@ object LibraryBrowser {
                     allFolders.firstOrNull { it.folderKey == key }?.relativePath
                 }
                 available.filter { video ->
-                    val videoPath = video.relativePath.orEmpty().trimEnd('/').replace('\\', '/')
-                    val parentPath = currentPath.orEmpty().trimEnd('/').replace('\\', '/')
+                    val videoPath = normalizedPath(video.relativePath.orEmpty())
+                    val parentPath = normalizedPath(currentPath.orEmpty())
                     videoPath == parentPath && matchesVideo(video)
                 }
             }
