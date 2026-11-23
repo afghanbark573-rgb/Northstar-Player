@@ -52,6 +52,7 @@ class NorthstarApplication : Application() {
             database.mediaItemDao(),
             database.folderDao(),
             database.scanStateDao(),
+            database.safSnapshotDao(),
             database.externalTreeGrantDao()
         )
     }

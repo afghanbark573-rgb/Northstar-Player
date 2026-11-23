@@ -497,3 +497,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - A missing persisted grant is handled explicitly: the grant and source are marked unavailable and scan error state is recorded, while stored folder history remains.
 - No Room schema change is needed; the change adds a DAO update query only.
 - This hardening is source-committed but requires a fresh CI run before it can be called build-verified. Device-level SAF provider testing remains outstanding.
+
+
+## SAF snapshot publication transaction — 2026-11-23
+
+- Follow-up hardening moves the final SAF publication into a dedicated Room `@Transaction` DAO operation.
+- The transaction replaces the source's folder hierarchy, activates the fully staged media generation, retires older media rows, and records the successful scan timestamp together. This closes the gap where a database exception between separate DAO calls could expose a mixed generation.
+- No entities or columns changed; database schema version remains 1. The new DAO adds transaction/query methods only.
+- The scanner's application wiring now injects the snapshot publisher. A fresh GitHub Actions run is required to validate Room code generation and compilation before treating this as verified.

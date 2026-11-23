@@ -52,6 +52,7 @@ class SafTreeScanner(
     private val mediaDao: MediaItemDao,
     private val folderDao: FolderDao,
     private val scanStateDao: ScanStateDao,
+    private val snapshotDao: com.northstar.player.core.database.SafSnapshotDao,
     private val grantDao: ExternalTreeGrantDao,
     private val clock: () -> Long = System::currentTimeMillis
 ) {
@@ -209,15 +210,16 @@ class SafTreeScanner(
                         acknowledgedAtMillis = old?.acknowledgedAtMillis
                     )
                 }
-                // Publish the new generation only after the entire provider tree was read.
-                // Older records are retired after the new generation is activated.
-                mediaDao.activateStagedItems(sourceKey, scanStartedAt)
-                mediaDao.markOlderItemsUnavailable(sourceKey, scanStartedAt)
-                folderDao.replaceForSource(sourceKey, indexedFolders)
-                scanStateDao.save(
-                    ScanStateEntity(sourceKey, scanStartedAt, "SAF_TREE", null, null)
-                )
+                // Publish media, folder hierarchy, and successful scan state atomically.
                 grantDao.setAvailability(grant.treeUri, true)
+                snapshotDao.publishSafSnapshot(
+                    sourceKey = sourceKey,
+                    scanStartedAtMillis = scanStartedAt,
+                    folders = indexedFolders,
+                    successfulState = ScanStateEntity(
+                        sourceKey, scanStartedAt, "SAF_TREE", null, null
+                    )
+                )
                 Result.success(
                     SafTreeScanResult(sourceKey, videoCount, indexedFolders.size, clock())
                 )

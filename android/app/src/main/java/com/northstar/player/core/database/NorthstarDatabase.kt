@@ -115,12 +115,6 @@ interface MediaItemDao {
     @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey")
     suspend fun markSourceUnavailable(sourceKey: String)
 
-    @Query("UPDATE media_items SET isAvailable = 1 WHERE sourceKey = :sourceKey AND indexedAtMillis = :scanStartedAtMillis")
-    suspend fun activateStagedItems(sourceKey: String, scanStartedAtMillis: Long)
-
-    @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey AND indexedAtMillis < :scanStartedAtMillis")
-    suspend fun markOlderItemsUnavailable(sourceKey: String, scanStartedAtMillis: Long)
-
     @Query("DELETE FROM media_items WHERE mediaKey = :mediaKey")
     suspend fun deleteByKey(mediaKey: String)
 }
@@ -180,6 +174,42 @@ interface ScanStateDao {
 }
 
 @Dao
+interface SafSnapshotDao {
+    @Query("UPDATE media_items SET isAvailable = 1 WHERE sourceKey = :sourceKey AND indexedAtMillis = :scanStartedAtMillis")
+    suspend fun activateStagedItems(sourceKey: String, scanStartedAtMillis: Long)
+
+    @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey AND indexedAtMillis < :scanStartedAtMillis")
+    suspend fun markOlderItemsUnavailable(sourceKey: String, scanStartedAtMillis: Long)
+
+    @Query("DELETE FROM folders WHERE sourceKey = :sourceKey")
+    suspend fun deleteFoldersForSource(sourceKey: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFolders(folders: List<FolderEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveSuccessfulScan(state: ScanStateEntity)
+
+    /**
+     * Publishes media availability, folder hierarchy, and scan success as one Room transaction.
+     * A crash or database exception cannot leave only part of a completed SAF generation visible.
+     */
+    @Transaction
+    suspend fun publishSafSnapshot(
+        sourceKey: String,
+        scanStartedAtMillis: Long,
+        folders: List<FolderEntity>,
+        successfulState: ScanStateEntity
+    ) {
+        deleteFoldersForSource(sourceKey)
+        if (folders.isNotEmpty()) insertFolders(folders)
+        activateStagedItems(sourceKey, scanStartedAtMillis)
+        markOlderItemsUnavailable(sourceKey, scanStartedAtMillis)
+        saveSuccessfulScan(successfulState)
+    }
+}
+
+@Dao
 interface ExternalTreeGrantDao {
     @Query("SELECT * FROM external_tree_grants ORDER BY displayName COLLATE NOCASE")
     fun observeAll(): Flow<List<ExternalTreeGrantEntity>>
@@ -219,6 +249,7 @@ abstract class NorthstarDatabase : RoomDatabase() {
     abstract fun folderDao(): FolderDao
     abstract fun userMediaDao(): UserMediaDao
     abstract fun scanStateDao(): ScanStateDao
+    abstract fun safSnapshotDao(): SafSnapshotDao
     abstract fun externalTreeGrantDao(): ExternalTreeGrantDao
 
     companion object {
