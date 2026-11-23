@@ -22,6 +22,13 @@ data class LibraryListing(
  * folders would be misleading. Video ordering supports all four approved sort choices.
  */
 object LibraryBrowser {
+    private fun compareNewest(left: Long?, right: Long?): Int = when {
+        left == null && right == null -> 0
+        left == null -> 1
+        right == null -> -1
+        else -> right.compareTo(left)
+    }
+
     fun build(
         allVideos: List<MediaItemEntity>,
         allFolders: List<FolderEntity>,
@@ -51,7 +58,31 @@ object LibraryBrowser {
             LibraryViewMode.NESTED_VIEW -> allFolders.filter {
                 it.parentFolderKey == currentFolderKey && matchesFolder(it)
             }
-        }.sortedBy { it.displayName.lowercase(Locale.ROOT) }
+        }.sortedWith { left, right ->
+            val leftPath = left.relativePath.trimEnd('/').replace('\\\\', '/')
+            val rightPath = right.relativePath.trimEnd('/').replace('\\\\', '/')
+            fun contents(path: String) = available.filter { video ->
+                val videoPath = video.relativePath.orEmpty().trimEnd('/').replace('\\\\', '/')
+                videoPath == path || videoPath.startsWith("$path/")
+            }
+            val leftVideos = contents(leftPath)
+            val rightVideos = contents(rightPath)
+            val primary = when (sort) {
+                LibrarySort.DATE_ADDED -> compareNewest(
+                    leftVideos.mapNotNull { it.dateAddedSeconds }.maxOrNull(),
+                    rightVideos.mapNotNull { it.dateAddedSeconds }.maxOrNull()
+                )
+                LibrarySort.DATE_MODIFIED -> compareNewest(
+                    leftVideos.mapNotNull { it.dateModifiedSeconds }.maxOrNull(),
+                    rightVideos.mapNotNull { it.dateModifiedSeconds }.maxOrNull()
+                )
+                LibrarySort.NAME -> left.displayName.compareTo(right.displayName, ignoreCase = true)
+                LibrarySort.LARGEST -> rightVideos.sumOf { it.sizeBytes }
+                    .compareTo(leftVideos.sumOf { it.sizeBytes })
+            }
+            if (primary != 0) primary
+            else left.displayName.compareTo(right.displayName, ignoreCase = true)
+        }
 
         val videos = when (mode) {
             LibraryViewMode.VIDEO_FOLDERS -> emptyList()
