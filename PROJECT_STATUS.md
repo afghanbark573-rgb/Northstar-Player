@@ -209,7 +209,7 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Status: drafted and saved for user review; not yet approved for implementation.
 - The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
 - No application source code was changed and no APK was built while preparing the plan.
-- Six product decisions remain listed in Section 14 of the plan. Private import behavior is now resolved: Move only, with no Copy option or separate Delete action. Do not silently decide private recovery or other user-visible interaction details.
+- Five product decisions remain listed in Section 14 of the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), and Nested View navigation/toolbar are now resolved. Do not silently decide the remaining user-visible interaction details.
 - The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
 - `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
 - `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
@@ -233,3 +233,14 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - This is a user-experience decision, not permission to use weak answers directly as encryption keys. The cryptographic key-recovery design, answer handling/normalization, rate limiting, and protection against offline guessing require a security-reviewed engineering design.
 - Recovery remains local-first; no server-based recovery or automatic cloud upload.
 - The decision is recorded in the master product specification and integrated implementation plan. No application code has been changed; overall plan approval remains a prerequisite to coding.
+
+
+## Approved Nested View navigation and toolbar — 2026-11-23
+
+- Nested View uses normal folder-opening navigation, not an expandable/inline tree.
+- Tapping a folder opens a folder page showing its child folders and files, preserving the real hierarchy and including empty folders.
+- Provide a Back control and a breadcrumb path near the top, showing the current location and allowing navigation to ancestor folders. Keep breadcrumbs compact and usable on narrow screens.
+- Provide a Create Folder icon.
+- Provide one compact controls icon that opens the unified Sort, View Mode, and Layout options. Do not scatter these options across separate toolbar buttons.
+- Support pull-to-refresh on the folder page.
+- This decision is recorded in the master product specification and integrated implementation plan. No application code has been changed; overall plan approval remains a prerequisite to coding.
