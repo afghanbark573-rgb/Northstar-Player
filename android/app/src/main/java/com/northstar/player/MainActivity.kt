@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.Gravity
 import android.view.View
 import android.widget.*
@@ -17,6 +16,10 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import java.util.Locale
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 data class LocalVideo(val uri: Uri, val name: String, val duration: Long, val size: Long, val folder: String, val date: Long)
 
@@ -31,6 +34,7 @@ class MainActivity : ComponentActivity() {
     private var sort = 0
     private var player: ExoPlayer? = null
     private var playerView: PlayerView? = null
+    private var libraryObservation: Job? = null
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         loadVideos()
@@ -89,27 +93,23 @@ class MainActivity : ComponentActivity() {
     private fun sortLabel() = when (sort) { 0 -> "Recent"; 1 -> "A–Z"; else -> "Largest" }
 
     private fun loadVideos() {
-        val result = mutableListOf<LocalVideo>()
-        val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        val columns = arrayOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.DURATION, MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RELATIVE_PATH, MediaStore.Video.Media.DATE_ADDED)
-        try {
-            contentResolver.query(collection, columns, null, null, "${MediaStore.Video.Media.DATE_ADDED} DESC")?.use { c ->
-                val id = c.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-                val name = c.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-                val duration = c.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-                val size = c.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-                val path = c.getColumnIndex(MediaStore.Video.Media.RELATIVE_PATH)
-                val date = c.getColumnIndex(MediaStore.Video.Media.DATE_ADDED)
-                while (c.moveToNext()) result.add(LocalVideo(
-                    Uri.withAppendedPath(collection, c.getLong(id).toString()),
-                    c.getString(name) ?: "Untitled video", c.getLong(duration), c.getLong(size),
-                    if (path >= 0) c.getString(path).orEmpty().trimEnd('/') else "",
-                    if (date >= 0) c.getLong(date) else 0L
-                ))
+        if (libraryObservation?.isActive == true) return
+        val repository = (application as NorthstarApplication).mediaLibraryRepository
+        libraryObservation = lifecycleScope.launch {
+            repository.observeAvailableVideos().collect { indexed ->
+                videos = indexed.map { item ->
+                    LocalVideo(
+                        uri = Uri.parse(item.uri),
+                        name = item.displayName,
+                        duration = item.durationMs,
+                        size = item.sizeBytes,
+                        folder = item.relativePath.orEmpty().trimEnd('/'),
+                        date = item.dateAddedSeconds ?: 0L
+                    )
+                }
+                render()
             }
-            videos = result
-            render()
-        } catch (e: Exception) { status.text = "Library error: ${e.localizedMessage ?: "unknown"}" }
+        }
     }
 
     private fun render() {
