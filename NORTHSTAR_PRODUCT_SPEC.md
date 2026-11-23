@@ -98,7 +98,14 @@ The Private Library should behave like its own small file manager, with folder c
 - If the original cannot be removed, do not report a successful move. Clearly report that the move is incomplete and that the original remains; preserve the verified private data safely and let the user retry or resolve the permission issue.
 - Never delete the source before the private destination is fully verified. Do not expose this safety mechanism as separate Copy and Delete product actions.
 
-**Still to specify before implementation:** the exact recovery method and the precise Android storage/visibility guarantees. Do not silently choose destructive behavior.
+**Approved recovery experience — RECOMMENDED SECURITY QUESTIONS (23 November 2026):**
+- During Private Library setup, Northstar presents a curated list of recommended security questions. The user chooses any three questions from that list and supplies an answer to each.
+- All three answers must be verified for forgotten-PIN recovery.
+- Users choose from Northstar's supplied questions; they do not write their own questions.
+- The questions and answers are a user-friendly recovery experience, not a substitute for cryptographic key protection. Engineering must design and security-review a secure key-recovery mechanism; answers must not be stored in plaintext, and the design must account for guessable answers, offline attacks, and repeated attempts.
+- No server-based recovery or automatic cloud upload.
+
+**Still to specify before implementation:** the precise cryptographic recovery design and Android storage/visibility guarantees. Do not silently choose a design that weakens vault encryption.
 
 ## 7. Performance, reliability, and permissions — LOCKED
 
