@@ -582,3 +582,13 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Emulator boot now uses Android emulator TCG software CPU emulation on hosted Linux; the successful run took approximately 5m44s for the instrumentation Gradle task.
 - Starting provider-backed folder creation as the next storage milestone. The feature must validate persisted write permission, restrict creation to an indexed SAF directory, reject unsafe names, use `DocumentsContract.createDocument`, and refresh the source index after creation.
 - No physical USB/SD provider test or Xiaomi 14 acceptance test has yet been performed. Do not distribute the intermediate APK.
+
+## SAF provider-backed folder creation — CI verified — 2026-11-23
+
+- Implementation commit: [5bfc5c2b9a586c315ee6aafc16fa17ca1c6f4271](https://github.com/afghanbark573-rgb/Northstar-Player/commit/5bfc5c2b9a586c315ee6aafc16fa17ca1c6f4271).
+- GitHub Actions run [45179931782](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45179931782) completed successfully for this exact commit. Both `debug-apk` and `release-apk` jobs passed.
+- Debug job: JVM unit tests and debug APK build passed; Android Room v1-to-v2 migration instrumentation test passed; Room schema and debug APK artifacts uploaded.
+- Release job: signed release APK build passed; `apksigner` signature verification passed; signed release artifact uploaded.
+- Folder-creation implementation adds SAF root browsing, nested folder navigation, provider-backed directory creation through `DocumentsContract.createDocument`, strict validation of folder names, and checks for both stored and currently active Android read/write permissions. The source is rescanned after creation.
+- CI validates compilation, unit tests, Room migration, packaging, and signing. It does **not** validate real removable-storage provider behavior. USB/SD creation, reconnect/revocation behavior, SAF playback, and full Xiaomi 14 acceptance remain untested on physical hardware.
+- Treat this as an internal engineering milestone only. Do not distribute the intermediate APK; all eight approved product areas remain one coordinated release.
