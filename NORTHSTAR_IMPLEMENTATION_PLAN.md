@@ -402,7 +402,12 @@ Preserve the active sort/filter order. Define behavior when a queue item becomes
 - Use Keystore-protected keys; biometric enrollment/key invalidation must have a planned fallback.
 - A forgotten PIN recovery process must not undermine encryption.
 
-**User decision still required:** recovery mechanism. Recommended local-first design is a user-generated recovery code/key that the user must save securely. If both the PIN and recovery key are lost, encrypted data may be permanently unrecoverable. Do not promise server recovery for a local-only encrypted vault.
+**User decision resolved — security-question experience (23 November 2026):**
+- During setup, present a curated list of Northstar-provided security questions. The user selects any three and supplies answers; all three must be correct for forgotten-PIN recovery.
+- Do not ask users to invent their own questions.
+- Security questions are not cryptographic keys. Their answers may be guessable and must not be stored in plaintext. The implementation must use a reviewed cryptographic key-recovery design that protects against online guessing and offline attacks; do not weaken vault encryption merely to make recovery convenient.
+- Recovery remains local-first, with no server-based recovery or automatic cloud upload.
+- The exact key hierarchy, answer normalization, secure answer processing, rate-limiting, lockout policy, and recovery-key wrapping mechanism remain engineering design work and require security review before implementation.
 
 ### 8.4 Threat and privacy review
 
@@ -640,7 +645,7 @@ These are development milestones, not separate product releases.
 These are the only currently identified product choices that should be returned to the user. Do not reopen already locked decisions.
 
 1. **Private import behavior — RESOLVED:** Move only. No Copy option and no separate Delete action. Use the safe staged-transfer procedure in Section 8.2; if Android prevents source removal, report the move as incomplete and preserve the original.
-2. **Private recovery:** Recommended local recovery code generated during setup. If both PIN and recovery code are lost, encrypted content may be unrecoverable. Is this acceptable?
+2. **Private recovery experience — RESOLVED:** curated Northstar-provided question bank; user selects any three and answers all three. No user-created questions. Cryptographic recovery implementation remains an engineering/security design task, not a further product choice at this stage.
 3. **Nested View interaction:** Should folders expand inline as a tree, or should tapping a folder open a dedicated folder screen with a breadcrumb/back path? Both can preserve hierarchy; choose before UI implementation.
 4. **Recent sorting:** Recommended use file modified date for Recent sorting. Should that be the meaning of Recent?
 5. **Swipe gestures:** Recommended left-side vertical swipe = brightness; right-side vertical swipe = volume. Confirm or change.
