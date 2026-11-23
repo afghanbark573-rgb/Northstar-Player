@@ -329,3 +329,15 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Completely closing/terminating the app ends Headphone Mode and its background playback. The app must not restore the mode on the next launch; it starts off, and the user must activate it again with the headphone icon.
 - This lifecycle rule is part of the approved product behavior and supersedes any earlier wording that could imply the mode stays armed until merely exiting a video or stopping playback. PiP remains a separate feature with unchanged dedicated-icon and automatic-Home Settings behavior.
 - No application code has been changed by recording this clarification; implementation-plan approval remains required before coding.
+
+
+## Implementation-readiness review — 2026-11-23
+
+- Rechecked the live `phase-0/release-signing` branch. Current HEAD at review: `81bc9d467dd4c9fccd99a60521ec9dd9366ac7b0` (documentation-only commit recording the final Headphone Mode lifecycle rule).
+- Re-inspected `MainActivity.kt`, app Gradle configuration, Android manifest, root Gradle configuration, settings, and GitHub Actions workflow. The app remains a small prototype: one Activity owns UI, permission requests, synchronous MediaStore query, filtering/sorting/grouping, and Media3 playback; the standard PlayerView is used; `onStop()` pauses playback and `onDestroy()` releases it.
+- The current manifest has media permissions and a launcher Activity, but no declared playback service or PiP support. The app Gradle file has no Room, coroutine, WorkManager, or test dependencies. These are source observations, not assumptions about features in historical APKs.
+- The signed GitHub Actions workflow exists and its previously recorded successful run is still the last successful release evidence found. No new build was triggered during this review.
+- Review found stale documentation: the product spec's Section 12 still listed Private import and recovery experience as unresolved; the implementation plan's Section 14 heading/approval checklist treated already-resolved decisions as pending; and the plan had duplicate subsection numbering in Private Library. These have been corrected in the updated documents.
+- Added structural screen-by-screen wireframes and permission/discovery, playback/Headphone Mode, and Private move flow diagrams to the implementation plan. They are design artifacts, not implemented UI.
+- Remaining gates are engineering: player-engine benchmark, cryptographic recovery/security review, Room schema and migrations, scan reconciliation/NEW-state rules, external-storage edge cases, lifecycle/PiP validation, and automated/device acceptance coverage.
+- No application source code was changed and no APK was built. The integrated plan is ready for user review; implementation must wait for explicit approval.
