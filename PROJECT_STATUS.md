@@ -138,3 +138,46 @@ Important: the current folder display is a first grouping pass, not the final ne
 - Never install a lower versionCode over a higher one.
 - Never claim a build passed until its actual workflow result is checked.
 - Never treat CI success as proof of real-device correctness.
+
+
+## Recovery notes — 2026-11-23
+
+### Recovered from earlier conversation context (not a full transcript)
+- On 2026-11-22 around 20:01 UTC, the user explicitly accepted:
+  - permanent application ID `com.northstar.player`;
+  - permanent release signing key;
+  - Room/SQLite as the local persistence direction;
+  - AndroidX Media3 ExoPlayer 1.11.1 as the initial playback engine.
+- On 2026-11-22 around 20:04 UTC, the user approved the roadmap, instructed us to begin Phase 0, and said to make no unrelated changes during that phase.
+- The complete exact text of the user's "eight locked discussions" has not yet been recovered from available saved files or conversation retrieval. Do not claim that this document reproduces all eight verbatim. Continue searching for the original conversation/export if the user supplies it or it becomes accessible.
+- Additional recovered library decisions:
+  - Default view is By Folder.
+  - Player stays hidden until a video is selected.
+  - Player must have a distinctive custom UI, not Chrome/browser controls.
+  - Folder navigation, embedded/external subtitle support, and Next/Previous playback are required.
+  - Scan-first, file-manager-like library.
+  - Compact receipt-style menus.
+  - List/Grid applies to both folders and videos.
+  - Folder-level NEW indicator: colored dot on the folder, with labels inside the folder.
+  - No separate Recently Added section.
+  - Smart Collections were explicitly removed from scope.
+- The approved reliability requirements and seven-phase roadmap above are recovered summaries, not a substitute for the missing full eight-discussion transcript.
+
+### Corrected assessment of native 0.1.2 candidate
+- The user installed the signed 0.1.2-native APK after uninstalling the previous debug-signed app.
+- The user supplied a screenshot of the previous app's library showing 238 videos, Folders / All videos, Grid, Recent, search, folder grouping and a scrollable list.
+- The user then supplied a screenshot after installing 0.1.2 showing essentially the same visible features.
+- Therefore the 0.1.2 library screen must NOT be described as a new feature milestone. Those visible capabilities already existed in the previous app. The latest native commit is a basic implementation/port and has not demonstrated a meaningful user-visible improvement over the prior baseline.
+- Do not claim that 0.1.2 added these features. First obtain and compare the actual prior APK/source against the current branch. The older APK file is not the same as the installed app's source and may not include source history.
+- The user's report that the screen looks unchanged is valid. Treat it as evidence that the candidate did not deliver the expected new functionality, not as a testing misunderstanding.
+
+### Process correction
+- Before every Northstar coding session:
+  1. Read this PROJECT_STATUS.md.
+  2. Inspect GitHub branch, recent commits, workflows, and current source.
+  3. Identify the last user-verified baseline.
+  4. Compare planned work against already-existing behavior.
+  5. Make no code changes until the Main Quest and bundled Side Quests are grounded in the approved roadmap.
+- Never create a new APK merely to repackage existing functionality.
+- Preserve the user's agreement: meaningful bundled releases only; no cosmetic or duplicate-feature micro-releases.
+- Keep Phase 0 constraints: no unrelated changes.
