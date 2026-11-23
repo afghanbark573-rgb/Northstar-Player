@@ -200,3 +200,16 @@ This latest specification supersedes conflicting older UX proposals in this file
 - **All eight discussion areas are intended for one coordinated product release.** Internal development and test milestones are allowed; do not ship one discussion/feature area as a separate public release.
 
 Before implementation, review the complete product specification, resolve its listed implementation details, compare it with the live source, and obtain approval of the detailed integrated implementation plan.
+
+
+## Integrated implementation plan — 2026-11-23
+
+The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTATION_PLAN.md](./NORTHSTAR_IMPLEMENTATION_PLAN.md)**.
+
+- Status: drafted and saved for user review; not yet approved for implementation.
+- The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
+- No application source code was changed and no APK was built while preparing the plan.
+- Seven genuine product decisions remain listed in Section 14 of the plan. Do not silently decide destructive private import/recovery behavior or user-visible interaction details.
+- The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
+- `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
+- `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
