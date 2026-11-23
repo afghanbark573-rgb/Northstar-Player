@@ -424,3 +424,39 @@ The approved implementation plan is now in active development on `phase-0/releas
 - CI run [45156625321](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45156625321) is queued/in progress at the time of this update. Do not claim the mutex change is build-verified until both debug and signed-release jobs pass.
 - This is in-process serialization through the singleton scanner in `NorthstarApplication`; it is not a cross-process database lock. The current WorkManager configuration uses the app's default process. If a future manifest assigns workers to another process, revisit this guarantee.
 - Latest confirmed passing test/build run remains [45155690835](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45155690835), which includes the three folder reconciliation tests and signed APK verification.
+
+
+## Three-mode library navigation and CI verification — 2026-11-23
+
+### Source implementation
+- Commit `640ea6b088c14afdde7103213a925d915642a176` (`Integrate three-mode library navigation UI`) adds the first native UI integration for the three approved library modes.
+- The Activity observes Room-backed video and folder Flows and renders Video Folders, Files Only, and Nested View. Video Folders is the default.
+- Folder taps open Nested View at that folder; Back navigates to the parent and then returns to Video Folders at the root.
+- The top bar follows the approved order: Northstar title, You/Profile, unified Library Controls, Search. The controls menu contains Sort, View Mode, and Layout groups.
+- The basic You page lists Favorites, Watch History, Private Library, and Settings.
+- This is an implementation milestone, not completion of the approved library experience or a user-visible release milestone.
+
+### CI verification for commit 640ea6b
+- GitHub Actions run [45158767229](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45158767229) completed successfully for branch `phase-0/release-signing` and commit `640ea6b088c14afdde7103213a925d915642a176`.
+- `debug-apk`: completed successfully. Unit tests and debug APK build passed; Room schema and debug APK artifacts uploaded.
+- `release-apk`: completed successfully. Signed release APK build passed, the APK signature verification step passed, and the release APK artifact uploaded.
+- Artifacts: `northstar-room-schema` (ID `14810401053`), `northstar-debug-apk` (ID `14809134305`), and `northstar-release-apk` (ID `14809971481`). Artifacts expire on 2027-02-21.
+- This verifies JVM unit tests/build and CI signing/packaging for this exact commit. It does not establish runtime correctness, upgrade compatibility, or Xiaomi 14 acceptance. No device test is claimed.
+
+### Current UI limitations — not yet implemented
+- You-page destinations are placeholders that display a Toast; Favorites, Watch History, Private Library and Settings are not functional destinations yet.
+- The Create Folder control is a placeholder; SAF folder creation is not implemented.
+- Pull-to-refresh and the Private Library pull-and-hold quick-access gesture are not implemented.
+- Folder NEW indicators are not implemented.
+- Empty folders are not discoverable through the current MediaStore RELATIVE_PATH index; SAF tree selection and empty-directory indexing remain required.
+- Folder sorting is currently alphabetical; reliable aggregate size and provider-derived folder dates have not been implemented.
+- The player remains the basic Media3 PlayerView. The approved custom controls, playback context/previous-next, resume, subtitle/audio-track UI, gestures, Headphone Mode and PiP are not implemented.
+- The current UI is a functional integration shell, not final visual polish and not a complete release.
+
+### Next engineering priorities
+1. Continue library foundations without changing the Room schema casually: design SAF tree grants and folder indexing for empty directories/removable storage, then add folder creation using provider-supported SAF APIs.
+2. Define reliable folder metadata aggregation (size, Date Added, Date Modified) and introduce any required Room migration with exported schema and migration tests.
+3. Implement pull-to-refresh and NEW-state lifecycle; only then add the distinct pull-and-hold Private Library shortcut with authentication.
+4. Replace You-page placeholders as the corresponding Favorites, History, Private Library and Settings workflows become functional.
+5. Keep the custom player, Headphone Mode and PiP behind their architecture/security/lifecycle gates.
+6. Preserve one coordinated product release. Do not ask the user to install this intermediate APK; wait for the integrated release gates and then request Xiaomi 14 acceptance testing.
