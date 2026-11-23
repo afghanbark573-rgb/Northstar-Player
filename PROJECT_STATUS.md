@@ -460,3 +460,13 @@ The approved implementation plan is now in active development on `phase-0/releas
 4. Replace You-page placeholders as the corresponding Favorites, History, Private Library and Settings workflows become functional.
 5. Keep the custom player, Headphone Mode and PiP behind their architecture/security/lifecycle gates.
 6. Preserve one coordinated product release. Do not ask the user to install this intermediate APK; wait for the integrated release gates and then request Xiaomi 14 acceptance testing.
+
+## Master continuation checkpoint — 2026-11-23
+
+- Created the refreshed master handover document: `Northstar_Master_Continuation_Pack_2026-11-23.docx`.
+- This checkpoint consolidates the approved eight product areas, current native architecture and implementation history, latest source milestone `640ea6b088c14afdde7103213a925d915642a176`, successful CI run `45158767229`, known UI limitations, and the next storage engineering sequence.
+- Latest CI evidence remains: debug unit tests/build and Room schema artifact upload passed; signed release build and apksigner verification passed. No Xiaomi 14 acceptance test or signed upgrade test is claimed.
+- Read-only storage audit found that Room's `ExternalTreeGrantEntity` / DAO already exist, but SAF tree selection, persisted-grant workflow, recursive SAF indexing, empty-directory discovery, USB/SD browsing, and provider-backed folder creation are not implemented.
+- Next engineering priority: design and implement SAF tree selection and persisted grants, recursive indexing of nested/empty directories and video documents, source-aware identity, disconnect/revocation handling, and automated tests. Folder creation follows once provider access is reliable.
+- No application source code was changed in preparing this checkpoint.
+- The DOCX is the human-readable handover artifact. Keep this `PROJECT_STATUS.md` as the concise live engineering status. Update both after major milestones and before each new chat.
