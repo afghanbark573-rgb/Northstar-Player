@@ -9,6 +9,7 @@ import com.northstar.player.core.database.ScanStateEntity
 import com.northstar.player.core.permissions.VideoPermissionScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -65,15 +66,19 @@ class MediaStoreVideoScanner(
                 )
                 Result.success(MediaScanResult(count, permissionScope, completedAt))
             } catch (cancelled: CancellationException) {
-                repository.saveScanState(
-                    ScanStateEntity(
-                        sourceKey = sourceKey,
-                        lastSuccessfulScanMillis = previousSuccess,
-                        permissionScope = permissionScope.name,
-                        inProgressSinceMillis = null,
-                        lastError = "Scan cancelled"
+                // The scan context is already cancelled. Persist cleanup in a
+                // non-cancellable section so the in-progress marker is cleared.
+                withContext(NonCancellable) {
+                    repository.saveScanState(
+                        ScanStateEntity(
+                            sourceKey = sourceKey,
+                            lastSuccessfulScanMillis = previousSuccess,
+                            permissionScope = permissionScope.name,
+                            inProgressSinceMillis = null,
+                            lastError = "Scan cancelled"
+                        )
                     )
-                )
+                }
                 throw cancelled
             } catch (error: Exception) {
                 repository.saveScanState(
