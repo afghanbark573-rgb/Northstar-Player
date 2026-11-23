@@ -9,6 +9,7 @@ import com.northstar.player.data.library.MediaLibraryScanScheduler
 import com.northstar.player.data.library.RoomMediaLibraryRepository
 import com.northstar.player.data.storage.SafTreeGrantManager
 import com.northstar.player.data.storage.SafTreeScanner
+import com.northstar.player.data.storage.SafFolderManager
 
 class NorthstarApplication : Application() {
     override fun onCreate() {
@@ -55,5 +56,9 @@ class NorthstarApplication : Application() {
             database.safSnapshotDao(),
             database.externalTreeGrantDao()
         )
+    }
+
+    val safFolderManager: SafFolderManager by lazy {
+        SafFolderManager(contentResolver, database.externalTreeGrantDao())
     }
 }

@@ -574,3 +574,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - The migration test now also runs inside `runBlocking` because its Room DAO lookup is suspend.
 - Fresh run [45175664390](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45175664390) was queued before this emulator configuration fix and should not be treated as the final gate.
 - This commit triggers a new validation run. The emulator test must complete successfully before folder creation is implemented.
+
+
+## SAF provider-backed folder creation — implementation in progress — 2026-11-23
+
+- Room v1-to-v2 migration gate is now verified by GitHub Actions run [45175777323](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45175777323): Android instrumentation test completed 1/1 with zero failures or skips; JVM tests, debug APK, signed release APK, and apksigner verification also passed.
+- Emulator boot now uses Android emulator TCG software CPU emulation on hosted Linux; the successful run took approximately 5m44s for the instrumentation Gradle task.
+- Starting provider-backed folder creation as the next storage milestone. The feature must validate persisted write permission, restrict creation to an indexed SAF directory, reject unsafe names, use `DocumentsContract.createDocument`, and refresh the source index after creation.
+- No physical USB/SD provider test or Xiaomi 14 acceptance test has yet been performed. Do not distribute the intermediate APK.

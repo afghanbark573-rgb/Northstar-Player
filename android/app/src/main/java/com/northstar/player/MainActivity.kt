@@ -1,6 +1,7 @@
 package com.northstar.player
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.content.Intent
 import android.net.Uri
@@ -24,6 +25,7 @@ import com.northstar.player.data.library.LibraryBrowser
 import com.northstar.player.data.library.LibrarySort
 import com.northstar.player.data.library.LibraryViewMode
 import com.northstar.player.core.database.ExternalTreeGrantEntity
+import com.northstar.player.data.storage.SafSourceIdentity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -291,13 +293,25 @@ class MainActivity : ComponentActivity() {
                 maxLines = 1
                 setTextColor(0xFFBBBBBB.toInt())
             }, LinearLayout.LayoutParams(0, 42, 1f))
+            val canCreate = folder?.let { current ->
+                current.sourceKey.startsWith("saf:") && externalGrants.any { grant ->
+                    SafSourceIdentity.key(grant.treeUri) == current.sourceKey &&
+                        grant.isAvailable &&
+                        (grant.persistedFlags and Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0
+                }
+            } == true
             breadcrumb.addView(TextView(this).apply {
                 text = "+"
                 textSize = 25f
                 contentDescription = "Create folder"
-                setTextColor(0xFFFFFFFF.toInt())
+                setTextColor(if (canCreate) 0xFFFFFFFF.toInt() else 0xFF666666.toInt())
                 setPadding(12, 0, 8, 0)
-                setOnClickListener { Toast.makeText(this@MainActivity, "Folder creation will be added with storage-folder support.", Toast.LENGTH_SHORT).show() }
+                setOnClickListener {
+                    if (canCreate && folder != null) showCreateFolderDialog(folder!!)
+                    else Toast.makeText(this@MainActivity,
+                        "Folder creation requires an available USB/SD folder with write permission.",
+                        Toast.LENGTH_LONG).show()
+                }
             })
             content.addView(breadcrumb)
         }
@@ -434,6 +448,13 @@ class MainActivity : ComponentActivity() {
                     setTextColor(0xFF999999.toInt())
                     setPadding(0, 4, 0, 0)
                 })
+                row.addView(TextView(this@MainActivity).apply {
+                    text = "Browse folders  ›"
+                    textSize = 12f
+                    setTextColor(0xFFFFFFFF.toInt())
+                    setPadding(0, 10, 0, 0)
+                    setOnClickListener { browseExternalTree(grant) }
+                })
                 content.addView(row)
                 content.addView(View(this).apply { setBackgroundColor(0xFF252525.toInt()) },
                     LinearLayout.LayoutParams(-1, 1))
@@ -462,6 +483,71 @@ class MainActivity : ComponentActivity() {
                     Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun browseExternalTree(grant: ExternalTreeGrantEntity) {
+        if (!grant.isAvailable) {
+            Toast.makeText(this, "Reconnect or reselect this storage folder first.", Toast.LENGTH_LONG).show()
+            return
+        }
+        val treeUri = Uri.parse(grant.treeUri)
+        val rootDocumentId = try { DocumentsContract.getTreeDocumentId(treeUri) } catch (_: Exception) { null }
+        if (rootDocumentId == null) {
+            Toast.makeText(this, "This storage folder cannot be opened.", Toast.LENGTH_LONG).show()
+            return
+        }
+        val sourceKey = SafSourceIdentity.key(grant.treeUri)
+        val rootKey = "$sourceKey|$rootDocumentId"
+        if (folders.none { it.folderKey == rootKey }) {
+            scanExternalTree(grant)
+            Toast.makeText(this, "Storage is being refreshed. Browse again when indexing finishes.", Toast.LENGTH_LONG).show()
+            return
+        }
+        showingExternalStorage = false
+        showingYou = false
+        viewMode = LibraryViewMode.NESTED_VIEW
+        currentFolderKey = rootKey
+        render()
+    }
+
+    private fun showCreateFolderDialog(parent: FolderEntity) {
+        val nameInput = EditText(this).apply {
+            hint = "Folder name"
+            setSingleLine(true)
+            setTextColor(0xFFFFFFFF.toInt())
+            setHintTextColor(0xFF888888.toInt())
+            setPadding(18, 12, 18, 12)
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Create folder")
+            .setView(nameInput)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Create", null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val name = nameInput.text.toString()
+                lifecycleScope.launch {
+                    try {
+                        val app = application as NorthstarApplication
+                        val grant = app.safFolderManager.createFolder(parent, name)
+                        val scan = app.safTreeScanner.scan(grant)
+                        scan.onSuccess {
+                            Toast.makeText(this@MainActivity, "Folder created", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss()
+                        }.onFailure { error ->
+                            Toast.makeText(this@MainActivity,
+                                "Folder created, but library refresh failed: ${error.message ?: "Storage unavailable"}",
+                                Toast.LENGTH_LONG).show()
+                            dialog.dismiss()
+                        }
+                    } catch (error: Exception) {
+                        nameInput.error = error.message ?: "Could not create folder"
+                    }
+                }
+            }
+        }
+        dialog.show()
     }
 
     private fun queryTreeDisplayName(uri: Uri): String {
