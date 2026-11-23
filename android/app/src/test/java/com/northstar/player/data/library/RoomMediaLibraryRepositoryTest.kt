@@ -29,14 +29,6 @@ class RoomMediaLibraryRepositoryTest {
             }
         }
 
-        override suspend fun markOlderItemsUnavailable(sourceKey: String, scanStartedAtMillis: Long) {
-            for (index in items.indices) if (
-                items[index].sourceKey == sourceKey &&
-                items[index].indexedAtMillis < scanStartedAtMillis
-            ) {
-                items[index] = items[index].copy(isAvailable = false)
-            }
-        }
         override suspend fun deleteByKey(mediaKey: String) {
             items.removeAll { it.mediaKey == mediaKey }
         }
