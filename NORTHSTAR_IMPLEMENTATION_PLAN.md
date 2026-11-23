@@ -364,13 +364,13 @@ Approved gesture convention (23 November 2026): left-side vertical swipe control
 
 ### 7.3 Background audio, Picture-in-Picture, and lifecycle
 
-**Audio-only background playback:** provide a headphone icon/control in the player. Activating it switches to audio-only playback so audio can continue when the user leaves the app. Use a MediaSessionService or equivalent service-backed playback architecture if validated for the selected engine; the service owns the active player and notification/media-session integration.
+**Headphone / audio-only background behavior:** provide a headphone icon/control in the player. Tapping it arms audio-only background playback; it does not immediately close the video, hide the player, switch screens, or exit the app. While the user remains in that video, the video continues to play normally and remains visible. If the user presses Home or otherwise leaves/exits the video view while this mode is active, playback continues as audio only (no floating video). This audio-only continuation remains active until the user exits that video or stops playback. Use a MediaSessionService or equivalent service-backed playback architecture if validated for the selected engine; the service owns active playback and notification/media-session integration. The UI must make the armed state clear and define how the user turns it off before leaving the video.
 
 **Picture-in-Picture (PiP):** support floating video playback as a separate experience from audio-only background playback. Provide both activation paths:
 - A dedicated PiP icon/control in the player.
 - Android Home-button activation to enter PiP when the user leaves the app.
 
-Add a Settings preference that lets the user choose the active PiP entry method: **Home button** or **PiP icon**. Both entry paths must be implemented, but respect the selected preference so the unselected path does not unexpectedly trigger PiP. Do not conflate the headphone/audio-only action with PiP.
+Add a Settings toggle for **Automatically enter PiP when pressing Home** (on/off). When enabled, pressing Home while a video is playing enters PiP automatically. When disabled, pressing Home leaves the app normally and does not automatically enter PiP. The dedicated PiP icon remains visible/available and always enters PiP when tapped, regardless of this setting. Do not hide or disable the icon when automatic Home-button PiP is off. Do not conflate the headphone/audio-only action with PiP.
 
 The selected playback engine and Android version may impose lifecycle/API constraints. Validate PiP transitions, playback continuity, controls, aspect ratio, and return-to-app behavior on supported Android versions and the user's Xiaomi 14. Activity/screen recreation must not unexpectedly destroy active playback.
 
@@ -517,7 +517,9 @@ Before release, review:
 - All approved controls, timeline toggle, gestures, temporary 2× hold, speed, orientation, tracks, subtitles, fullscreen, resume, and contextual Previous/Next work.
 - Controls hide and reappear predictably.
 - Headphone control starts/continues audio-only playback outside the app.
-- PiP icon and Home-button PiP entry both work, with Settings selecting which activation method is active.
+- The dedicated PiP icon is always visible/available and always enters PiP when tapped.
+- Settings independently enables/disables only automatic PiP on Home-button press; turning it off never disables the PiP icon.
+- Headphone mode leaves the video/player open and visible; leaving the video/app changes playback to audio-only until the user exits that video or stops playback.
 - Audio-only background playback and PiP remain distinct and do not trigger each other.
 - Unsupported file/track cases show clear errors or unavailable options rather than crashing.
 
@@ -676,7 +678,7 @@ These are the only currently identified product choices that should be returned 
 4. **Sorting options — RESOLVED:** provide separate Date Added and Date Modified options (both newest first), alongside A–Z and Largest. Use source-provided dates where reliable; do not invent missing dates.
 5. **Player gesture arrangement — RESOLVED:** left vertical = brightness; right vertical = volume; left double-tap = seek backward; right double-tap = seek forward; press-and-hold = temporary 2× playback.
 6. **Top navigation — RESOLVED:** Northstar title on the left; Profile/You, unified Library Controls, and Search icons on the right, in that order. The unified controls icon is between Profile/You and Search and contains all Sort, View Mode, and Layout options. Do not add bottom navigation. Detailed visual styling remains a design task.
-7. **Background audio and PiP — RESOLVED:** a headphone control in the player enables audio-only background playback. PiP is also approved, with both a dedicated player icon and Home-button entry implemented. A Settings preference lets the user choose the active PiP trigger: Home button or PiP icon. Keep audio-only playback and PiP as separate modes.
+7. **Background audio and PiP — RESOLVED:** the headphone control arms audio-only background behavior without closing the video/player. The video remains visible while the user stays in the video; when the user goes Home or leaves the video, audio continues without floating video until the user exits that video or stops playback. The dedicated PiP icon is always visible/available and always works. Settings only toggles automatic PiP on Home-button press; disabling it does not affect the icon. Keep audio-only playback and PiP as separate modes.
 
 Technical engine choice, encryption implementation, schema details, and exact scan strategy are engineering decisions to be justified by tests; they do not need to be presented as product questionnaires unless they change the user experience or data-loss risk.
 
