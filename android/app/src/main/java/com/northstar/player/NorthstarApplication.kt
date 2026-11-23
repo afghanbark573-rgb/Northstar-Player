@@ -8,7 +8,11 @@ import com.northstar.player.data.library.MediaStoreVideoScanner
 import com.northstar.player.data.library.MediaLibraryScanScheduler
 import com.northstar.player.data.library.RoomMediaLibraryRepository
 
-class NorthstarApplication : Application() {\n    override fun onCreate() {\n        super.onCreate()\n        mediaLibraryScanScheduler.ensurePeriodicScan()\n    }
+class NorthstarApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        mediaLibraryScanScheduler.ensurePeriodicScan()
+    }
     val database: NorthstarDatabase by lazy {
         NorthstarDatabase.getInstance(this)
     }
@@ -24,7 +28,11 @@ class NorthstarApplication : Application() {\n    override fun onCreate() {\n   
         VideoPermissionChecker(this)
     }
 
-    val mediaLibraryScanScheduler: MediaLibraryScanScheduler by lazy {\n        MediaLibraryScanScheduler(this)\n    }\n\n    val mediaStoreVideoScanner: MediaStoreVideoScanner by lazy {
+    val mediaLibraryScanScheduler: MediaLibraryScanScheduler by lazy {
+        MediaLibraryScanScheduler(this)
+    }
+
+    val mediaStoreVideoScanner: MediaStoreVideoScanner by lazy {
         MediaStoreVideoScanner(
             contentResolver,
             mediaLibraryRepository
