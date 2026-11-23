@@ -375,3 +375,20 @@ The approved implementation plan is now in active development on `phase-0/releas
 4. Review first-scan and empty-library behavior, permission reselection, scan concurrency, and cancellation during Room writes.
 5. Continue final library UX (three approved modes, actual nested folder navigation, controls, NEW indicators) only after the Room-backed data path is stable.
 6. Keep the signed release identity, application ID, branch separation and coordinated-release policy unchanged.
+
+
+## Continuation update — 2026-11-23 (plan approval and repository recheck)
+
+- The user explicitly approved the integrated implementation plan in the project conversation. `NORTHSTAR_IMPLEMENTATION_PLAN.md` has been corrected to record approval and active implementation; older statements in this file saying the plan still awaited approval are historical and superseded.
+- Rechecked the live `phase-0/release-signing` source. `MainActivity.kt` observes `RoomMediaLibraryRepository.observeAvailableVideos()` through a lifecycle coroutine and schedules background refreshes. `NorthstarApplication.kt` wires Room, the repository, permission checker, scanner and WorkManager scheduler. This confirms that the Room-backed work described above is present on this branch.
+- Rechecked `NorthstarDatabase.kt`: Room database version is 1 and `exportSchema = true`; Gradle config points Room schema output to `android/app/schemas`. The expected schema directory/file was not discoverable through the GitHub file interface during this check. Treat schema export/commit as unverified, not as confirmed absent from every possible build artifact.
+- Rechecked GitHub CI evidence: the commit-status endpoint returned no statuses for the recorded native implementation commits, and the available workflow-run lookup is limited to pull-request-triggered runs. No fresh current-head debug or signed-release result could be verified. Do not claim current-head build success.
+- The repository default branch is `main`; native work remains on `phase-0/release-signing`. A separate default-branch commit titled “Build scrollable folder-based native video library with search and view controls” is not a substitute for the native branch's Room-backed source and must not be merged into it casually.
+- No application source code or APK was changed/generated during this continuation. The documentation-only plan-status correction is recorded in commit `be49e7931f63788a82afb4c0906cc83c8cd039a3`.
+
+### Next gates
+
+1. Obtain a genuine Actions run for the native branch head and inspect both debug and signed-release jobs, including apksigner verification.
+2. Verify generated Room schema output and commit the v1 schema artifact; add migration coverage before schema changes.
+3. Locate and inspect the existing test source tree before adding scanner batching, cancellation, failure-state and FULL/PARTIAL reconciliation tests.
+4. Review WorkManager concurrency and scan reconciliation before advancing to more UI work.
