@@ -138,9 +138,9 @@ class SafFolderManagerTest {
         }
     }
 
-    private inline fun <reified T : Throwable> assertFails(block: () -> Unit): T {
+    private suspend inline fun <reified T : Throwable> assertFails(crossinline block: suspend () -> Unit): T {
         try {
-            block()
+            runBlocking { block() }
         } catch (error: Throwable) {
             if (error is T) return error
             throw AssertionError("Expected ${T::class.java.simpleName}, got ${error::class.java.simpleName}", error)
