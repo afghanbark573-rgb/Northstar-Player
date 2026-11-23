@@ -505,3 +505,14 @@ The approved implementation plan is now in active development on `phase-0/releas
 - The transaction replaces the source's folder hierarchy, activates the fully staged media generation, retires older media rows, and records the successful scan timestamp together. This closes the gap where a database exception between separate DAO calls could expose a mixed generation.
 - No entities or columns changed; database schema version remains 1. The new DAO adds transaction/query methods only.
 - The scanner's application wiring now injects the snapshot publisher. A fresh GitHub Actions run is required to validate Room code generation and compilation before treating this as verified.
+
+
+## SAF scan generation uniqueness and latest validation — 2026-11-23
+
+- Scan generation timestamps now advance beyond both the last successful scan and the newest indexed row for that source. This prevents a fast retry from reusing the same generation timestamp and accidentally activating stale rows left by a failed attempt.
+- Extracted the generation calculation into `SafScanGeneration` and added three JVM unit tests covering failed-attempt advancement, current-clock precedence, and strict advancement beyond the last successful scan.
+- Updated the Room repository test fake to match the current `MediaItemDao` interface after moving snapshot publication into `SafSnapshotDao`.
+- Latest source commit: `704f89b4d4f03215f3d5235e2b1749b2b157ff89`.
+- CI run [45171712123](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45171712123) was still in progress at checkpoint time. Do not claim this commit is build-verified until both debug unit tests/build and signed-release/apksigner jobs complete.
+- Earlier attempt [45171603064](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45171603064) encountered Maven Central HTTP 429 dependency throttling during debug dependency resolution; its release job was separate. This is an external dependency-fetch failure, not evidence of a source compilation defect.
+- Next gate: obtain a clean CI pass for the current head, then add provider-level SAF tests and implement folder creation only after persisted read/write grant behavior is verified. Physical-device tests on removable storage remain required.
