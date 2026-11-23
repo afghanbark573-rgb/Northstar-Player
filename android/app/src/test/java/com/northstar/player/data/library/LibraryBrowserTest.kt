@@ -52,6 +52,32 @@ class LibraryBrowserTest {
         assertEquals(listOf("alpha.mp4"), result.videos.map { it.displayName })
     }
 
+
+    @Test fun folderSortUsesNewestDescendantDateAddedAndDateModified() {
+        val allVideos = videos + video("d", "camera.mp4", "Camera/", 30, 5, 50)
+        val allFolders = folders + folder("camera", null, "Camera", "Camera", 1)
+
+        val byAdded = LibraryBrowser.build(
+            allVideos, allFolders, LibraryViewMode.VIDEO_FOLDERS, LibrarySort.DATE_ADDED
+        )
+        assertEquals(listOf("Camera", "Movies"), byAdded.folders.map { it.displayName })
+
+        val byModified = LibraryBrowser.build(
+            allVideos, allFolders, LibraryViewMode.VIDEO_FOLDERS, LibrarySort.DATE_MODIFIED
+        )
+        assertEquals(listOf("Movies", "Camera"), byModified.folders.map { it.displayName })
+    }
+
+    @Test fun largestFolderSortUsesSumOfAvailableDescendantBytes() {
+        val allVideos = videos + video("d", "camera.mp4", "Camera/", 30, 5, 50)
+        val allFolders = folders + folder("camera", null, "Camera", "Camera", 1)
+
+        val result = LibraryBrowser.build(
+            allVideos, allFolders, LibraryViewMode.VIDEO_FOLDERS, LibrarySort.LARGEST
+        )
+        assertEquals(listOf("Movies", "Camera"), result.folders.map { it.displayName })
+    }
+
     @Test fun dateModifiedSortIsIndependentFromDateAddedSort() {
         val result = LibraryBrowser.build(videos, folders, LibraryViewMode.FILES_ONLY, LibrarySort.DATE_MODIFIED)
         assertEquals(listOf("zeta.mp4", "root.mp4", "alpha.mp4"), result.videos.map { it.displayName })
