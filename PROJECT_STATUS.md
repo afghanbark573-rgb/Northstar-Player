@@ -557,3 +557,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Strengthened the Android migration test to seed and verify preservation of representative rows across all existing user-data tables (media, favorites, playback progress, watch history, folders, scan state, new-content state, and external tree grants), and to include the v1 Room identity hash.
 - Added a 25-minute timeout to the emulator migration step so an unavailable or stalled emulator cannot leave the workflow indefinitely in progress.
 - Earlier migration validation run [45173392724](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45173392724) remains in progress at the last API check; its release build and JVM/debug build passed, but the emulator migration test has not reported a result. The strengthened test must pass in a fresh run before storage-write features are unblocked.
+
+
+## Instrumentation test coroutine fix — 2026-11-23
+
+- Static review caught that the migration test calls the suspend DAO method `findByKey`; the earlier test source used a regular JUnit method and would not compile when Android instrumentation sources were compiled.
+- Wrapped the test body in `runBlocking` so it can invoke Room suspend APIs correctly.
+- The prior workflow run [45175159918](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45175159918) had passed JVM unit tests and release signing but remained at the emulator instrumentation step at the last check. Its instrumentation result is not accepted as passed.
+- This fix triggers a fresh full validation run. Folder creation remains gated on the fresh emulator migration test.

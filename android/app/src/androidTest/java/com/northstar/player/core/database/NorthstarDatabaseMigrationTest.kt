@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -13,7 +14,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NorthstarDatabaseMigrationTest {
     @Test
-    fun migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable() {
+    fun migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val databaseName = "northstar-migration-${System.nanoTime()}.db"
         val databaseFile = context.getDatabasePath(databaseName)
