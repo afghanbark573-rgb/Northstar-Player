@@ -79,7 +79,7 @@ Signing and signed CI pipeline were completed and verified in CI.
 - Long-playback, memory, heat and battery testing.
 
 ### Phase 4 — Main and You interface
-- Graphite Orange visual direction.
+- AMOLED black-and-white visual direction (latest user-approved direction; supersedes older Graphite Orange notes).
 - User-oriented library/player design, not a generic browser/native demo screen.
 - Clear navigation and preferences.
 
@@ -119,7 +119,7 @@ The current library candidate includes:
 - Sort by recent, A–Z, and largest.
 - Media3 playback retained.
 
-Important: the current folder display is a first grouping pass, not the final nested folder-navigation UX. The simple native UI is a functional validation shell, not the approved final Graphite Orange interface.
+Important: the current folder display is a first grouping pass, not the final nested folder-navigation UX. The simple native UI is a functional validation shell, not the approved final AMOLED black-and-white interface.
 
 ## Current status and next actions
 
@@ -181,3 +181,22 @@ Important: the current folder display is a first grouping pass, not the final ne
 - Never create a new APK merely to repackage existing functionality.
 - Preserve the user's agreement: meaningful bundled releases only; no cosmetic or duplicate-feature micro-releases.
 - Keep Phase 0 constraints: no unrelated changes.
+
+
+## Latest approved product specification — 2026-11-23
+
+The user completed and approved all eight Northstar product discussions on 2026-11-23. The complete durable record is now maintained in **[NORTHSTAR_PRODUCT_SPEC.md](./NORTHSTAR_PRODUCT_SPEC.md)** on this branch.
+
+This latest specification supersedes conflicting older UX proposals in this file, especially:
+- Visual theme is now **AMOLED black and white**, not Graphite Orange.
+- Main navigation is at the top; the bottom area remains empty (no bottom navigation).
+- The top profile icon opens the **You** page, which contains Settings and all secondary options.
+- Library has exactly three modes: Video Folders, Files Only, and Nested View. Nested View is the all-folders hierarchy mode, not a fourth mode.
+- Sort, View Mode, and Layout are grouped in one simple icon-and-text controls area.
+- Favorites are a separate section reached through You, not a home-screen section.
+- Watch History replaces a separate Recently Played section.
+- Private Library supports importing complete folders and creating folders/subfolders.
+- Connected USB and SD storage should be browsable where Android/device access permits.
+- **All eight discussion areas are intended for one coordinated product release.** Internal development and test milestones are allowed; do not ship one discussion/feature area as a separate public release.
+
+Before implementation, review the complete product specification, resolve its listed implementation details, compare it with the live source, and obtain approval of the detailed integrated implementation plan.
