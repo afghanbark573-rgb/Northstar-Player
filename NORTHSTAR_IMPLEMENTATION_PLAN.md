@@ -362,11 +362,17 @@ Required:
 
 Approved gesture convention (23 November 2026): left-side vertical swipe controls brightness; right-side vertical swipe controls volume; double-tap left side seeks backward and double-tap right side seeks forward; press-and-hold temporarily switches to 2× and restores the prior speed on release/cancel. Design gesture zones and conflict handling so swipes, taps, and holds do not trigger accidentally; validate on the user's Xiaomi 14.
 
-### 7.3 Playback service and lifecycle
+### 7.3 Background audio, Picture-in-Picture, and lifecycle
 
-Use a MediaSessionService or equivalent service-backed playback architecture if validated for the selected engine. The service owns the active player and notification/media-session integration. Activity/screen recreation must not unexpectedly destroy active playback.
+**Audio-only background playback:** provide a headphone icon/control in the player. Activating it switches to audio-only playback so audio can continue when the user leaves the app. Use a MediaSessionService or equivalent service-backed playback architecture if validated for the selected engine; the service owns the active player and notification/media-session integration.
 
-Background playback requirement is audio playback outside the app where appropriate. Whether the product also needs Picture-in-Picture is not currently approved and must not be silently added.
+**Picture-in-Picture (PiP):** support floating video playback as a separate experience from audio-only background playback. Provide both activation paths:
+- A dedicated PiP icon/control in the player.
+- Android Home-button activation to enter PiP when the user leaves the app.
+
+Add a Settings preference that lets the user choose the active PiP entry method: **Home button** or **PiP icon**. Both entry paths must be implemented, but respect the selected preference so the unselected path does not unexpectedly trigger PiP. Do not conflate the headphone/audio-only action with PiP.
+
+The selected playback engine and Android version may impose lifecycle/API constraints. Validate PiP transitions, playback continuity, controls, aspect ratio, and return-to-app behavior on supported Android versions and the user's Xiaomi 14. Activity/screen recreation must not unexpectedly destroy active playback.
 
 ### 7.4 Previous/Next context
 
@@ -510,7 +516,9 @@ Before release, review:
 ### F. Player
 - All approved controls, timeline toggle, gestures, temporary 2× hold, speed, orientation, tracks, subtitles, fullscreen, resume, and contextual Previous/Next work.
 - Controls hide and reappear predictably.
-- Playback survives screen changes and app backgrounding according to the approved background behavior.
+- Headphone control starts/continues audio-only playback outside the app.
+- PiP icon and Home-button PiP entry both work, with Settings selecting which activation method is active.
+- Audio-only background playback and PiP remain distinct and do not trigger each other.
 - Unsupported file/track cases show clear errors or unavailable options rather than crashing.
 
 ### G. Private Library
@@ -668,7 +676,7 @@ These are the only currently identified product choices that should be returned 
 4. **Sorting options — RESOLVED:** provide separate Date Added and Date Modified options (both newest first), alongside A–Z and Largest. Use source-provided dates where reliable; do not invent missing dates.
 5. **Player gesture arrangement — RESOLVED:** left vertical = brightness; right vertical = volume; left double-tap = seek backward; right double-tap = seek forward; press-and-hold = temporary 2× playback.
 6. **Top navigation — RESOLVED:** Northstar title on the left; Profile/You, unified Library Controls, and Search icons on the right, in that order. The unified controls icon is between Profile/You and Search and contains all Sort, View Mode, and Layout options. Do not add bottom navigation. Detailed visual styling remains a design task.
-7. **Background playback:** Audio playback outside the app is locked. Confirm whether it should continue automatically when the user leaves the app, or only after the user explicitly enables/starts background audio. Do not add Picture-in-Picture unless separately approved.
+7. **Background audio and PiP — RESOLVED:** a headphone control in the player enables audio-only background playback. PiP is also approved, with both a dedicated player icon and Home-button entry implemented. A Settings preference lets the user choose the active PiP trigger: Home button or PiP icon. Keep audio-only playback and PiP as separate modes.
 
 Technical engine choice, encryption implementation, schema details, and exact scan strategy are engineering decisions to be justified by tests; they do not need to be presented as product questionnaires unless they change the user experience or data-loss risk.
 
