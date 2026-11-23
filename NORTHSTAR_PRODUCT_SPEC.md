@@ -45,7 +45,7 @@ Guiding principles:
 
 ### Unified library controls
 
-Sort, View Mode, and Layout must be together in one single, easy-to-find controls area. Each uses a simple icon and text label. Do not scatter these controls across separate menus.
+Sort, View Mode, and Layout must be together in one single, easy-to-find controls area, opened by the dedicated controls icon in the top bar between Profile/You and Search. Inside that one menu, each group uses a simple icon and text label. Sort contains Date Added, Date Modified, A–Z, and Largest; View Mode contains Video Folders, Files Only, and Nested View; Layout contains List and Grid. Do not scatter these controls across separate menus or add separate top-bar buttons for them.
 
 ## 3. Video player — LOCKED
 
@@ -66,9 +66,9 @@ Sort, View Mode, and Layout must be together in one single, easy-to-find control
 ## 4. Main interface and user experience — LOCKED
 
 1. **Visual theme:** AMOLED black and white — clean, minimal, modern, and high-contrast.
-2. **Navigation:** important and frequently used navigation items belong at the top. Keep the bottom area empty; do not add bottom navigation.
+2. **Navigation:** important and frequently used navigation items belong at the top. The top bar places the Northstar title on the left and, on the right, the Profile/You icon, the unified Library Controls icon, and the Search icon, in that order. Keep the bottom area empty; do not add bottom navigation.
 3. **Home screen:** folder-focused library.
-4. **Secondary options:** no scattered menus. A profile icon at the top opens the **You** page. Settings and all other secondary options belong there.
+4. **Secondary options:** no scattered menus. The Profile/You icon opens the **You** page. Settings and all other secondary options belong there. The adjacent unified Library Controls icon opens one compact menu containing all Sort, View Mode, and Layout options.
 5. **You page destinations:** show clear, directly accessible entries for Favorites, Watch History, Private Library, and Settings. Private Library must be visibly listed as a normal destination in You; the pull-and-hold gesture is an additional shortcut, never the only discovery or access method.
 5. **Consistency:** consistent visual language across the library, folders, You page, and player.
 6. **Feedback:** clear loading, empty, permission, and error states.
@@ -201,8 +201,7 @@ The existing native app is a starting foundation, not the completed product. The
 ## 12. Important distinctions and unresolved implementation details
 
 These details require technical design or explicit user approval before implementation:
-- Exact interaction and placement of the unified Sort / View Mode / Layout control.
-- Exact top navigation items and their ordering; bottom navigation remains excluded.
+- Exact visual styling and detailed interaction of the unified Sort / View Mode / Layout menu remain design tasks. Its top-bar placement and order are locked: Profile/You, unified Library Controls, Search.
 - Whether Private Library import copies, moves, or lets the user choose.
 - Exact forgotten-PIN recovery method and consequences for encrypted data.
 - Exact behavior when a USB/SD device disconnects during browsing or playback.
