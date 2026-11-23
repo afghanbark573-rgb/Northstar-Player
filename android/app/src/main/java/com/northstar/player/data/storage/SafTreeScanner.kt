@@ -31,6 +31,19 @@ data class SafTreeScanResult(
     val completedAtMillis: Long
 )
 
+/** Produces a unique, monotonically increasing timestamp for each scan generation. */
+internal object SafScanGeneration {
+    fun next(
+        clockMillis: Long,
+        lastSuccessfulScanMillis: Long?,
+        latestIndexedAtMillis: Long?
+    ): Long = maxOf(
+        clockMillis,
+        (lastSuccessfulScanMillis ?: 0L) + 1L,
+        (latestIndexedAtMillis ?: 0L) + 1L
+    )
+}
+
 /** Stable, privacy-preserving source identity. The raw tree URI stays in the grant table. */
 object SafSourceIdentity {
     fun key(treeUri: String): String {
@@ -100,10 +113,8 @@ class SafTreeScanner(
             // Include timestamps of failed staged generations, so a rapid retry can never
             // accidentally activate stale rows left by an earlier interrupted attempt.
             val latestIndexedAt = mediaDao.latestIndexedAtMillis(sourceKey) ?: 0L
-            val scanStartedAt = maxOf(
-                clock(),
-                (previous?.lastSuccessfulScanMillis ?: 0L) + 1L,
-                latestIndexedAt + 1L
+            val scanStartedAt = SafScanGeneration.next(
+                clock(), previous?.lastSuccessfulScanMillis, latestIndexedAt
             )
             scanStateDao.save(
                 ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",

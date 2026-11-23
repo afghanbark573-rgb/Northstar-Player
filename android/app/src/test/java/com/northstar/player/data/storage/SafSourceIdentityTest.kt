@@ -25,4 +25,28 @@ class SafSourceIdentityTest {
         assertEquals(false, key.contains("private-provider"))
         assertEquals(68, key.length)
     }
+
+    @Test fun scanGenerationAdvancesPastFailedStagedAttempt() {
+        assertEquals(2_001L, SafScanGeneration.next(
+            clockMillis = 1_500L,
+            lastSuccessfulScanMillis = 1_000L,
+            latestIndexedAtMillis = 2_000L
+        ))
+    }
+
+    @Test fun scanGenerationUsesCurrentClockWhenItIsNewest() {
+        assertEquals(5_000L, SafScanGeneration.next(
+            clockMillis = 5_000L,
+            lastSuccessfulScanMillis = 1_000L,
+            latestIndexedAtMillis = 2_000L
+        ))
+    }
+
+    @Test fun scanGenerationAlwaysAdvancesPastLastSuccess() {
+        assertEquals(3_001L, SafScanGeneration.next(
+            clockMillis = 2_000L,
+            lastSuccessfulScanMillis = 3_000L,
+            latestIndexedAtMillis = 2_500L
+        ))
+    }
 }
