@@ -58,7 +58,7 @@ Sort, View Mode, and Layout must be together in one single, easy-to-find control
 7. **Subtitles:** support embedded and external subtitle files.
 8. **Audio tracks:** allow selection among available audio tracks.
 9. **Orientation:** portrait, landscape, and automatic rotation options.
-10. **Background playback and PiP:** provide a headphone control in the player for audio-only background playback. Also support Picture-in-Picture (PiP) video playback with both a dedicated PiP icon and Home-button activation. In Settings, let the user choose which PiP activation method is active: Home button or the dedicated PiP icon. Both methods must be implemented; the selected preference determines the trigger.
+10. **Background playback and PiP:** provide a headphone control in the player that arms audio-only background playback without closing the video or leaving the player. The video remains visible and plays normally while the user stays in the video; if the user goes to the Android Home screen or otherwise leaves the video, audio continues without showing the video in a floating window. Audio-only background playback ends when the user exits that video or stops playback. Also support Picture-in-Picture (PiP) with a dedicated player icon that is always visible/available and always enters PiP when tapped. Settings controls only automatic PiP on Home-button press: users can enable or disable that automatic behavior. Disabling automatic Home-button PiP must not disable or hide the dedicated PiP icon.
 11. **Resume playback:** remember each video's position and offer to continue.
 12. **Next/Previous context:** navigate through videos in the current folder or selected library context.
 13. **Fullscreen:** clean viewing experience; controls hide automatically.
