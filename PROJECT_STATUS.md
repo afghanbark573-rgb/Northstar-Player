@@ -516,3 +516,13 @@ The approved implementation plan is now in active development on `phase-0/releas
 - CI run [45171712123](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45171712123) was still in progress at checkpoint time. Do not claim this commit is build-verified until both debug unit tests/build and signed-release/apksigner jobs complete.
 - Earlier attempt [45171603064](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45171603064) encountered Maven Central HTTP 429 dependency throttling during debug dependency resolution; its release job was separate. This is an external dependency-fetch failure, not evidence of a source compilation defect.
 - Next gate: obtain a clean CI pass for the current head, then add provider-level SAF tests and implement folder creation only after persisted read/write grant behavior is verified. Physical-device tests on removable storage remain required.
+
+
+## SAF isolated staging table and database migration — 2026-11-23
+
+- Code review found that writing staged scan rows directly into `media_items` still replaced canonical rows sharing the same stable media key. That could hide the previous successful record before the new scan completed.
+- Replaced in-place staging with a dedicated `saf_staged_media` Room table. Scan batches now write only to this table; the visible `media_items` table is untouched until publication.
+- The final Room transaction copies the complete staged generation into canonical media rows, marks only missing prior rows unavailable, replaces the folder hierarchy, marks the grant available, records successful scan state, and clears staging. An interrupted or failed scan cannot overwrite the last published media snapshot.
+- Stale staging generations are cleared before a new scan after their generation timestamp has been considered, so a retry always uses a newer generation.
+- Database version is now 2, with explicit `MIGRATION_1_2` creating the staging table and its indexes. The migration is registered in the database builder; destructive fallback is not enabled.
+- This is an application data-model migration and must be verified by CI Room schema export and migration validation before proceeding to folder creation. Physical-device upgrade testing remains required.

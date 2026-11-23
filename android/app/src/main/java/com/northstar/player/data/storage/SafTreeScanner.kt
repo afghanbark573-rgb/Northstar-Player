@@ -12,6 +12,7 @@ import com.northstar.player.core.database.MediaItemDao
 import com.northstar.player.core.database.MediaItemEntity
 import com.northstar.player.core.database.ScanStateDao
 import com.northstar.player.core.database.ScanStateEntity
+import com.northstar.player.core.database.SafStagedMediaEntity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -36,11 +37,11 @@ internal object SafScanGeneration {
     fun next(
         clockMillis: Long,
         lastSuccessfulScanMillis: Long?,
-        latestIndexedAtMillis: Long?
+        latestGenerationMillis: Long?
     ): Long = maxOf(
         clockMillis,
         (lastSuccessfulScanMillis ?: 0L) + 1L,
-        (latestIndexedAtMillis ?: 0L) + 1L
+        (latestGenerationMillis ?: 0L) + 1L
     )
 }
 
@@ -101,6 +102,7 @@ class SafTreeScanner(
             if (!persisted) {
                 grantDao.setAvailability(grant.treeUri, false)
                 mediaDao.markSourceUnavailable(sourceKey)
+                snapshotDao.clearStagedForSource(sourceKey)
                 val previousState = scanStateDao.get(sourceKey)
                 scanStateDao.save(
                     ScanStateEntity(sourceKey, previousState?.lastSuccessfulScanMillis,
@@ -113,8 +115,10 @@ class SafTreeScanner(
             // Include timestamps of failed staged generations, so a rapid retry can never
             // accidentally activate stale rows left by an earlier interrupted attempt.
             val latestIndexedAt = mediaDao.latestIndexedAtMillis(sourceKey) ?: 0L
+            val latestStagedGeneration = snapshotDao.latestStagedGenerationMillis(sourceKey) ?: 0L
+            val latestGeneration = maxOf(latestIndexedAt, latestStagedGeneration)
             val scanStartedAt = SafScanGeneration.next(
-                clock(), previous?.lastSuccessfulScanMillis, latestIndexedAt
+                clock(), previous?.lastSuccessfulScanMillis, latestGeneration
             )
             scanStateDao.save(
                 ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
@@ -122,6 +126,7 @@ class SafTreeScanner(
             )
 
             try {
+                snapshotDao.clearStagedForSource(sourceKey)
                 val rootDocumentId = DocumentsContract.getTreeDocumentId(treeUri)
                 val rootKey = "$sourceKey|$rootDocumentId"
                 val root = MutableFolder(
@@ -135,7 +140,7 @@ class SafTreeScanner(
                 val queue = ArrayDeque<PendingFolder>()
                 queue.add(PendingFolder(rootDocumentId, grant.displayName, "", rootKey, listOf(rootDocumentId)))
                 val visited = mutableSetOf(rootDocumentId)
-                val batch = ArrayList<MediaItemEntity>(BATCH_SIZE)
+                val batch = ArrayList<SafStagedMediaEntity>(BATCH_SIZE)
                 var videoCount = 0
 
                 while (queue.isNotEmpty()) {
@@ -177,7 +182,9 @@ class SafTreeScanner(
                                 val size = cursor.longOrNull(sizeColumn)?.takeIf { it >= 0L } ?: 0L
                                 val modified = cursor.longOrNull(modifiedColumn)
                                     ?.takeIf { it > 0L }?.div(1000L)
-                                batch += MediaItemEntity(
+                                batch += SafStagedMediaEntity(
+                                    sourceKey = sourceKey,
+                                    generationMillis = scanStartedAt,
                                     mediaKey = "$sourceKey|$documentId",
                                     uri = documentUri.toString(),
                                     displayName = name,
@@ -187,12 +194,7 @@ class SafTreeScanner(
                                     dateAddedSeconds = null,
                                     dateModifiedSeconds = modified,
                                     sourceType = SOURCE_TYPE,
-                                    sourceKey = sourceKey,
-                                    relativePath = parent.relativePath,
-                                    // Stage as unavailable. Failed or cancelled scans must not
-                                    // leak a partial new index into the visible library.
-                                    isAvailable = false,
-                                    indexedAtMillis = scanStartedAt
+                                    relativePath = parent.relativePath
                                 )
                                 parent.ancestorIds.forEach { ancestorId ->
                                     folders[ancestorId]?.let { it.totalVideoCount++ }
@@ -200,7 +202,7 @@ class SafTreeScanner(
                                 folders[parent.documentId]?.let { it.directVideoCount++ }
                                 videoCount++
                                 if (batch.size >= BATCH_SIZE) {
-                                    mediaDao.upsertAll(batch.toList())
+                                    snapshotDao.stageMedia(batch.toList())
                                     batch.clear()
                                 }
                             }
@@ -209,7 +211,7 @@ class SafTreeScanner(
                 }
 
                 currentCoroutineContext().ensureActive()
-                if (batch.isNotEmpty()) mediaDao.upsertAll(batch)
+                if (batch.isNotEmpty()) snapshotDao.stageMedia(batch)
 
                 // Reconcile only after a complete traversal. Keep NEW/acknowledgement history.
                 val previousFolders = folderDao.findForSource(sourceKey).associateBy { it.folderKey }
@@ -228,11 +230,10 @@ class SafTreeScanner(
                         acknowledgedAtMillis = old?.acknowledgedAtMillis
                     )
                 }
-                // Publish media, folder hierarchy, and successful scan state atomically.
-                grantDao.setAvailability(grant.treeUri, true)
                 snapshotDao.publishSafSnapshot(
                     sourceKey = sourceKey,
-                    scanStartedAtMillis = scanStartedAt,
+                    generationMillis = scanStartedAt,
+                    treeUri = grant.treeUri,
                     folders = indexedFolders,
                     successfulState = ScanStateEntity(
                         sourceKey, scanStartedAt, "SAF_TREE", null, null
@@ -243,10 +244,13 @@ class SafTreeScanner(
                 )
             } catch (cancelled: CancellationException) {
                 withContext(NonCancellable) {
-                    scanStateDao.save(
-                        ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
-                            null, "Scan cancelled")
-                    )
+                    runCatching { snapshotDao.clearStagedForSource(sourceKey) }
+                    runCatching {
+                        scanStateDao.save(
+                            ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
+                                null, "Scan cancelled")
+                        )
+                    }
                 }
                 throw cancelled
             } catch (error: Exception) {
@@ -256,10 +260,15 @@ class SafTreeScanner(
                     grantDao.setAvailability(grant.treeUri, false)
                     mediaDao.markSourceUnavailable(sourceKey)
                 }
-                scanStateDao.save(
-                    ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
-                        null, error.message ?: error.javaClass.simpleName)
-                )
+                withContext(NonCancellable) {
+                    runCatching { snapshotDao.clearStagedForSource(sourceKey) }
+                    runCatching {
+                        scanStateDao.save(
+                            ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
+                                null, error.message ?: error.javaClass.simpleName)
+                        )
+                    }
+                }
                 Result.failure(error)
             }
         }

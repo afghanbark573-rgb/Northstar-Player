@@ -12,6 +12,8 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Entity(
@@ -98,6 +100,26 @@ data class ExternalTreeGrantEntity(
     val isAvailable: Boolean
 )
 
+@Entity(
+    tableName = "saf_staged_media",
+    primaryKeys = ["sourceKey", "generationMillis", "mediaKey"],
+    indices = [Index("sourceKey"), Index("generationMillis")]
+)
+data class SafStagedMediaEntity(
+    val sourceKey: String,
+    val generationMillis: Long,
+    val mediaKey: String,
+    val uri: String,
+    val displayName: String,
+    val mimeType: String?,
+    val durationMs: Long,
+    val sizeBytes: Long,
+    val dateAddedSeconds: Long?,
+    val dateModifiedSeconds: Long?,
+    val sourceType: String,
+    val relativePath: String?
+)
+
 @Dao
 interface MediaItemDao {
     @Query("SELECT * FROM media_items WHERE isAvailable = 1 ORDER BY dateAddedSeconds DESC")
@@ -178,11 +200,39 @@ interface ScanStateDao {
 
 @Dao
 interface SafSnapshotDao {
-    @Query("UPDATE media_items SET isAvailable = 1 WHERE sourceKey = :sourceKey AND indexedAtMillis = :scanStartedAtMillis")
-    suspend fun activateStagedItems(sourceKey: String, scanStartedAtMillis: Long)
+    @Query("SELECT MAX(generationMillis) FROM saf_staged_media WHERE sourceKey = :sourceKey")
+    suspend fun latestStagedGenerationMillis(sourceKey: String): Long?
 
-    @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey AND indexedAtMillis < :scanStartedAtMillis")
-    suspend fun markOlderItemsUnavailable(sourceKey: String, scanStartedAtMillis: Long)
+    @Query("DELETE FROM saf_staged_media WHERE sourceKey = :sourceKey")
+    suspend fun clearStagedForSource(sourceKey: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun stageMedia(items: List<SafStagedMediaEntity>)
+
+    @Query("""
+        INSERT OR REPLACE INTO media_items (
+            mediaKey, uri, displayName, mimeType, durationMs, sizeBytes,
+            dateAddedSeconds, dateModifiedSeconds, sourceType, sourceKey,
+            relativePath, isAvailable, indexedAtMillis
+        )
+        SELECT
+            mediaKey, uri, displayName, mimeType, durationMs, sizeBytes,
+            dateAddedSeconds, dateModifiedSeconds, sourceType, sourceKey,
+            relativePath, 1, generationMillis
+        FROM saf_staged_media
+        WHERE sourceKey = :sourceKey AND generationMillis = :generationMillis
+    """)
+    suspend fun publishStagedMedia(sourceKey: String, generationMillis: Long)
+
+    @Query("""
+        UPDATE media_items SET isAvailable = 0
+        WHERE sourceKey = :sourceKey
+          AND mediaKey NOT IN (
+              SELECT mediaKey FROM saf_staged_media
+              WHERE sourceKey = :sourceKey AND generationMillis = :generationMillis
+          )
+    """)
+    suspend fun markMissingMediaUnavailable(sourceKey: String, generationMillis: Long)
 
     @Query("DELETE FROM folders WHERE sourceKey = :sourceKey")
     suspend fun deleteFoldersForSource(sourceKey: String)
@@ -193,22 +243,24 @@ interface SafSnapshotDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveSuccessfulScan(state: ScanStateEntity)
 
-    /**
-     * Publishes media availability, folder hierarchy, and scan success as one Room transaction.
-     * A crash or database exception cannot leave only part of a completed SAF generation visible.
-     */
+    @Query("UPDATE external_tree_grants SET isAvailable = 1 WHERE treeUri = :treeUri")
+    suspend fun markGrantAvailable(treeUri: String)
+
     @Transaction
     suspend fun publishSafSnapshot(
         sourceKey: String,
-        scanStartedAtMillis: Long,
+        generationMillis: Long,
+        treeUri: String,
         folders: List<FolderEntity>,
         successfulState: ScanStateEntity
     ) {
         deleteFoldersForSource(sourceKey)
         if (folders.isNotEmpty()) insertFolders(folders)
-        activateStagedItems(sourceKey, scanStartedAtMillis)
-        markOlderItemsUnavailable(sourceKey, scanStartedAtMillis)
+        publishStagedMedia(sourceKey, generationMillis)
+        markMissingMediaUnavailable(sourceKey, generationMillis)
+        markGrantAvailable(treeUri)
         saveSuccessfulScan(successfulState)
+        clearStagedForSource(sourceKey)
     }
 }
 
@@ -242,9 +294,10 @@ interface ExternalTreeGrantDao {
         WatchHistoryEntity::class,
         ScanStateEntity::class,
         NewContentStateEntity::class,
-        ExternalTreeGrantEntity::class
+        ExternalTreeGrantEntity::class,
+        SafStagedMediaEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class NorthstarDatabase : RoomDatabase() {
@@ -258,13 +311,37 @@ abstract class NorthstarDatabase : RoomDatabase() {
     companion object {
         @Volatile private var instance: NorthstarDatabase? = null
 
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS saf_staged_media (
+                        sourceKey TEXT NOT NULL,
+                        generationMillis INTEGER NOT NULL,
+                        mediaKey TEXT NOT NULL,
+                        uri TEXT NOT NULL,
+                        displayName TEXT NOT NULL,
+                        mimeType TEXT,
+                        durationMs INTEGER NOT NULL,
+                        sizeBytes INTEGER NOT NULL,
+                        dateAddedSeconds INTEGER,
+                        dateModifiedSeconds INTEGER,
+                        sourceType TEXT NOT NULL,
+                        relativePath TEXT,
+                        PRIMARY KEY(sourceKey, generationMillis, mediaKey)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_saf_staged_media_sourceKey ON saf_staged_media(sourceKey)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_saf_staged_media_generationMillis ON saf_staged_media(generationMillis)")
+            }
+        }
+
         fun getInstance(context: Context): NorthstarDatabase =
             instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     NorthstarDatabase::class.java,
                     "northstar.db"
-                ).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
             }
     }
 }
