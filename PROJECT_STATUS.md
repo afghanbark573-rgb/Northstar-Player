@@ -209,7 +209,17 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Status: drafted and saved for user review; not yet approved for implementation.
 - The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
 - No application source code was changed and no APK was built while preparing the plan.
-- Seven genuine product decisions remain listed in Section 14 of the plan. Do not silently decide destructive private import/recovery behavior or user-visible interaction details.
+- Six product decisions remain listed in Section 14 of the plan. Private import behavior is now resolved: Move only, with no Copy option or separate Delete action. Do not silently decide private recovery or other user-visible interaction details.
 - The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
 - `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
 - `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
+
+
+## Approved Private Library import decision — 2026-11-23
+
+- The user approved **Move only** as the sole Private Library import action.
+- There must be no Copy option and no separate Delete action in the import workflow.
+- The intended outcome is that the item leaves its former public location and exists in the protected Private Library.
+- Engineering must use a safe staged transfer: encrypt/write the private destination, verify integrity/readability, commit it, then request removal of the source using the relevant Android/SAF flow.
+- If Android denies or cannot perform source removal, report the move as incomplete and explicitly state that the original remains. Never claim success or remove the source before verifying the private destination.
+- This decision is recorded in `NORTHSTAR_PRODUCT_SPEC.md` and `NORTHSTAR_IMPLEMENTATION_PLAN.md`. It does not authorize application-code changes; the implementation plan still requires the user's overall approval before coding.
