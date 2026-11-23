@@ -211,3 +211,16 @@ Do not treat these open implementation details as reasons to reopen already lock
 ## 14. Next action
 
 Create a detailed implementation specification with screen-by-screen UX, data model, permissions/storage flows, playback-engine benchmark criteria, security/recovery design, acceptance criteria, test plan, and a single integrated release plan. Compare it with the live source tree and identify which requirements already exist, partially exist, or are missing. Do not start implementation until the user reviews and approves that complete plan.
+
+
+## 15. Durable project record and backup
+
+This file is the canonical, durable record of the eight approved product discussions. It is stored in the GitHub repository itself and is independent of any ChatGPT conversation. Deleting or losing a chat does not delete this repository file.
+
+- Canonical path: `NORTHSTAR_PRODUCT_SPEC.md` at the repository root.
+- Canonical branch: `phase-0/release-signing`.
+- Repository: https://github.com/afghanbark573-rgb/Northstar-Player
+- The current approved requirements, decisions, exclusions, release philosophy, audit snapshot, unresolved implementation details, and continuity rules must be preserved when this document is revised.
+- Future project work must read this specification and `PROJECT_STATUS.md` before making decisions or code changes.
+- Update this file in GitHub whenever the user approves a material change. Do not rely on chat history as the only copy.
+- For additional protection against account or repository access loss, periodically download a local/offline copy of this file (and ideally the repository) to a device or storage location controlled by the user.
