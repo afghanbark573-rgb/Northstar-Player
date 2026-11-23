@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.security.MessageDigest
@@ -53,6 +55,8 @@ class SafTreeScanner(
     private val grantDao: ExternalTreeGrantDao,
     private val clock: () -> Long = System::currentTimeMillis
 ) {
+    private val scanMutex = Mutex()
+
     private data class PendingFolder(
         val documentId: String,
         val displayName: String,
@@ -73,6 +77,7 @@ class SafTreeScanner(
     )
 
     suspend fun scan(grant: ExternalTreeGrantEntity): Result<SafTreeScanResult> =
+        scanMutex.withLock {
         withContext(Dispatchers.IO) {
             val treeUri = Uri.parse(grant.treeUri)
             val persisted = resolver.persistedUriPermissions.any {
@@ -214,7 +219,7 @@ class SafTreeScanner(
                 }
                 throw cancelled
             } catch (error: Exception) {
-                if (error is SecurityException) {
+                if (error is SecurityException || error is IOException) {
                     grantDao.setAvailability(grant.treeUri, false)
                     mediaDao.markSourceUnavailable(sourceKey)
                     folderDao.deleteForSource(sourceKey)
@@ -225,6 +230,7 @@ class SafTreeScanner(
                 )
                 Result.failure(error)
             }
+        }
         }
 
     private fun isVideo(name: String, mime: String?): Boolean {
