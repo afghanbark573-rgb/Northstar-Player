@@ -389,9 +389,11 @@ Preserve the active sort/filter order. Define behavior when a queue item becomes
 - Import individual files or an entire selected folder tree.
 - Preserve the source folder structure during folder import.
 - Show progress, cancellation, insufficient-space errors, and partial-import recovery.
-- Never delete the source during import unless the user explicitly chooses a clearly explained move operation.
+- The only user-facing import action is **Move to Private Library**; do not offer Copy or a separate Delete action in this workflow.
+- Implement a safe move across Android storage providers as a staged transfer: encrypt/write to private storage, verify integrity and readability, commit the destination, then request source removal using the appropriate MediaStore/SAF permission flow.
+- Never remove the source before the private destination is verified. If source removal is denied or unsupported, report the operation as incomplete and explicitly state that the original remains; do not claim the move succeeded. Preserve the verified private destination safely and support a clear retry/recovery path.
 
-**User decision still required:** copy, move, or user-selectable import. Recommended safe v1 behavior is copy-only, with the source left untouched. A move operation is destructive and must not be assumed.
+**User decision resolved (23 November 2026):** Move only. The user explicitly rejected Copy and selected Move as the sole user-facing import action. The safe staged-transfer and source-removal behavior above is an implementation safeguard, not a separate Copy/Delete workflow.
 
 ### 8.3 PIN, biometrics, and recovery
 
@@ -637,7 +639,7 @@ These are development milestones, not separate product releases.
 
 These are the only currently identified product choices that should be returned to the user. Do not reopen already locked decisions.
 
-1. **Private import behavior:** Recommended safe default is copy-only for the first release. Should import always copy, or should users be able to choose Copy/Move? Move must never delete the source without an explicit confirmation.
+1. **Private import behavior — RESOLVED:** Move only. No Copy option and no separate Delete action. Use the safe staged-transfer procedure in Section 8.2; if Android prevents source removal, report the move as incomplete and preserve the original.
 2. **Private recovery:** Recommended local recovery code generated during setup. If both PIN and recovery code are lost, encrypted content may be unrecoverable. Is this acceptable?
 3. **Nested View interaction:** Should folders expand inline as a tree, or should tapping a folder open a dedicated folder screen with a breadcrumb/back path? Both can preserve hierarchy; choose before UI implementation.
 4. **Recent sorting:** Recommended use file modified date for Recent sorting. Should that be the meaning of Recent?
