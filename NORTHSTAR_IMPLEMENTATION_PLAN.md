@@ -402,6 +402,15 @@ Preserve the active sort/filter order. Define behavior when a queue item becomes
 
 **User decision resolved (23 November 2026):** Move only. The user explicitly rejected Copy and selected Move as the sole user-facing import action. The safe staged-transfer and source-removal behavior above is an implementation safeguard, not a separate Copy/Delete workflow.
 
+### 8.3 Private Library quick-access gesture
+
+- On the main library and folder pages, a normal pull-down followed by release refreshes the current page.
+- Pulling beyond the normal refresh threshold and holding briefly activates a distinct Private Library access gesture.
+- This gesture opens only the Private Library authentication screen; it must never bypass PIN or biometric authentication.
+- Provide clear visual feedback as the user crosses the threshold and while the hold is being recognized.
+- Tune the threshold, hold duration, cancellation, and gesture arbitration to avoid accidental activation during ordinary refresh, scrolling, or folder navigation.
+- The gesture is available on the main library and folder pages, not inside the video player.
+
 ### 8.3 PIN, biometrics, and recovery
 
 - Require PIN and support biometric unlock.
