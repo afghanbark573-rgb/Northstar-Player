@@ -600,3 +600,12 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Refactored folder-creation policy to depend on a narrow `SafFolderProvider` boundary. Production uses `AndroidSafFolderProvider`, which performs the real persisted-permission check and `DocumentsContract.createDocument` call; deterministic JVM tests use a fake provider.
 - Added tests for successful nested creation, missing grants, unavailable storage, read-only stored grants, revoked live write access, provider refusal, unsupported operations, provider permission denial, provider name rejection, invalid source/folder identity, and unsafe names.
 - This test seam verifies application policy and error mapping, not every vendor DocumentsProvider implementation. Actual USB/SD provider behavior and physical Xiaomi 14 acceptance remain mandatory later gates.
+
+
+## SAF DocumentsProvider integration test — implementation in progress — 2026-11-23
+
+- Added a test-only Android `DocumentsProvider` registered by the `androidTest` manifest. It exposes an in-memory root and nested directory and implements Android's real provider contract, including `createDocument` and child listing.
+- Added an instrumentation test that invokes the production `AndroidSafFolderProvider` adapter, creates a directory inside a nested provider folder through `DocumentsContract.createDocument`, then queries the provider and verifies the new directory appears with directory MIME type.
+- This provides a controlled end-to-end Android framework test for the provider adapter. It does not emulate removable-media hardware, vendor-specific provider quirks, or Android's full user-granted persisted-permission picker flow.
+- Source commit: [6dc49bb0e8625cde8200f827743cb03ae9b04648](https://github.com/afghanbark573-rgb/Northstar-Player/commit/6dc49bb0e8625cde8200f827743cb03ae9b04648). CI run [45188897334](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45188897334) is validating the new instrumentation test; do not mark it passed until the debug job completes.
+- Physical USB/SD testing and Xiaomi 14 acceptance remain outstanding. No intermediate APK distribution.
