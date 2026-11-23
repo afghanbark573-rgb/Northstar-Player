@@ -319,3 +319,13 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Disabling automatic Home-button PiP must never hide or disable the dedicated PiP icon.
 - Audio-only background behavior and PiP remain distinct modes.
 - This clarification supersedes the earlier wording that Settings selected between the Home and icon PiP activation methods. No application code has been changed.
+
+
+## Final clarification: session-based Headphone Mode — 2026-11-23
+
+- Headphone Mode is a temporary toggle for the current app session, not a persistent user preference.
+- Tapping the headphone icon arms audio-only background behavior; tapping it again while the video is open disarms it.
+- While armed, leaving the video or going to Android Home continues audio-only playback without floating video.
+- Completely closing/terminating the app ends Headphone Mode and its background playback. The app must not restore the mode on the next launch; it starts off, and the user must activate it again with the headphone icon.
+- This lifecycle rule is part of the approved product behavior and supersedes any earlier wording that could imply the mode stays armed until merely exiting a video or stopping playback. PiP remains a separate feature with unchanged dedicated-icon and automatic-Home Settings behavior.
+- No application code has been changed by recording this clarification; implementation-plan approval remains required before coding.
