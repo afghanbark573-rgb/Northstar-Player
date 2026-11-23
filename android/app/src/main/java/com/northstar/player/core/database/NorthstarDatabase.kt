@@ -115,6 +115,9 @@ interface MediaItemDao {
     @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey")
     suspend fun markSourceUnavailable(sourceKey: String)
 
+    @Query("UPDATE media_items SET isAvailable = 1 WHERE sourceKey = :sourceKey AND indexedAtMillis = :scanStartedAtMillis")
+    suspend fun activateStagedItems(sourceKey: String, scanStartedAtMillis: Long)
+
     @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey AND indexedAtMillis < :scanStartedAtMillis")
     suspend fun markOlderItemsUnavailable(sourceKey: String, scanStartedAtMillis: Long)
 

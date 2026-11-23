@@ -486,3 +486,14 @@ The approved implementation plan is now in active development on `phase-0/releas
 - CI run [45170360023](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45170360023) passed for commit `6cf9cdb1ed77bfb6440ba9696ea1083af362eb1c`: unit tests, debug APK build, Room schema artifact upload, signed release APK build, apksigner verification, and artifact uploads all succeeded.
 - This is CI/build evidence only. No SAF provider integration test on a physical device and no Xiaomi 14 acceptance test have been performed. Do not deliver this intermediate APK as a public/user release.
 - Remaining storage work: automated provider-level tests, verify SAF playback on device, removable-media reconnect/revocation testing, and provider-backed folder creation after the access workflow is proven.
+
+
+## SAF snapshot isolation hardening — 2026-11-23
+
+- Latest commit before this hardening: `1aa89de3eb2ed990e4f34e677ea18d11be108853`; its GitHub Actions run [45170764428](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45170764428) completed successfully for both debug and signed-release jobs, including unit tests, Room schema artifact upload, release signing verification and APK artifacts.
+- Code review identified a partial-scan visibility risk: SAF media rows were upserted as available before the provider traversal had completed.
+- SAF rows are now staged with `isAvailable=false`. A successful complete traversal activates only rows from that scan generation and then retires older rows. A failed or cancelled traversal therefore cannot publish a partial new generation.
+- Permission loss or provider I/O failure marks the source's media unavailable but retains the persisted media records and folder hierarchy; it no longer deletes the folder index. Reconnection/reselection can re-index the same source.
+- A missing persisted grant is handled explicitly: the grant and source are marked unavailable and scan error state is recorded, while stored folder history remains.
+- No Room schema change is needed; the change adds a DAO update query only.
+- This hardening is source-committed but requires a fresh CI run before it can be called build-verified. Device-level SAF provider testing remains outstanding.

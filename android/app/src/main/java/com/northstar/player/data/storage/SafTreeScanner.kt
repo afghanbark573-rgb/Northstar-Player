@@ -80,15 +80,21 @@ class SafTreeScanner(
         scanMutex.withLock {
         withContext(Dispatchers.IO) {
             val treeUri = Uri.parse(grant.treeUri)
+            val sourceKey = SafSourceIdentity.key(grant.treeUri)
             val persisted = resolver.persistedUriPermissions.any {
                 it.uri == treeUri && it.isReadPermission
             }
             if (!persisted) {
                 grantDao.setAvailability(grant.treeUri, false)
+                mediaDao.markSourceUnavailable(sourceKey)
+                val previousState = scanStateDao.get(sourceKey)
+                scanStateDao.save(
+                    ScanStateEntity(sourceKey, previousState?.lastSuccessfulScanMillis,
+                        "SAF_TREE", null, "Folder permission is no longer available")
+                )
                 return@withContext Result.failure(SecurityException("Folder permission is no longer available"))
             }
 
-            val sourceKey = SafSourceIdentity.key(grant.treeUri)
             val previous = scanStateDao.get(sourceKey)
             val scanStartedAt = maxOf(clock(), (previous?.lastSuccessfulScanMillis ?: 0L) + 1L)
             scanStateDao.save(
@@ -164,7 +170,9 @@ class SafTreeScanner(
                                     sourceType = SOURCE_TYPE,
                                     sourceKey = sourceKey,
                                     relativePath = parent.relativePath,
-                                    isAvailable = true,
+                                    // Stage as unavailable. Failed or cancelled scans must not
+                                    // leak a partial new index into the visible library.
+                                    isAvailable = false,
                                     indexedAtMillis = scanStartedAt
                                 )
                                 parent.ancestorIds.forEach { ancestorId ->
@@ -201,6 +209,9 @@ class SafTreeScanner(
                         acknowledgedAtMillis = old?.acknowledgedAtMillis
                     )
                 }
+                // Publish the new generation only after the entire provider tree was read.
+                // Older records are retired after the new generation is activated.
+                mediaDao.activateStagedItems(sourceKey, scanStartedAt)
                 mediaDao.markOlderItemsUnavailable(sourceKey, scanStartedAt)
                 folderDao.replaceForSource(sourceKey, indexedFolders)
                 scanStateDao.save(
@@ -220,9 +231,10 @@ class SafTreeScanner(
                 throw cancelled
             } catch (error: Exception) {
                 if (error is SecurityException || error is IOException) {
+                    // Preserve the last indexed rows and folder hierarchy. They remain
+                    // locally stored, but are hidden until the removable source is reachable.
                     grantDao.setAvailability(grant.treeUri, false)
                     mediaDao.markSourceUnavailable(sourceKey)
-                    folderDao.deleteForSource(sourceKey)
                 }
                 scanStateDao.save(
                     ScanStateEntity(sourceKey, previous?.lastSuccessfulScanMillis, "SAF_TREE",
