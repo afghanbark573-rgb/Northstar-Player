@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Entity(
@@ -122,6 +123,15 @@ interface FolderDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(folders: List<FolderEntity>)
+
+    @Query("DELETE FROM folders WHERE sourceKey = :sourceKey")
+    suspend fun deleteForSource(sourceKey: String)
+
+    @Transaction
+    suspend fun replaceForSource(sourceKey: String, folders: List<FolderEntity>) {
+        deleteForSource(sourceKey)
+        if (folders.isNotEmpty()) upsertAll(folders)
+    }
 }
 
 @Dao
