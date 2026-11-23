@@ -281,3 +281,18 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - The pull-and-hold gesture is an additional quick-access shortcut only. It must never be the only way users can discover or open Private Library.
 - Selecting the You-page Private Library entry still requires PIN or biometric authentication.
 - Recorded in the master product specification and integrated implementation plan. No application code has been changed.
+
+
+## Approved top navigation and unified library controls — 2026-11-23
+
+- The top bar places the Northstar title on the left.
+- On the right, the icons appear in this exact order: Profile/You, unified Library Controls, Search.
+- The unified Library Controls icon sits between Profile/You and Search.
+- That single icon opens one compact menu containing all three groups and all their options:
+  - **Sort:** Date Added, Date Modified, A–Z, Largest.
+  - **View Mode:** Video Folders, Files Only, Nested View.
+  - **Layout:** List, Grid.
+- Use simple icon-and-text labels within the menu. Do not add separate top-bar buttons for Sort, View Mode, or Layout.
+- No bottom navigation.
+- This resolves the remaining top-navigation product choice. Detailed visual styling and menu interaction polish remain design/implementation tasks.
+- Recorded in the master product specification and integrated implementation plan. No application code has been changed.
