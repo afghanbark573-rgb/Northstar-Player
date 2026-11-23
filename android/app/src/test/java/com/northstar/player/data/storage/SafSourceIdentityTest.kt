@@ -30,7 +30,7 @@ class SafSourceIdentityTest {
         assertEquals(2_001L, SafScanGeneration.next(
             clockMillis = 1_500L,
             lastSuccessfulScanMillis = 1_000L,
-            latestIndexedAtMillis = 2_000L
+            latestGenerationMillis = 2_000L
         ))
     }
 
@@ -38,7 +38,7 @@ class SafSourceIdentityTest {
         assertEquals(5_000L, SafScanGeneration.next(
             clockMillis = 5_000L,
             lastSuccessfulScanMillis = 1_000L,
-            latestIndexedAtMillis = 2_000L
+            latestGenerationMillis = 2_000L
         ))
     }
 
@@ -46,7 +46,7 @@ class SafSourceIdentityTest {
         assertEquals(3_001L, SafScanGeneration.next(
             clockMillis = 2_000L,
             lastSuccessfulScanMillis = 3_000L,
-            latestIndexedAtMillis = 2_500L
+            latestGenerationMillis = 2_500L
         ))
     }
 }
