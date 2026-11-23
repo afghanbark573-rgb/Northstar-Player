@@ -91,7 +91,14 @@ Keep the home screen clean and folder-focused.
 
 The Private Library should behave like its own small file manager, with folder creation, navigation, and organization.
 
-**Still to specify before implementation:** whether importing means copy, move, or a user-selectable choice; the exact recovery method; and the precise Android storage/visibility guarantees. Do not silently choose destructive behavior.
+**Approved import behavior — MOVE ONLY (23 November 2026):**
+- The only user-facing import action is **Move to Private Library**. There is no Copy option and no separate Delete action as part of this workflow.
+- The intended result is that the private video is stored in the protected Private Library and no longer appears at its former public location.
+- Because Android may not permit a direct atomic move across storage providers, implementation must use a safe internal transfer: stage/encrypt the private file, verify its integrity and readability, commit it, then request removal of the original through the applicable Android/SAF permission flow.
+- If the original cannot be removed, do not report a successful move. Clearly report that the move is incomplete and that the original remains; preserve the verified private data safely and let the user retry or resolve the permission issue.
+- Never delete the source before the private destination is fully verified. Do not expose this safety mechanism as separate Copy and Delete product actions.
+
+**Still to specify before implementation:** the exact recovery method and the precise Android storage/visibility guarantees. Do not silently choose destructive behavior.
 
 ## 7. Performance, reliability, and permissions — LOCKED
 
