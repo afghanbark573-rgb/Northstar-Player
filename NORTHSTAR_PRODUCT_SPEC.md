@@ -69,6 +69,7 @@ Sort, View Mode, and Layout must be together in one single, easy-to-find control
 2. **Navigation:** important and frequently used navigation items belong at the top. Keep the bottom area empty; do not add bottom navigation.
 3. **Home screen:** folder-focused library.
 4. **Secondary options:** no scattered menus. A profile icon at the top opens the **You** page. Settings and all other secondary options belong there.
+5. **You page destinations:** show clear, directly accessible entries for Favorites, Watch History, Private Library, and Settings. Private Library must be visibly listed as a normal destination in You; the pull-and-hold gesture is an additional shortcut, never the only discovery or access method.
 5. **Consistency:** consistent visual language across the library, folders, You page, and player.
 6. **Feedback:** clear loading, empty, permission, and error states.
 7. **Animations:** subtle and smooth, never distracting.
