@@ -576,11 +576,12 @@ The approved implementation plan is now in active development on `phase-0/releas
 - This commit triggers a new validation run. The emulator test must complete successfully before folder creation is implemented.
 
 
-## SAF provider-backed folder creation — implementation in progress — 2026-11-23
+## SAF provider-backed folder creation — CI verified — 2026-11-23
 
 - Room v1-to-v2 migration gate is now verified by GitHub Actions run [45175777323](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45175777323): Android instrumentation test completed 1/1 with zero failures or skips; JVM tests, debug APK, signed release APK, and apksigner verification also passed.
 - Emulator boot now uses Android emulator TCG software CPU emulation on hosted Linux; the successful run took approximately 5m44s for the instrumentation Gradle task.
-- Starting provider-backed folder creation as the next storage milestone. The feature must validate persisted write permission, restrict creation to an indexed SAF directory, reject unsafe names, use `DocumentsContract.createDocument`, and refresh the source index after creation.
+- Implemented provider-backed folder creation. The feature validates persisted write permission, restricts creation to an indexed SAF directory, rejects unsafe names, uses `DocumentsContract.createDocument`, and refreshes the source index after creation.
+- The subsequent clean validation run is [45179931782](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45179931782); both debug and signed-release jobs passed, including the migration instrumentation test and apksigner verification.
 - No physical USB/SD provider test or Xiaomi 14 acceptance test has yet been performed. Do not distribute the intermediate APK.
 
 ## SAF provider-backed folder creation — CI verified — 2026-11-23
@@ -592,3 +593,10 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Folder-creation implementation adds SAF root browsing, nested folder navigation, provider-backed directory creation through `DocumentsContract.createDocument`, strict validation of folder names, and checks for both stored and currently active Android read/write permissions. The source is rescanned after creation.
 - CI validates compilation, unit tests, Room migration, packaging, and signing. It does **not** validate real removable-storage provider behavior. USB/SD creation, reconnect/revocation behavior, SAF playback, and full Xiaomi 14 acceptance remain untested on physical hardware.
 - Treat this as an internal engineering milestone only. Do not distribute the intermediate APK; all eight approved product areas remain one coordinated release.
+
+
+## SAF folder-provider policy test seam — implementation in progress — 2026-11-23
+
+- Refactored folder-creation policy to depend on a narrow `SafFolderProvider` boundary. Production uses `AndroidSafFolderProvider`, which performs the real persisted-permission check and `DocumentsContract.createDocument` call; deterministic JVM tests use a fake provider.
+- Added tests for successful nested creation, missing grants, unavailable storage, read-only stored grants, revoked live write access, provider refusal, unsupported operations, provider permission denial, provider name rejection, invalid source/folder identity, and unsafe names.
+- This test seam verifies application policy and error mapping, not every vendor DocumentsProvider implementation. Actual USB/SD provider behavior and physical Xiaomi 14 acceptance remain mandatory later gates.
