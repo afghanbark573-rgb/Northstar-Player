@@ -470,3 +470,19 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Next engineering priority: design and implement SAF tree selection and persisted grants, recursive indexing of nested/empty directories and video documents, source-aware identity, disconnect/revocation handling, and automated tests. Folder creation follows once provider access is reliable.
 - No application source code was changed in preparing this checkpoint.
 - The DOCX is the human-readable handover artifact. Keep this `PROJECT_STATUS.md` as the concise live engineering status. Update both after major milestones and before each new chat.
+
+
+## SAF external-storage foundation — 2026-11-23
+
+- Implemented on `phase-0/release-signing` in commits `96bd1962b811887168feb75397ddc8262a6797a2`, `fab4b3e410c0774daf2198b3ef1897784b756bea`, `aa09ff5befb3d0de7056884e003b9ef1fd73dcb0`, and `6cf9cdb1ed77bfb6440ba9696ea1083af362eb1c`.
+- Added persistable Storage Access Framework tree grants, with read/write preference and read-only fallback.
+- Added stable SHA-256 source identities derived from selected tree URIs; raw tree URIs remain only in the local grant table.
+- Added recursive SAF traversal of directories and video documents, including empty directories, using bounded 400-item Room writes.
+- SAF items use provider-supplied modified dates where available. Date Added remains unknown when the provider does not supply it; no timestamps are fabricated.
+- Folder hierarchy records preserve prior discovery and acknowledgement timestamps. Library projections now scope folder metrics and folder-page video results by source identity, preventing collisions between separate storage providers.
+- SAF scans serialize. Old media rows are marked unavailable and folder indexes replaced only after a complete successful traversal. Permission loss or provider disconnection marks that source unavailable without deleting its stored records.
+- Added an External Storage management entry from Nested View, including folder selection and manual re-indexing. Provider reachability is checked in addition to the persisted permission; unavailable entries can be reselected.
+- No Room schema migration was required. The existing `external_tree_grants` entity/table and DAO were reused.
+- CI run [45170360023](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45170360023) passed for commit `6cf9cdb1ed77bfb6440ba9696ea1083af362eb1c`: unit tests, debug APK build, Room schema artifact upload, signed release APK build, apksigner verification, and artifact uploads all succeeded.
+- This is CI/build evidence only. No SAF provider integration test on a physical device and no Xiaomi 14 acceptance test have been performed. Do not deliver this intermediate APK as a public/user release.
+- Remaining storage work: automated provider-level tests, verify SAF playback on device, removable-media reconnect/revocation testing, and provider-backed folder creation after the access workflow is proven.

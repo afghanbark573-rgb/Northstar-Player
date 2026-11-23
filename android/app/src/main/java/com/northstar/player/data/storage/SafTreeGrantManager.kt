@@ -3,8 +3,11 @@ package com.northstar.player.data.storage
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import com.northstar.player.core.database.ExternalTreeGrantDao
 import com.northstar.player.core.database.ExternalTreeGrantEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Owns persistable SAF permissions and the Room record describing each selected tree.
@@ -45,15 +48,31 @@ class SafTreeGrantManager(
         return grant
     }
 
-    suspend fun refreshGrantAvailability(): List<ExternalTreeGrantEntity> {
-        val persisted = resolver.persistedUriPermissions
-            .filter { it.isReadPermission }
-            .map { it.uri.toString() }
-            .toSet()
-        dao.all().forEach { grant ->
-            dao.setAvailability(grant.treeUri, grant.treeUri in persisted)
+    suspend fun refreshGrantAvailability(): List<ExternalTreeGrantEntity> =
+        withContext(Dispatchers.IO) {
+            val persisted = resolver.persistedUriPermissions
+                .filter { it.isReadPermission }
+                .map { it.uri.toString() }
+                .toSet()
+            dao.all().forEach { grant ->
+                val available = grant.treeUri in persisted &&
+                    canReachTree(Uri.parse(grant.treeUri))
+                dao.setAvailability(grant.treeUri, available)
+            }
+            dao.all()
         }
-        return dao.all()
+
+    /** A persisted grant alone does not prove a removable USB/SD provider is still mounted. */
+    private fun canReachTree(treeUri: Uri): Boolean = try {
+        val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, rootId)
+        resolver.query(
+            childrenUri,
+            arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+            null, null, null
+        )?.use { true } ?: false
+    } catch (_: Exception) {
+        false
     }
 
     suspend fun removeTree(grant: ExternalTreeGrantEntity) {

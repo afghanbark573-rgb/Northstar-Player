@@ -418,7 +418,10 @@ class MainActivity : ComponentActivity() {
                     setPadding(14, 13, 14, 13)
                     setBackgroundColor(0xFF151515.toInt())
                     isClickable = true
-                    setOnClickListener { scanExternalTree(grant) }
+                    setOnClickListener {
+                        if (grant.isAvailable) scanExternalTree(grant)
+                        else treePicker.launch(null)
+                    }
                 }
                 row.addView(TextView(this@MainActivity).apply {
                     text = grant.displayName
