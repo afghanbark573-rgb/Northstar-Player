@@ -209,7 +209,7 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Status: drafted and saved for user review; not yet approved for implementation.
 - The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
 - No application source code was changed and no APK was built while preparing the plan.
-- Two product decisions remain listed in Section 14 of the plan: remaining top-navigation items/order and background-playback activation behavior. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, separate Date Added/Date Modified sorting, player gestures, and Private Library quick-access gesture are resolved.
+- The top-navigation and background-audio/PiP product decisions have now been resolved and recorded in the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, separate Date Added/Date Modified sorting, player gestures, and Private Library quick-access gesture are resolved.
 - The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
 - `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
 - `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
@@ -296,3 +296,14 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - No bottom navigation.
 - This resolves the remaining top-navigation product choice. Detailed visual styling and menu interaction polish remain design/implementation tasks.
 - Recorded in the master product specification and integrated implementation plan. No application code has been changed.
+
+
+## Approved background audio and Picture-in-Picture behavior — 2026-11-23
+
+- Add a headphone control/icon in the player for audio-only background playback. This lets the user continue listening when leaving the app without keeping the video in a floating window.
+- Support Picture-in-Picture (PiP) as a separate video experience.
+- Implement both PiP activation methods: a dedicated PiP icon in the player and activation by pressing the Android Home button/leaving the app.
+- Add a Settings preference so the user can choose the active PiP activation method: **Home button** or **PiP icon**. Both paths exist in the product, while the selected preference determines which one activates PiP.
+- Do not conflate the headphone/audio-only action with PiP.
+- Validate Android lifecycle/API behavior, playback continuity, PiP controls/aspect ratio/return-to-app behavior, and device compatibility during implementation and Xiaomi 14 testing.
+- This resolves the background-playback product decision. No application code has been changed.
