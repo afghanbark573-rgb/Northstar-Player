@@ -341,3 +341,37 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Added structural screen-by-screen wireframes and permission/discovery, playback/Headphone Mode, and Private move flow diagrams to the implementation plan. They are design artifacts, not implemented UI.
 - Remaining gates are engineering: player-engine benchmark, cryptographic recovery/security review, Room schema and migrations, scan reconciliation/NEW-state rules, external-storage edge cases, lifecycle/PiP validation, and automated/device acceptance coverage.
 - No application source code was changed and no APK was built. The integrated plan is ready for user review; implementation must wait for explicit approval.
+
+
+## Engineering implementation update — 2026-11-23 (supersedes the older "Current status and next actions" list above)
+
+The approved implementation plan is now in active development on `phase-0/release-signing`. The earlier statement that Phase 1 work had not started is obsolete.
+
+### Implemented in source (CI/device verification must be tracked separately)
+
+- Room 2.8.5 database and entities for media, folders, favorites, playback progress, watch history, scan state, NEW-content state and external tree grants.
+- Room-backed media repository and Android video permission-scope resolver (FULL / PARTIAL / DENIED).
+- MediaStore scanner streams video rows into Room in bounded batches of 400 and checks coroutine cancellation while scanning.
+- Partial-permission scans are additive/upsert-only; they do not infer that unreturned items were deleted.
+- Nested folder index builder creates stable parent/child folder keys and counts from MediaStore RELATIVE_PATH. It does not invent empty directories; those require a separately granted SAF tree.
+- WorkManager 2.12.0 worker and scheduler: unique refresh work, periodic reconciliation every 12 hours, no network requirement, bounded retry policy.
+- Application startup schedules periodic reconciliation; Activity start and successful permission grant schedule a refresh.
+- Visible library now observes the Room media Flow rather than querying MediaStore synchronously in the Activity. Its current screen layout is still the earlier functional validation shell, not the approved final UX.
+- Folder reconciliation runs only after a scan completes. FULL access replaces the source's folder index; PARTIAL access only upserts visible folders and retains previously indexed folders. Existing folder discovery/acknowledgement timestamps are preserved.
+
+### Build and verification record
+
+- Earlier verified CI runs for commits before the background-worker layer remain valid for those commits only.
+- CI run `45152804949` failed in Gradle script configuration because a literal escaped newline was inserted in the WorkManager dependency declaration. It did not reach Kotlin compilation.
+- Follow-up source repairs corrected the Gradle dependency formatting and the escaped-newline formatting in `NorthstarApplication.kt` and `MainActivity.kt`; the permission callback now schedules refresh after a grant.
+- The current folder reconciliation and Room Flow integration are committed after those repairs. A successful build for the current head has **not yet been confirmed**. Do not label these commits build-verified until the GitHub Actions debug and signed-release jobs both complete successfully.
+- No current-head APK has been delivered for user testing. No Xiaomi 14 runtime test has been performed on this implementation.
+
+### Immediate engineering gates
+
+1. Obtain a fresh GitHub Actions run for the current branch head; inspect debug build, signed release build, and apksigner verification. Fix any compile or runtime packaging errors before proceeding.
+2. Confirm Room schema JSON is generated and committed under the configured schema directory; add migration tests before any schema version change.
+3. Add automated coverage for scanner batching/cancellation/error timestamp preservation and FULL-versus-PARTIAL folder reconciliation.
+4. Review first-scan and empty-library behavior, permission reselection, scan concurrency, and cancellation during Room writes.
+5. Continue final library UX (three approved modes, actual nested folder navigation, controls, NEW indicators) only after the Room-backed data path is stable.
+6. Keep the signed release identity, application ID, branch separation and coordinated-release policy unchanged.
