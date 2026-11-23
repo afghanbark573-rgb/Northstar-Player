@@ -223,3 +223,13 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Engineering must use a safe staged transfer: encrypt/write the private destination, verify integrity/readability, commit it, then request removal of the source using the relevant Android/SAF flow.
 - If Android denies or cannot perform source removal, report the move as incomplete and explicitly state that the original remains. Never claim success or remove the source before verifying the private destination.
 - This decision is recorded in `NORTHSTAR_PRODUCT_SPEC.md` and `NORTHSTAR_IMPLEMENTATION_PLAN.md`. It does not authorize application-code changes; the implementation plan still requires the user's overall approval before coding.
+
+
+## Approved Private Library recovery experience — 2026-11-23
+
+- The user selected a question-and-answer recovery experience instead of a user-generated recovery code.
+- Northstar will provide a curated list of recommended security questions. During setup, the user chooses any three and supplies answers to all three. All three answers are required for forgotten-PIN recovery.
+- Questions are selected from Northstar's list; users do not create their own questions.
+- This is a user-experience decision, not permission to use weak answers directly as encryption keys. The cryptographic key-recovery design, answer handling/normalization, rate limiting, and protection against offline guessing require a security-reviewed engineering design.
+- Recovery remains local-first; no server-based recovery or automatic cloud upload.
+- The decision is recorded in the master product specification and integrated implementation plan. No application code has been changed; overall plan approval remains a prerequisite to coding.
