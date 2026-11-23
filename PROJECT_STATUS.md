@@ -209,7 +209,7 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Status: drafted and saved for user review; not yet approved for implementation.
 - The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
 - No application source code was changed and no APK was built while preparing the plan.
-- Three product decisions remain listed in Section 14 of the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, separate Date Added/Date Modified sorting, and player gesture arrangement are now resolved. Do not silently decide the remaining user-visible interaction details.
+- Two product decisions remain listed in Section 14 of the plan: remaining top-navigation items/order and background-playback activation behavior. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, separate Date Added/Date Modified sorting, player gestures, and Private Library quick-access gesture are resolved.
 - The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
 - `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
 - `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
@@ -263,3 +263,13 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Double-tap the left side to seek backward; double-tap the right side to seek forward.
 - Press and hold for temporary 2× playback; restore the previous speed on release or cancellation.
 - Gesture zones and conflict handling must prevent accidental triggers and be tested on the user's Xiaomi 14. The separate proposed folder-screen pull gesture for Private Library access has not been approved and is not part of this locked player gesture decision.
+
+
+## Approved Private Library quick-access gesture — 2026-11-23
+
+- On the main library and folder pages, a normal pull-down followed by release refreshes the current page.
+- Pulling farther than the normal refresh threshold and holding briefly activates a distinct Private Library access gesture.
+- The gesture opens the Private Library authentication screen only; PIN or biometric authentication remains mandatory.
+- Provide clear threshold/hold feedback and tune gesture arbitration to avoid accidental activation during ordinary refresh, scrolling, and navigation.
+- This gesture is available on the main library and folder pages, not inside the video player.
+- Recorded in the master product specification and integrated implementation plan. No application code has been changed.
