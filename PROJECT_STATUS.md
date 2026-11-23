@@ -609,3 +609,12 @@ The approved implementation plan is now in active development on `phase-0/releas
 - This provides a controlled end-to-end Android framework test for the provider adapter. It does not emulate removable-media hardware, vendor-specific provider quirks, or Android's full user-granted persisted-permission picker flow.
 - Source commit: [6dc49bb0e8625cde8200f827743cb03ae9b04648](https://github.com/afghanbark573-rgb/Northstar-Player/commit/6dc49bb0e8625cde8200f827743cb03ae9b04648). CI run [45188897334](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45188897334) is validating the new instrumentation test; do not mark it passed until the debug job completes.
 - Physical USB/SD testing and Xiaomi 14 acceptance remain outstanding. No intermediate APK distribution.
+
+
+## DocumentsProvider instrumentation compile fix — validation retry pending — 2026-11-23
+
+- The first integration-test validation, [run 45188897334](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45188897334), failed at `compileDebugAndroidTestKotlin` before executing instrumentation. The precise compiler errors were three unresolved `toTypedArray()` references in `TestSafDocumentsProvider.kt`; this was a test-source compile issue, not a runtime DocumentsProvider failure.
+- Corrected the provider to use the supplied projection array directly and changed the row mapper to accept `Array<out String>`.
+- Fix commit: [c84d31d8d3b0e5a38cbcd9e8bfbc38a39418d03b](https://github.com/afghanbark573-rgb/Northstar-Player/commit/c84d31d8d3b0e5a38cbcd9e8bfbc38a39418d03b).
+- Fresh validation [run 45224911347](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45224911347) is in progress. Unit-test/debug compilation, instrumentation execution, and release signing must all be checked before marking the integration test verified.
+- Prior run [45186122294](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45186122294) passed both jobs for the provider-policy test seam and migration coverage, but predates the new DocumentsProvider integration test.
