@@ -60,6 +60,7 @@ kapt {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("androidx.activity:activity-ktx:1.11.0")
     implementation("androidx.media3:media3-exoplayer:1.11.1")
     implementation("androidx.media3:media3-ui:1.11.1")

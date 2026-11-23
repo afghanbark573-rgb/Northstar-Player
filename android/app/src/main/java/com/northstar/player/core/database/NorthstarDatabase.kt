@@ -115,6 +115,9 @@ interface MediaItemDao {
     @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey")
     suspend fun markSourceUnavailable(sourceKey: String)
 
+    @Query("UPDATE media_items SET isAvailable = 0 WHERE sourceKey = :sourceKey AND indexedAtMillis < :scanStartedAtMillis")
+    suspend fun markOlderItemsUnavailable(sourceKey: String, scanStartedAtMillis: Long)
+
     @Query("DELETE FROM media_items WHERE mediaKey = :mediaKey")
     suspend fun deleteByKey(mediaKey: String)
 }
@@ -178,8 +181,17 @@ interface ExternalTreeGrantDao {
     @Query("SELECT * FROM external_tree_grants ORDER BY displayName COLLATE NOCASE")
     fun observeAll(): Flow<List<ExternalTreeGrantEntity>>
 
+    @Query("SELECT * FROM external_tree_grants ORDER BY displayName COLLATE NOCASE")
+    suspend fun all(): List<ExternalTreeGrantEntity>
+
+    @Query("SELECT * FROM external_tree_grants WHERE treeUri = :treeUri LIMIT 1")
+    suspend fun find(treeUri: String): ExternalTreeGrantEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(grant: ExternalTreeGrantEntity)
+
+    @Query("UPDATE external_tree_grants SET isAvailable = :available WHERE treeUri = :treeUri")
+    suspend fun setAvailability(treeUri: String, available: Boolean)
 
     @Query("DELETE FROM external_tree_grants WHERE treeUri = :treeUri")
     suspend fun delete(treeUri: String)

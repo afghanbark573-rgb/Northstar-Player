@@ -63,7 +63,8 @@ object LibraryBrowser {
             val path = normalizedPath(folder.relativePath)
             val descendants = available.filter { video ->
                 val videoPath = normalizedPath(video.relativePath.orEmpty())
-                videoPath == path || videoPath.startsWith("$path/")
+                video.sourceKey == folder.sourceKey &&
+                    (videoPath == path || videoPath.startsWith("$path/"))
             }
             folder.folderKey to FolderMetrics(
                 totalBytes = descendants.sumOf { it.sizeBytes },
@@ -97,13 +98,15 @@ object LibraryBrowser {
             LibraryViewMode.VIDEO_FOLDERS -> emptyList()
             LibraryViewMode.FILES_ONLY -> available.filter(::matchesVideo)
             LibraryViewMode.NESTED_VIEW -> {
-                val currentPath = currentFolderKey?.let { key ->
-                    allFolders.firstOrNull { it.folderKey == key }?.relativePath
+                val currentFolder = currentFolderKey?.let { key ->
+                    allFolders.firstOrNull { it.folderKey == key }
                 }
+                val currentPath = currentFolder?.relativePath
                 available.filter { video ->
                     val videoPath = normalizedPath(video.relativePath.orEmpty())
                     val parentPath = normalizedPath(currentPath.orEmpty())
-                    videoPath == parentPath && matchesVideo(video)
+                    (currentFolder == null || video.sourceKey == currentFolder.sourceKey) &&
+                        videoPath == parentPath && matchesVideo(video)
                 }
             }
         }.let { list ->

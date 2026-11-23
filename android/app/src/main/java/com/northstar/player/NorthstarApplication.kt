@@ -7,6 +7,8 @@ import com.northstar.player.data.library.MediaLibraryRepository
 import com.northstar.player.data.library.MediaStoreVideoScanner
 import com.northstar.player.data.library.MediaLibraryScanScheduler
 import com.northstar.player.data.library.RoomMediaLibraryRepository
+import com.northstar.player.data.storage.SafTreeGrantManager
+import com.northstar.player.data.storage.SafTreeScanner
 
 class NorthstarApplication : Application() {
     override fun onCreate() {
@@ -37,6 +39,20 @@ class NorthstarApplication : Application() {
         MediaStoreVideoScanner(
             contentResolver,
             mediaLibraryRepository
+        )
+    }
+
+    val safTreeGrantManager: SafTreeGrantManager by lazy {
+        SafTreeGrantManager(contentResolver, database.externalTreeGrantDao())
+    }
+
+    val safTreeScanner: SafTreeScanner by lazy {
+        SafTreeScanner(
+            contentResolver,
+            database.mediaItemDao(),
+            database.folderDao(),
+            database.scanStateDao(),
+            database.externalTreeGrantDao()
         )
     }
 }

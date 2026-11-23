@@ -2,7 +2,9 @@ package com.northstar.player
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -21,6 +23,7 @@ import com.northstar.player.core.database.MediaItemEntity
 import com.northstar.player.data.library.LibraryBrowser
 import com.northstar.player.data.library.LibrarySort
 import com.northstar.player.data.library.LibraryViewMode
+import com.northstar.player.core.database.ExternalTreeGrantEntity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -51,10 +54,41 @@ class MainActivity : ComponentActivity() {
     private var grid = false
     private var currentFolderKey: String? = null
     private var showingYou = false
+    private var showingExternalStorage = false
+    private var externalGrants = emptyList<ExternalTreeGrantEntity>()
     private var player: ExoPlayer? = null
     private var playerView: PlayerView? = null
     private var libraryObservation: Job? = null
     private var folderObservation: Job? = null
+    private var grantObservation: Job? = null
+
+    private val treePicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            lifecycleScope.launch {
+                try {
+                    val name = queryTreeDisplayName(uri)
+                    val app = application as NorthstarApplication
+                    val grant = app.safTreeGrantManager.addTree(uri, name)
+                    val result = app.safTreeScanner.scan(grant)
+                    result.onSuccess {
+                        Toast.makeText(this@MainActivity,
+                            "Indexed ${it.discoveredVideos} videos in ${it.discoveredFolders} folders",
+                            Toast.LENGTH_LONG).show()
+                    }.onFailure {
+                        Toast.makeText(this@MainActivity,
+                            "Storage scan failed: ${it.message ?: "Access unavailable"}",
+                            Toast.LENGTH_LONG).show()
+                    }
+                    showingExternalStorage = true
+                    render()
+                } catch (error: Exception) {
+                    Toast.makeText(this@MainActivity,
+                        "Could not access this folder: ${error.message ?: "Permission unavailable"}",
+                        Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         loadLibrary()
@@ -209,11 +243,22 @@ class MainActivity : ComponentActivity() {
                 render()
             }
         }
+        grantObservation = lifecycleScope.launch {
+            app.database.externalTreeGrantDao().observeAll().collect { grants ->
+                externalGrants = grants
+                render()
+            }
+        }
     }
 
     private fun render() {
         if (!::content.isInitialized) return
         content.removeAllViews()
+
+        if (showingExternalStorage) {
+            renderExternalStorage()
+            return
+        }
 
         if (showingYou) {
             status.text = "YOUR LIBRARY"
@@ -255,6 +300,17 @@ class MainActivity : ComponentActivity() {
                 setOnClickListener { Toast.makeText(this@MainActivity, "Folder creation will be added with storage-folder support.", Toast.LENGTH_SHORT).show() }
             })
             content.addView(breadcrumb)
+        }
+
+        if (viewMode == LibraryViewMode.NESTED_VIEW && currentFolderKey == null) {
+            val manage = TextView(this).apply {
+                text = "＋  Manage external storage"
+                textSize = 13f
+                setTextColor(0xFFFFFFFF.toInt())
+                setPadding(12, 12, 12, 12)
+                setOnClickListener { showingExternalStorage = true; render() }
+            }
+            content.addView(manage)
         }
 
         val listing = LibraryBrowser.build(
@@ -302,6 +358,7 @@ class MainActivity : ComponentActivity() {
     override fun onBackPressed() {
         when {
             player != null -> { releasePlayer(); showLibrary() }
+            showingExternalStorage -> { showingExternalStorage = false; showingYou = true; render() }
             showingYou -> { showingYou = false; render() }
             viewMode == LibraryViewMode.NESTED_VIEW && currentFolderKey != null -> navigateUp()
             viewMode == LibraryViewMode.NESTED_VIEW -> setViewMode(LibraryViewMode.VIDEO_FOLDERS)
@@ -331,6 +388,87 @@ class MainActivity : ComponentActivity() {
         card.addView(line)
         content.addView(card)
         content.addView(View(this).apply { setBackgroundColor(0xFF252525.toInt()) }, LinearLayout.LayoutParams(-1, 1))
+    }
+
+    private fun renderExternalStorage() {
+        status.text = "EXTERNAL STORAGE"
+        section("Selected folders")
+        val add = TextView(this).apply {
+            text = "＋  Add USB / SD card or folder"
+            textSize = 14f
+            setTextColor(0xFFFFFFFF.toInt())
+            setPadding(14, 16, 14, 16)
+            setOnClickListener { treePicker.launch(null) }
+        }
+        content.addView(add)
+        if (externalGrants.isEmpty()) {
+            section("No external folders selected")
+        } else {
+            externalGrants.forEach { grant ->
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(14, 13, 14, 13)
+                    setBackgroundColor(0xFF151515.toInt())
+                    isClickable = true
+                    setOnClickListener { scanExternalTree(grant) }
+                }
+                row.addView(TextView(this@MainActivity).apply {
+                    text = grant.displayName
+                    textSize = 14f
+                    setTextColor(0xFFFFFFFF.toInt())
+                })
+                row.addView(TextView(this@MainActivity).apply {
+                    text = if (grant.isAvailable) "Tap to refresh and index" else "Permission unavailable — select again"
+                    textSize = 11f
+                    setTextColor(0xFF999999.toInt())
+                    setPadding(0, 4, 0, 0)
+                })
+                content.addView(row)
+                content.addView(View(this).apply { setBackgroundColor(0xFF252525.toInt()) },
+                    LinearLayout.LayoutParams(-1, 1))
+            }
+        }
+        val back = TextView(this).apply {
+            text = "‹  Back to library"
+            textSize = 13f
+            setTextColor(0xFFBBBBBB.toInt())
+            setPadding(12, 18, 12, 18)
+            setOnClickListener { showingExternalStorage = false; showingYou = false; render() }
+        }
+        content.addView(back)
+    }
+
+    private fun scanExternalTree(grant: ExternalTreeGrantEntity) {
+        lifecycleScope.launch {
+            val result = (application as NorthstarApplication).safTreeScanner.scan(grant)
+            result.onSuccess {
+                Toast.makeText(this@MainActivity,
+                    "Updated ${it.discoveredVideos} videos",
+                    Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(this@MainActivity,
+                    "Storage unavailable: ${it.message ?: "Permission revoked"}",
+                    Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun queryTreeDisplayName(uri: Uri): String {
+        val documentId = try { DocumentsContract.getTreeDocumentId(uri) } catch (_: Exception) { null }
+        if (documentId != null) {
+            val documentUri = DocumentsContract.buildDocumentUriUsingTree(uri, documentId)
+            contentResolver.query(
+                documentUri,
+                arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
+                null, null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                    if (index >= 0 && !cursor.isNull(index)) return cursor.getString(index)
+                }
+            }
+        }
+        return uri.lastPathSegment?.substringAfterLast(':')?.ifBlank { null } ?: "External storage"
     }
 
     private fun section(label: String) {
@@ -505,6 +643,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         libraryObservation?.cancel()
         folderObservation?.cancel()
+        grantObservation?.cancel()
         releasePlayer()
         super.onDestroy()
     }
