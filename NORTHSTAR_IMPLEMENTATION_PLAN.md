@@ -298,7 +298,7 @@ Date Added and Date Modified are separate user-facing sort options; do not colla
 The You page is the single home for secondary destinations and settings. It contains:
 - Favorites.
 - Watch History.
-- Private Library.
+- **Private Library** — a clearly visible, directly accessible destination alongside Favorites and Watch History.
 - Settings.
 - Other secondary options only when they are approved and useful.
 
@@ -502,7 +502,8 @@ Before release, review:
 
 ### E. You
 - Opens from the top profile icon.
-- Contains Favorites, Watch History, Private Library, Settings, and approved secondary options.
+- Contains clearly visible, directly accessible entries for Favorites, Watch History, Private Library, Settings, and approved secondary options.
+- Private Library is discoverable from You without knowing the pull-and-hold shortcut; the gesture is only an additional shortcut.
 - Does not turn the main Library into a dashboard.
 
 ### F. Player
