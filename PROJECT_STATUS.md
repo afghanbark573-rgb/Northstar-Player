@@ -116,7 +116,7 @@ The current library candidate includes:
 - Folders and All Videos views.
 - Search across filenames and folder paths.
 - List/Grid toggle.
-- Sort by recent, A–Z, and largest.
+- Sort by Date Added, Date Modified, A–Z, and Largest; Date Added and Date Modified are separate newest-first options.
 - Media3 playback retained.
 
 Important: the current folder display is a first grouping pass, not the final nested folder-navigation UX. The simple native UI is a functional validation shell, not the approved final AMOLED black-and-white interface.
@@ -209,7 +209,7 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Status: drafted and saved for user review; not yet approved for implementation.
 - The plan records the fresh source inspection, current gaps, proposed architecture, data model, library/player/private-storage/external-storage design, acceptance criteria, test strategy, and one coordinated release gates.
 - No application source code was changed and no APK was built while preparing the plan.
-- Five product decisions remain listed in Section 14 of the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), and Nested View navigation/toolbar are now resolved. Do not silently decide the remaining user-visible interaction details.
+- Four product decisions remain listed in Section 14 of the plan. Private import behavior (Move only), Private Library recovery experience (three selected questions from a Northstar-provided list), Nested View navigation/toolbar, and separate Date Added/Date Modified sorting are now resolved. Do not silently decide the remaining user-visible interaction details.
 - The next step is user review/approval of the implementation plan and resolution of those product decisions. Coding must not begin until then.
 - `NORTHSTAR_PRODUCT_SPEC.md` remains the authority for the eight locked product discussions. This implementation plan translates those requirements; it does not replace them.
 - `NATIVE_ROADMAP.md` contains older statements that conflict with the current product specification/status. Treat the latest product spec and this status file as authoritative until the roadmap is reconciled.
@@ -244,3 +244,13 @@ The eight approved discussions have been translated into **[NORTHSTAR_IMPLEMENTA
 - Provide one compact controls icon that opens the unified Sort, View Mode, and Layout options. Do not scatter these options across separate toolbar buttons.
 - Support pull-to-refresh on the folder page.
 - This decision is recorded in the master product specification and integrated implementation plan. No application code has been changed; overall plan approval remains a prerequisite to coding.
+
+
+## Approved library sorting options — 2026-11-23
+
+- Provide separate **Date Added** and **Date Modified** sort options; do not merge them into a generic Recent option.
+- Both date-based options sort newest first.
+- Date Added uses the storage provider's added/indexed date where available; Date Modified uses the file's last-modified date where available.
+- Also retain A–Z and Largest.
+- If a provider does not expose a reliable date, handle the item consistently without inventing a timestamp. Folder NEW-indicator state remains separate from sorting.
+- This decision is recorded in the master product specification and implementation plan. No application code has been changed.
