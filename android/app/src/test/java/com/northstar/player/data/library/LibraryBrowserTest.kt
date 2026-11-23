@@ -10,8 +10,8 @@ class LibraryBrowserTest {
         MediaItemEntity(key, "content://media/$key", name, "video/mp4", 1000, bytes, added, modified,
             "MEDIA_STORE", "media", path, true, 1000)
 
-    private fun folder(key: String, parent: String?, name: String, path: String, hasVideos: Boolean = true) =
-        FolderEntity(key, parent, name, "media", path, hasVideos, 1, 0, 1000, null)
+    private fun folder(key: String, parent: String?, name: String, path: String, count: Int = 1) =
+        FolderEntity(key, parent, name, "media", path, count > 0, count, 0, 1000, null)
 
     private val videos = listOf(
         video("a", "zeta.mp4", "Movies/Trips/", 10, 30, 100),
@@ -20,12 +20,12 @@ class LibraryBrowserTest {
         video("gone", "gone.mp4", "Movies/", 99, 99, 999).copy(isAvailable = false)
     )
     private val folders = listOf(
-        folder("movies", null, "Movies", "Movies", false),
-        folder("trips", "movies", "Trips", "Movies/Trips"),
-        folder("empty", null, "Empty", "Empty", false)
+        folder("movies", null, "Movies", "Movies", 2),
+        folder("trips", "movies", "Trips", "Movies/Trips", 2),
+        folder("empty", null, "Empty", "Empty", 0)
     )
 
-    @Test fun videoFoldersShowsOnlyTopLevelFoldersContainingVideos() {
+    @Test fun videoFoldersShowsTopLevelFoldersWithDescendantVideos() {
         val result = LibraryBrowser.build(videos, folders, LibraryViewMode.VIDEO_FOLDERS, LibrarySort.NAME)
         assertEquals(listOf("Movies"), result.folders.map { it.displayName })
         assertEquals(emptyList<MediaItemEntity>(), result.videos)
@@ -37,7 +37,7 @@ class LibraryBrowserTest {
         assertEquals(listOf("alpha.mp4", "root.mp4", "zeta.mp4"), result.videos.map { it.displayName })
     }
 
-    @Test fun nestedViewShowsOnlyImmediateChildrenAndDirectVideos() {
+    @Test fun nestedViewShowsImmediateChildrenAndDirectVideos() {
         val result = LibraryBrowser.build(videos, folders, LibraryViewMode.NESTED_VIEW, LibrarySort.NAME, currentFolderKey = "movies")
         assertEquals(listOf("Trips"), result.folders.map { it.displayName })
         assertEquals(emptyList<MediaItemEntity>(), result.videos)
@@ -47,7 +47,7 @@ class LibraryBrowserTest {
         assertEquals(listOf("alpha.mp4", "zeta.mp4"), child.videos.map { it.displayName })
     }
 
-    @Test fun searchMatchesVideoNamesAndFolderPathsAndExcludesUnavailableItems() {
+    @Test fun searchMatchesVideoNamesAndExcludesUnavailableItems() {
         val result = LibraryBrowser.build(videos, folders, LibraryViewMode.FILES_ONLY, LibrarySort.DATE_ADDED, query = "ALPHA")
         assertEquals(listOf("alpha.mp4"), result.videos.map { it.displayName })
     }

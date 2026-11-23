@@ -45,7 +45,7 @@ object LibraryBrowser {
 
         val folders = when (mode) {
             LibraryViewMode.VIDEO_FOLDERS -> allFolders.filter {
-                it.parentFolderKey == null && it.containsVideos && matchesFolder(it)
+                it.parentFolderKey == null && it.videoCount > 0 && matchesFolder(it)
             }
             LibraryViewMode.FILES_ONLY -> emptyList()
             LibraryViewMode.NESTED_VIEW -> allFolders.filter {
@@ -61,8 +61,8 @@ object LibraryBrowser {
                     allFolders.firstOrNull { it.folderKey == key }?.relativePath
                 }
                 available.filter { video ->
-                    val videoPath = video.relativePath.orEmpty().trimEnd('/').replace('\\\\', '/')
-                    val parentPath = currentPath.orEmpty().trimEnd('/').replace('\\\\', '/')
+                    val videoPath = video.relativePath.orEmpty().trimEnd('/').replace('\\', '/')
+                    val parentPath = currentPath.orEmpty().trimEnd('/').replace('\\', '/')
                     videoPath == parentPath && matchesVideo(video)
                 }
             }
