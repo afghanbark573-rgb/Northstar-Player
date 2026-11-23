@@ -415,3 +415,12 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Artifacts from run 45155690835: `northstar-room-schema`, `northstar-debug-apk`, and `northstar-release-apk`.
 - These results verify JVM unit tests and CI packaging/signing only. They do not establish device/runtime behavior, scanner integration against a real MediaStore, or Xiaomi 14 testing.
 - Remaining scan-reliability work: add direct scanner tests for null cursor/error handling, bounded 400-row batching and cancellation/failure timestamp preservation; review scan concurrency and permission reselection; then move into the approved three-mode library UX.
+
+
+## Follow-up scan concurrency review — 2026-11-23
+
+- Reviewed the WorkManager scheduler and found that foreground refresh and 12-hour periodic reconciliation use separate unique-work names. That permits the two worker types to overlap.
+- Added a scanner-instance `Mutex` in commit `77df249f1712139e20f36d569576b53c472e5b42` so requests reaching the shared application scanner serialize rather than interleave MediaStore batches, folder reconciliation, and scan-state updates.
+- CI run [45156625321](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45156625321) is queued/in progress at the time of this update. Do not claim the mutex change is build-verified until both debug and signed-release jobs pass.
+- This is in-process serialization through the singleton scanner in `NorthstarApplication`; it is not a cross-process database lock. The current WorkManager configuration uses the app's default process. If a future manifest assigns workers to another process, revisit this guarantee.
+- Latest confirmed passing test/build run remains [45155690835](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45155690835), which includes the three folder reconciliation tests and signed APK verification.
