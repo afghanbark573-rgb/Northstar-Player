@@ -20,7 +20,8 @@ class NorthstarApplication : Application() {
     val mediaLibraryRepository: MediaLibraryRepository by lazy {
         RoomMediaLibraryRepository(
             database.mediaItemDao(),
-            database.scanStateDao()
+            database.scanStateDao(),
+            database.folderDao()
         )
     }
 
