@@ -13,6 +13,8 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 
 data class MediaScanResult(
@@ -33,8 +35,13 @@ class MediaStoreVideoScanner(
     private val repository: MediaLibraryRepository,
     private val clock: () -> Long = System::currentTimeMillis
 ) {
+    // Refresh and periodic WorkManager requests use different unique names. Serialize
+    // them here so overlapping workers cannot interleave cursor batches or scan state.
+    private val scanMutex = Mutex()
+
     suspend fun scan(permissionScope: VideoPermissionScope): Result<MediaScanResult> =
-        withContext(Dispatchers.IO) {
+        scanMutex.withLock {
+            withContext(Dispatchers.IO) {
             if (permissionScope == VideoPermissionScope.DENIED) {
                 return@withContext Result.failure(SecurityException("Video permission is not granted"))
             }
@@ -92,6 +99,7 @@ class MediaStoreVideoScanner(
                 )
                 Result.failure(error)
             }
+        }
         }
 
     private suspend fun queryAndPersist(): Int {
