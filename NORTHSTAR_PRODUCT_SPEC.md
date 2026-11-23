@@ -26,6 +26,10 @@ Guiding principles:
    - **Files Only:** show video files without folder listings.
    - **Nested View:** show the complete folder hierarchy, including main folders, nested folders, and video folders. This is the all-folders hierarchy mode; it is not a fourth mode.
 3. **Layout:** List and Grid layouts.
+4. **Nested View navigation:** use normal folder-opening navigation, not an expandable/inline folder tree. Opening a folder displays its contents on a folder page. Show a breadcrumb path near the top so users can see their current location and navigate back to ancestor folders. Keep the path usable on narrow screens (for example, horizontally scrollable or otherwise compact).
+5. **Nested View toolbar:** provide a Back control, a Create Folder icon, and one compact controls icon that opens the unified Sort, View Mode, and Layout options. Do not scatter these options across separate toolbar buttons.
+6. **Refresh:** support pull-to-refresh on the folder page to refresh its contents.
+7. **Folder hierarchy:** preserve the actual parent-child structure and include empty folders in Nested View.
 4. **Search:** search videos by filename.
 5. **Sorting:** Recent, A–Z, and Largest.
 6. **New content:** small NEW indicators on relevant folders.
