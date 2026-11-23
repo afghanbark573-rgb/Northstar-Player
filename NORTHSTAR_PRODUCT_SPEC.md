@@ -50,8 +50,8 @@ Sort, View Mode, and Layout must be together in one single, easy-to-find control
 1. **Player design:** fully custom Northstar player interface, not the default Media3 control appearance.
 2. **Playback controls:** Play/Pause, Previous, Next, Rewind, and Forward.
 3. **Timeline and time display:** show current time and total duration. Tapping the total-duration display toggles it to remaining time.
-4. **Gestures:** swipe to control brightness and volume; double-tap to seek.
-5. **Temporary 2× playback:** press and hold the screen for temporary 2× playback.
+4. **Gestures:** left-side vertical swipe controls brightness; right-side vertical swipe controls volume. Double-tap the left side to seek backward and the right side to seek forward.
+5. **Temporary 2× playback:** press and hold the screen for temporary 2× playback; restore the previous speed when released or cancelled.
 6. **Playback speed:** provide multiple speed options and custom speed selection.
 7. **Subtitles:** support embedded and external subtitle files.
 8. **Audio tracks:** allow selection among available audio tracks.
