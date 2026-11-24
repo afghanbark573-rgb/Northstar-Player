@@ -650,3 +650,12 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Corrected the emulator script so directory change, diagnostics setup, Gradle execution, exit-code capture, and logcat capture run inside one shell block. This preserves the working directory and ensures logcat capture runs after Gradle whether tests pass or fail.
 - This is a CI orchestration fix only; no production SAF code or test assertions were changed. A fresh workflow run must now execute both Android instrumentation tests before the DocumentsProvider integration can be considered validated.
 - Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding. Do not distribute an intermediate APK.
+
+
+## Emulator-runner script command-line correction — 2026-11-24
+
+- Follow-up CI run [45403648975](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45403648975) confirms the previous shell-block workaround was also incompatible with the emulator runner: it launches each script line as an individual `sh -c` command, so the opening line containing `cd android && {` was parsed without the closing brace and failed with a shell syntax error before tests ran.
+- Replaced the multiline shell block with one physical script line containing the directory change, diagnostics directory creation, Gradle test invocation, exit-code capture, logcat capture, and final exit. This matches the runner's per-line execution model while keeping the entire sequence in one shell.
+- The run again confirms JVM unit tests/debug APK and signed release build/signature verification pass; instrumentation still did not execute.
+- No production code or test logic changed. The next run is the first meaningful retry after correcting the runner script format.
+- The DocumentsProvider integration test remains unverified; no intermediate APK distribution. Physical USB/SD and Xiaomi 14 acceptance remain outstanding.
