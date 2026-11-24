@@ -671,9 +671,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Latest run: JVM unit tests/debug APK and signed release APK/signature verification passed; Android instrumentation failed. No intermediate APK distribution. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding.
 
 
-## Current CI checkpoint — run #56 in progress — 2026-11-24
+## Current SAF test-provider correction — 2026-11-24
 
-- Native branch HEAD: `07b96f31a4cbab9cfcad1e0ccfa4f81232142960` ([commit](https://github.com/afghanbark573-rgb/Northstar-Player/commit/07b96f31a4cbab9cfcad1e0ccfa4f81232142960)).
-- Run [45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45411300973) was still `in_progress` at the checkpoint poll. Release job completed successfully (signed release build, `apksigner` verification and artifact upload). Debug JVM unit tests and debug APK build passed. The debug job remained active in `Run database migration instrumentation tests`; no final instrumentation conclusion was available.
-- Do not mark the SAF DocumentsProvider integration test passed or failed based on this in-progress run. Poll the exact run and inspect diagnostics if it fails.
+- Native source commit `07b96f31a4cbab9cfcad1e0ccfa4f81232142960` moved the in-memory DocumentsProvider to the debug app source set, but run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45411300973) then exposed the exact remaining setup defect.
+- Run #56 evidence: JVM unit tests and debug APK build passed; release APK build, `apksigner` verification and artifact upload passed. Android instrumentation launched zero tests because the target app process crashed while installing `TestSafDocumentsProvider`.
+- Exact exception: `java.lang.SecurityException: Provider must be protected by MANAGE_DOCUMENTS`, thrown by `DocumentsProvider.attachInfo`. This is a debug test-provider manifest configuration error, not a production SAF assertion failure.
+- Corrective source commit: `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b` ([commit](https://github.com/afghanbark573-rgb/Northstar-Player/commit/3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b)). Added `android:permission="android.permission.MANAGE_DOCUMENTS"` to the debug-only provider declaration. The provider remains in `src/debug` and is excluded from release builds. Production SAF implementation and test assertions were not changed.
+- A new CI run should be triggered by this manifest change. Confirm that it tests the exact new HEAD and inspect both Room migration and SAF DocumentsProvider instrumentation results before closing the gate.
 - No intermediate APK distribution. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed upgrade test remain outstanding.
