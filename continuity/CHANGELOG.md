@@ -64,3 +64,15 @@
 - Earlier run #59 also passed on the intermediate code-only commit; run #60 is authoritative for final code plus tests.
 - Device gates remain open: physical USB/SD behavior, real picker/persisted grants, Xiaomi 14 acceptance, and signed install-over-existing upgrade. No APK distributed.
 - Next: inspect the current implementation plan and adjacent code before selecting the next Library/Storage foundation task. No scope assumptions or schema changes.
+
+
+## Folder NEW-state lifecycle — CI run #68 passed — 2026-11-25
+
+- Native source commit: `d00f920399d699981532985c5e07a9c4b23035fe` on `phase-0/release-signing`.
+- Workflow [run #68 / 45483698896](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45483698896) completed with overall conclusion **success** on that exact commit.
+- Debug job passed `:app:testDebugUnitTest`, `:app:assembleDebug`, and `:app:connectedDebugAndroidTest`. The unit-test task includes six focused `FolderNewStateTest` cases and the repository discovery/acknowledgement regression test.
+- Emulator API 35 instrumentation diagnostics artifact ID `14964397667`, SHA-256 `606acb2774245aa223605da8217ebf4dcf77067ff421894bb2da20443bd087ab`, confirms **2 tests, 0 failures, 0 errors, 0 skipped**: Room migration/acknowledgement assertion passed; nested SAF DocumentsProvider create/list integration passed. XML reports `tests="2" failures="0" errors="0" skipped="0"`; test log ends `OK (2 tests)`.
+- Release job passed release keystore restoration, `:app:assembleRelease`, `apksigner` verification and signed artifact upload. Release artifact ID `14963031377`, SHA-256 `58f2c260ec92394e8b6a3c93b523925a699c297353a207f9ad5b6026d9a253bb`.
+- Debug artifact ID `14964815811`, SHA-256 `bc15724c02fc50bf63354fd1ab47d31d059a1fa094c6dfe685d5600dce0f4ccc`. Room schema artifact ID `14964681631`, SHA-256 `b18dad2293c8469ac18a972f1b0fb00245848ed3944e354fd032307ae24dd6ce`.
+- Implementation reuses existing `discoveredAtMillis` and `acknowledgedAtMillis` fields. Shared `FolderNewState` logic is used by MediaStore and SAF; new descendant videos or child folders advance discovery state; opening a folder acknowledges it. Same-millisecond discoveries are handled without losing the NEW state. No Room schema migration was introduced.
+- Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain **unverified device gates**. CI artifacts are engineering evidence only. **No APK was distributed**; all eight approved product areas remain one coordinated public release.
