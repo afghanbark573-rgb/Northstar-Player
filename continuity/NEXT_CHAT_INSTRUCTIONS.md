@@ -9,3 +9,13 @@
 7. Preserve all eight approved product areas, AMOLED black-and-white design, exactly three library modes, package/signing identity, local-first privacy and one coordinated public release. Never distribute intermediate APKs.
 8. Do not mix the `main` web prototype branch with native development. Before coding, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests.
 9. At each major milestone and before a new chat, update native `PROJECT_STATUS.md` plus this branch's master pack and changelog. Keep verified CI evidence separate from device acceptance.
+
+
+## Latest restart instruction — 24 November 2026, after run #56 diagnosis
+1. Inspect the live native branch `phase-0/release-signing` and confirm the latest HEAD. Source correction: `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
+2. Poll the CI run triggered by that commit. Verify the tested SHA, job conclusions, and that both Room migration and SAF DocumentsProvider instrumentation tests actually ran and passed.
+3. Run #56 (`45411300973`) is conclusively failed: the app process crashed before tests started because the debug test DocumentsProvider lacked `android:permission="android.permission.MANAGE_DOCUMENTS"`. This was fixed in the source commit above. Do not misstate run #56 as a production SAF failure.
+4. If the new run fails, inspect diagnostics and exact exception before changing code. If it passes, update native status and continuity files with evidence, then resume Library Browser folder metadata aggregation/sorting and regression tests.
+5. Do not begin Library Browser work before the SAF instrumentation gate is resolved. Keep physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade testing as separate outstanding gates.
+6. Preserve all eight approved product areas as one coordinated public release; no intermediate APK distribution. Preserve package/signing identity, AMOLED black-and-white direction, three library modes and local-first privacy.
+7. After each successful engineering milestone, update native `PROJECT_STATUS.md` plus this continuity master pack, changelog and restart instructions before starting the next milestone. Record failed attempts with exact evidence too.
