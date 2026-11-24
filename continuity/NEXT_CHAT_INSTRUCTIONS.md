@@ -64,3 +64,14 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 5. Next planned internal milestone: Library Browser folder metadata aggregation/sorting. Re-inspect current code and plan first; define Main Quest, bundled Side Quests, files, risks, acceptance criteria and tests before edits. Preserve three modes, hierarchy/empty folders, source separation, unknown-date behavior and deterministic tie-breaks.
 6. No intermediate APK distribution. Eight product areas remain one coordinated public release. Preserve package ID/signing identity and local-first privacy.
 7. After every milestone update native `PROJECT_STATUS.md` and all four continuity records before proceeding.
+
+
+## Latest restart instruction — 25 November 2026, after Library Browser CI run #60
+1. Confirm native HEAD is `9b84ea24a1f11671aca54c10a339dc161307473d` or inspect whatever newer commit is now current.
+2. CI [run #60 / 45479496288](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45479496288) passed on exact source SHA above. Unit tests/debug build, emulator instrumentation (2/2; Room migration and nested SAF integration), signed release build and signature verification all passed. Read the latest dated checkpoint in `MASTER_CONTINUATION_PACK.md` for artifact IDs/digests.
+3. Library Browser metadata aggregation and deterministic sorting is complete for that tested commit. It preserves three modes, normalized folder paths, source separation, unknown-date ordering and deterministic tie-breaks.
+4. Re-inspect live product spec, implementation plan, `PROJECT_STATUS.md`, source and branch heads before choosing the next internal task. Candidate broader Library/Storage work includes background/incremental MediaStore scanning, permission-scope/reselection behavior, SAF persisted-grant lifecycle/revocation, and folder hierarchy integration; establish what is already implemented before selecting.
+5. Before coding, state Main Quest, bundled Side Quests, exact files, risks, acceptance criteria and regression tests. No casual Room schema changes.
+6. Keep real USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade as outstanding device gates until physically verified.
+7. Preserve local-first privacy, package ID `com.northstar.player`, permanent signing identity, all eight approved product areas as one coordinated public release, and no intermediate APK distribution.
+8. After each successful milestone, update native `PROJECT_STATUS.md` and all four continuity records before moving on. Never put signing secrets or keystore bytes in tracked docs.
