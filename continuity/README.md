@@ -26,3 +26,7 @@ The latest checkpoint diagnoses run #56's instrumentation crash and records the 
 Engineering cadence: after each successful milestone, update native `PROJECT_STATUS.md` and the continuity master pack, changelog and next-chat instructions before moving to the next milestone. Record failures with evidence rather than silently overwriting history.
 
 Current CI gate: run [#57 / 45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) validates the debug SAF provider's required MANAGE_DOCUMENTS manifest protection. Its result was pending at the latest checkpoint.
+
+
+## 24 November 2026 checkpoint — run #57 diagnosis
+Run [#57 / 45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) ran both instrumentation tests: Room migration passed; SAF integration failed because the debug in-memory DocumentsProvider did not implement `isChildDocument` for nested tree descendants. The debug-only provider was corrected in native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. The master pack and next-chat instructions contain the evidence and next validation gate. Poll the new CI run before proceeding; do not distribute intermediate APKs.
