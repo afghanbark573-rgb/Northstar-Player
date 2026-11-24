@@ -315,3 +315,28 @@ Run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/ac
 - New run: [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513), exact tested source HEAD `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
 - At the latest poll both debug and release jobs were still running. The debug instrumentation step had not started, so there is no result yet. No artifacts were available at that poll.
 - Next: poll run #57; confirm the debug-only DocumentsProvider now installs and both instrumentation tests execute and pass. Do not start the Library Browser milestone until then.
+
+
+## CURRENT CHECKPOINT UPDATE — 24 NOVEMBER 2026 (RUN #57 DIAGNOSED; TREE DESCENDANT FIX)
+
+### Run #57 evidence
+- Run [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) tested exact source commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b` and completed with failure.
+- JVM unit tests/debug APK build passed. Room migration instrumentation passed (1/1). The SAF DocumentsProvider integration test ran and failed (1/1) with `SecurityException: Document nested-parent is not a descendant of test-root` from `DocumentsProvider.enforceTree`, via `DocumentsContract.createDocument` and production `AndroidSafFolderProvider.createDirectory`.
+- This is an exact in-memory test-provider contract defect. The provider represented parent IDs and child listings but did not implement `DocumentsProvider.isChildDocument`; Android consequently rejected a nested document as outside the requested tree. This is not an emulator crash and does not establish a production SAF implementation defect.
+- Signed release job passed: keystore restore, release APK build, `apksigner` verification and artifact upload.
+
+### Corrective test-only change
+- Native commit [35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4](https://github.com/afghanbark573-rgb/Northstar-Player/commit/35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4) implements synchronized ancestor-chain traversal in the debug-only `TestSafDocumentsProvider.isChildDocument(parentDocumentId, documentId)`.
+- It reports true for direct and deeper descendants, false for missing/broken parent chains. No production SAF adapter/policy, database or integration assertions were changed.
+- Native `PROJECT_STATUS.md` records the run #57 evidence and source correction.
+- A fresh CI run must validate this correction. SAF gate remains open until both Room migration and SAF DocumentsProvider tests pass on the new commit.
+
+### Immediate next actions
+1. Poll the CI run triggered by `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`; verify its exact tested SHA and both instrumentation results/test counts.
+2. If the integration test fails, inspect new report/logcat and make an evidence-led correction.
+3. Only after the SAF integration test passes, begin Library Browser metadata aggregation/sorting with the previously defined regression suite.
+4. Keep physical USB/SD providers, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade test as separate outstanding device gates.
+5. No intermediate APK distribution; all eight product areas remain one coordinated public release.
+
+### Ongoing documentation rule
+After each successful engineering milestone, update native `PROJECT_STATUS.md` and this continuity branch's master pack, changelog, and next-chat instructions before beginning the next milestone. Record failures with exact evidence as well.
