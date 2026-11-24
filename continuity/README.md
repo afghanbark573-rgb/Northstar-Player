@@ -43,3 +43,7 @@ Current gate: [CI run #58](https://github.com/afghanbark573-rgb/Northstar-Player
  
 ## 25 November 2026 — run #58 passed
 Run [#58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) passed on source SHA `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. Instrumentation diagnostics confirm 2 tests passed, 0 failures/errors/skips (Room migration and nested SAF DocumentsProvider integration). Signed release build and `apksigner` verification passed. The CI SAF/Room gate is closed for this commit; physical USB/SD, actual picker/persisted grants, Xiaomi 14 acceptance and signed upgrade testing remain open. Next internal milestone: inspect and implement Library Browser folder metadata aggregation/sorting. No intermediate APK distribution.
+
+
+## 25 November 2026 — Library Browser hardening passed
+Native commit `9b84ea24a1f11671aca54c10a339dc161307473d` passed CI run [#60 / 45479496288](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45479496288). JVM unit tests, debug build, Room migration and nested SAF instrumentation (2/2, no failures), signed release build and signature verification passed. Diagnostics artifact ID `14962565694`; release artifact ID `14960903935`. The Library Browser metadata aggregation and deterministic sorting change is verified by CI. Artifacts were not distributed. Physical USB/SD, picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed upgrade remain device gates. See the latest checkpoint in the master pack for full digests and exact tests.
