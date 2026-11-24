@@ -33,3 +33,8 @@
 - Signed release APK build, `apksigner` verification and artifact upload passed.
 - Implemented synchronized parent-chain descendant checks in debug-only provider in native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. Production SAF implementation and test assertions unchanged.
 - Updated native `PROJECT_STATUS.md` with exact failure and correction. New CI validation is required before closing SAF gate; no intermediate APK distribution.
+
+
+## 2026-11-24 — Run #58 started for SAF descendant correction
+- Run [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) was triggered by native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
+- Latest poll: debug unit/build and signed release build were active; instrumentation pending. No result claimed. Native status and continuity pack updated with this in-progress gate.
