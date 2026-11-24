@@ -45,3 +45,11 @@
 - Recorded run #58 exact source SHA `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`: JVM unit tests/debug APK build passed; signed release build, `apksigner` verification and artifact upload passed. Room migration and SAF DocumentsProvider instrumentation remained in progress at the latest poll; no test pass claimed.
 - Recorded signed artifact ID `14944179159` and SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`; artifact is not for intermediate distribution.
 - Added exact restart steps and the rule to update native status plus all continuity files after each milestone. No app source changed by this continuity update.
+
+ 
+## 2026-11-25 — Run #58 passed; SAF instrumentation gate closed
+- Run [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) completed successfully on exact native source SHA `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
+- Debug unit tests/build and connected instrumentation succeeded. The diagnostics artifact reports 2 instrumentation tests, 0 failures, 0 errors, 0 skipped: Room v1-to-v2 migration passed 1/1; nested SAF DocumentsProvider create/list integration passed 1/1. Test log: `OK (2 tests)`.
+- Signed release build, `apksigner` verification and artifact upload passed. Release artifact ID `14944179159`; SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`. CI artifact only; not distributed.
+- SAF emulator CI gate is closed for this tested commit. Real USB/SD provider behavior, picker/persisted grants, Xiaomi 14 acceptance and signed upgrade-over-existing remain unverified device gates.
+- Next planned internal milestone: inspect current source and implement Library Browser folder metadata aggregation/sorting with defined regression coverage. No intermediate APK release.
