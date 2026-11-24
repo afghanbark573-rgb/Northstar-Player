@@ -53,13 +53,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            cd android && {
-              mkdir -p app/build/diagnostics
-              gradle --no-daemon :app:connectedDebugAndroidTest
-              test_result=$?
-              adb logcat -d -v threadtime > app/build/diagnostics/emulator-logcat.txt || true
-              exit $test_result
-            }
+            cd android; mkdir -p app/build/diagnostics; gradle --no-daemon :app:connectedDebugAndroidTest; test_result=$?; adb logcat -d -v threadtime > app/build/diagnostics/emulator-logcat.txt || true; exit $test_result
 
       - name: Upload instrumentation diagnostics
         if: always()
