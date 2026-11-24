@@ -30,3 +30,6 @@ Current CI gate: run [#57 / 45441499513](https://github.com/afghanbark573-rgb/No
 
 ## 24 November 2026 checkpoint — run #57 diagnosis
 Run [#57 / 45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) ran both instrumentation tests: Room migration passed; SAF integration failed because the debug in-memory DocumentsProvider did not implement `isChildDocument` for nested tree descendants. The debug-only provider was corrected in native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. The master pack and next-chat instructions contain the evidence and next validation gate. Poll the new CI run before proceeding; do not distribute intermediate APKs.
+
+
+Current validation run: [#58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837), testing the `isChildDocument` descendant-chain fix from native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. At latest checkpoint, instrumentation had not started; see the master pack for details.
