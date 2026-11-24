@@ -75,3 +75,13 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 6. Keep real USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade as outstanding device gates until physically verified.
 7. Preserve local-first privacy, package ID `com.northstar.player`, permanent signing identity, all eight approved product areas as one coordinated public release, and no intermediate APK distribution.
 8. After each successful milestone, update native `PROJECT_STATUS.md` and all four continuity records before moving on. Never put signing secrets or keystore bytes in tracked docs.
+
+
+## Latest restart instruction — 25 November 2026, after Folder NEW-state CI run #68
+1. Confirm native HEAD is `d00f920399d699981532985c5e07a9c4b23035fe` or inspect any newer commit.
+2. CI [run #68 / 45483698896](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45483698896) passed on exact source SHA above. Unit tests/debug build, emulator instrumentation (2/2), signed release build and signature verification passed. Diagnostics artifact ID `14964397667`; release artifact ID `14963031377`.
+3. Folder NEW-state lifecycle is implemented using existing discovery/acknowledgement columns, with shared MediaStore/SAF discovery logic, folder-open acknowledgement and regression coverage. No schema migration was added.
+4. Read the latest dated checkpoint in the master pack. Re-inspect live product spec, implementation plan, `PROJECT_STATUS.md`, and source before selecting the next internal task. Pull-to-refresh and the Private Library long-pull shortcut are distinct approved behaviors; authentication must remain mandatory. Also check remaining scanning, permission and SAF grant lifecycle gaps.
+5. Before coding, declare Main Quest, bundled Side Quests, exact files, risks, acceptance criteria and regression tests. No casual Room schema changes.
+6. Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing remain unverified device gates. No intermediate APK distribution; all eight product areas remain one coordinated public release.
+7. After each successful milestone, update native `PROJECT_STATUS.md` and all four continuity records before proceeding. Never include signing secrets or keystore bytes.
