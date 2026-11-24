@@ -14,6 +14,7 @@ import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -46,6 +47,8 @@ private data class LocalVideo(
 class MainActivity : ComponentActivity() {
     private lateinit var root: LinearLayout
     private lateinit var content: LinearLayout
+    private lateinit var refreshLayout: SwipeRefreshLayout
+    private var refreshJob: Job? = null
     private lateinit var status: TextView
     private lateinit var searchField: EditText
     private var videos = emptyList<LocalVideo>()
@@ -179,9 +182,73 @@ class MainActivity : ComponentActivity() {
             setPadding(0, 2, 0, 16)
         }
         scroll.addView(content)
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        refreshLayout = SwipeRefreshLayout(this).apply {
+            setColorSchemeColors(0xFFFFFFFF.toInt())
+            setProgressBackgroundColorSchemeColor(0xFF151515.toInt())
+            setOnRefreshListener { refreshCurrentPage() }
+            addView(scroll, ViewGroup.LayoutParams(-1, -1))
+        }
+        root.addView(refreshLayout, LinearLayout.LayoutParams(-1, 0, 1f))
         setContentView(root)
         render()
+    }
+
+    private fun refreshCurrentPage() {
+        if (refreshJob?.isActive == true) {
+            refreshLayout.isRefreshing = true
+            return
+        }
+        val app = application as NorthstarApplication
+        refreshJob = lifecycleScope.launch {
+            refreshLayout.isRefreshing = true
+            val failures = mutableListOf<String>()
+            var refreshedSources = 0
+            try {
+                if (!showingExternalStorage) {
+                    val scope = app.videoPermissionChecker.currentScope()
+                    if (scope == com.northstar.player.core.permissions.VideoPermissionScope.DENIED) {
+                        failures += "Internal video permission is not available"
+                    } else {
+                        app.mediaStoreVideoScanner.scan(scope)
+                            .onSuccess { refreshedSources++ }
+                            .onFailure { failures += "Internal library: ${it.message ?: "scan failed"}" }
+                    }
+                }
+
+                val currentSourceKey = currentFolderKey?.let { key ->
+                    folders.firstOrNull { it.folderKey == key }?.sourceKey
+                }
+                val latestGrants = app.safTreeGrantManager.refreshGrantAvailability()
+                val targets = LibraryRefreshTargets.select(
+                    currentFolderSourceKey = currentSourceKey,
+                    showingExternalStorage = showingExternalStorage,
+                    grants = latestGrants
+                )
+                targets.forEach { grant ->
+                    app.safTreeScanner.scan(grant)
+                        .onSuccess { refreshedSources++ }
+                        .onFailure { failures += "${grant.displayName}: ${it.message ?: "scan failed"}" }
+                }
+
+                if (failures.isNotEmpty()) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Refresh finished with issues: ${failures.joinToString("; ")}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else if (refreshedSources == 0) {
+                    Toast.makeText(this@MainActivity, "No accessible storage sources to refresh", Toast.LENGTH_SHORT).show()
+                }
+            } catch (error: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Refresh failed: ${error.message ?: "Storage unavailable"}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                refreshLayout.isRefreshing = false
+            }
+        }
     }
 
     private fun topAction(label: String, description: String, action: (View) -> Unit) =
