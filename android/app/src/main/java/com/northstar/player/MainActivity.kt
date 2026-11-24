@@ -21,6 +21,7 @@ import androidx.media3.ui.PlayerView
 import androidx.lifecycle.lifecycleScope
 import com.northstar.player.core.database.FolderEntity
 import com.northstar.player.core.database.MediaItemEntity
+import com.northstar.player.data.library.FolderNewState
 import com.northstar.player.data.library.LibraryBrowser
 import com.northstar.player.data.library.LibrarySort
 import com.northstar.player.data.library.LibraryViewMode
@@ -360,9 +361,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun acknowledgeFolder(folderKey: String) {
+        lifecycleScope.launch {
+            (application as NorthstarApplication).database.folderDao().acknowledge(folderKey)
+        }
+    }
+
     private fun navigateUp() {
         val current = folders.firstOrNull { it.folderKey == currentFolderKey }
         currentFolderKey = current?.parentFolderKey
+        currentFolderKey?.let(::acknowledgeFolder)
         if (currentFolderKey == null && viewMode != LibraryViewMode.NESTED_VIEW) {
             viewMode = LibraryViewMode.VIDEO_FOLDERS
         }
@@ -507,6 +515,7 @@ class MainActivity : ComponentActivity() {
         showingYou = false
         viewMode = LibraryViewMode.NESTED_VIEW
         currentFolderKey = rootKey
+        acknowledgeFolder(rootKey)
         render()
     }
 
@@ -587,6 +596,7 @@ class MainActivity : ComponentActivity() {
             isClickable = true
             isFocusable = true
             setOnClickListener {
+                acknowledgeFolder(folder.folderKey)
                 viewMode = LibraryViewMode.NESTED_VIEW
                 currentFolderKey = folder.folderKey
                 showingYou = false
@@ -614,6 +624,16 @@ class MainActivity : ComponentActivity() {
                 setPadding(0, 3, 0, 0)
             })
         }, LinearLayout.LayoutParams(0, -2, 1f))
+        if (FolderNewState.isNew(folder)) {
+            card.addView(TextView(this).apply {
+                text = "NEW"
+                textSize = 9f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setTextColor(0xFFFFFFFF.toInt())
+                setPadding(8, 4, 8, 4)
+                contentDescription = "New content"
+            })
+        }
         card.addView(TextView(this).apply { text = "›"; textSize = 24f; setTextColor(0xFF888888.toInt()) })
         content.addView(card)
         content.addView(View(this).apply { setBackgroundColor(0xFF252525.toInt()) }, LinearLayout.LayoutParams(-1, 1))
