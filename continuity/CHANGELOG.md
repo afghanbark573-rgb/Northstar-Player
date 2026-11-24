@@ -53,3 +53,14 @@
 - Signed release build, `apksigner` verification and artifact upload passed. Release artifact ID `14944179159`; SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`. CI artifact only; not distributed.
 - SAF emulator CI gate is closed for this tested commit. Real USB/SD provider behavior, picker/persisted grants, Xiaomi 14 acceptance and signed upgrade-over-existing remain unverified device gates.
 - Next planned internal milestone: inspect current source and implement Library Browser folder metadata aggregation/sorting with defined regression coverage. No intermediate APK release.
+
+
+## 2026-11-25 — Library Browser metadata aggregation and deterministic sorting verified
+- Native commit `9b84ea24a1f11671aca54c10a339dc161307473d`; CI [run #60 / 45479496288](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45479496288) completed success on exact HEAD.
+- Folder metrics now aggregate by normalized ancestor path in one pass; deterministic folder/video tie-breakers and known-before-unknown date ordering are covered; source separation and the three approved modes are preserved.
+- JVM unit tests/debug build passed. LibraryBrowser regression class contains ten tests. Emulator instrumentation: Room migration 1/1 passed; nested SAF create/list 1/1 passed; total 2 passed, 0 failed/errors/skipped.
+- Signed release build and `apksigner` verification passed. Release artifact ID `14960903935`, SHA-256 `086e153dbfdaddd2aa0478e9fc2e160e6ffc145e0141dc41088d32b43fc899c5`; CI only, not distributed.
+- Diagnostics artifact ID `14962565694`, SHA-256 `41e5f659cf75907379bc4152fe297ee18912c90b3486f1665e78895d9e6e0043`. Debug artifact ID `14962885359`, SHA-256 `45a813a101cc58d6e5e0d0483b0825fdf3196f002cf5461678a2e316c09e58c6`. Room schema artifact ID `14961903353`, SHA-256 `bd3f21aa0d42ab1a5d15220f16d916d60d7200d5755cc0c900baee527ed5a239`.
+- Earlier run #59 also passed on the intermediate code-only commit; run #60 is authoritative for final code plus tests.
+- Device gates remain open: physical USB/SD behavior, real picker/persisted grants, Xiaomi 14 acceptance, and signed install-over-existing upgrade. No APK distributed.
+- Next: inspect the current implementation plan and adjacent code before selecting the next Library/Storage foundation task. No scope assumptions or schema changes.
