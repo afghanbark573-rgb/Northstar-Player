@@ -340,3 +340,9 @@ Run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/ac
 
 ### Ongoing documentation rule
 After each successful engineering milestone, update native `PROJECT_STATUS.md` and this continuity branch's master pack, changelog, and next-chat instructions before beginning the next milestone. Record failures with exact evidence as well.
+
+
+## CI run #58 — descendant fix validation in progress
+- Run [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) tests exact source commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
+- At latest poll, debug and release jobs were running; unit/debug build and signed release build steps were active. Android instrumentation had not started; no artifacts were available.
+- Native `PROJECT_STATUS.md` records this state. Poll run #58 and verify both instrumentation tests plus signature verification before proceeding.
