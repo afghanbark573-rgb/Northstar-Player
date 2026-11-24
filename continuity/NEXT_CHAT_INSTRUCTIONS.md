@@ -19,3 +19,8 @@
 5. Do not begin Library Browser work before the SAF instrumentation gate is resolved. Keep physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade testing as separate outstanding gates.
 6. Preserve all eight approved product areas as one coordinated public release; no intermediate APK distribution. Preserve package/signing identity, AMOLED black-and-white direction, three library modes and local-first privacy.
 7. After each successful engineering milestone, update native `PROJECT_STATUS.md` plus this continuity master pack, changelog and restart instructions before starting the next milestone. Record failed attempts with exact evidence too.
+
+
+### Current in-progress CI — run #57
+- Poll [run #57 / 45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513), which tests exact source commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
+- Last known state: debug and release jobs in progress; instrumentation pending. Do not infer a pass from the manifest change or from a successful release build alone.
