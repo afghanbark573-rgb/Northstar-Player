@@ -33,3 +33,9 @@ Run [#57 / 45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/ac
 
 
 Current validation run: [#58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837), testing the `isChildDocument` descendant-chain fix from native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. At latest checkpoint, instrumentation had not started; see the master pack for details.
+
+
+## Chat-independent source of truth — 24 November 2026
+GitHub is the durable project memory; previous chat history is not required. Native code/spec/status live on `phase-0/release-signing`; the documentation-only archive lives on `continuity/master-pack`. Start with this README, then the final dated checkpoint in [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md) and [NEXT_CHAT_INSTRUCTIONS.md](NEXT_CHAT_INSTRUCTIONS.md). Always inspect live branch heads and native status before coding. If records conflict, current source/product spec takes precedence, followed by current implementation plan/status, latest dated checkpoint, then historical changelog. Never commit credentials or keystore bytes.
+
+Current gate: [CI run #58](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837), testing `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. JVM unit tests/debug APK build and signed release/signature verification have passed; Room migration and SAF integration instrumentation is still running at the last poll. Do not begin Library Browser work until the SAF test passes.
