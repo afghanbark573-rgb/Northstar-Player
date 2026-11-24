@@ -54,3 +54,13 @@
 8. Never store secrets or keystore bytes in tracked files. Never claim device testing that the user has not performed.
 
 Standard restart phrase: **“Let's continue the Northstar Player project from the last checkpoint.”**
+
+ 
+## Latest restart instruction — 25 November 2026, after CI run #58
+1. Read the latest checkpoint at the end of `MASTER_CONTINUATION_PACK.md`; historical run #58 pending statements above are superseded.
+2. Inspect live native and continuity branch heads before coding. Native status was updated after the verified CI result.
+3. Run #58 / [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) tested exact source `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4` and completed success. Instrumentation diagnostics show 2/2 passed, 0 failures/errors/skips: Room migration and nested SAF DocumentsProvider integration. Signed release build and signature verification passed.
+4. The emulator SAF/Room CI gate is closed. Do not confuse this with physical USB/SD, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance or signed install-over-existing device verification; all remain outstanding.
+5. Next planned internal milestone: Library Browser folder metadata aggregation/sorting. Re-inspect current code and plan first; define Main Quest, bundled Side Quests, files, risks, acceptance criteria and tests before edits. Preserve three modes, hierarchy/empty folders, source separation, unknown-date behavior and deterministic tie-breaks.
+6. No intermediate APK distribution. Eight product areas remain one coordinated public release. Preserve package ID/signing identity and local-first privacy.
+7. After every milestone update native `PROJECT_STATUS.md` and all four continuity records before proceeding.
