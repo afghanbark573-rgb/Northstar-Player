@@ -24,3 +24,14 @@
 ### Current in-progress CI — run #57
 - Poll [run #57 / 45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513), which tests exact source commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
 - Last known state: debug and release jobs in progress; instrumentation pending. Do not infer a pass from the manifest change or from a successful release build alone.
+
+
+## Latest restart instruction — 24 November 2026, after run #57 diagnosis
+1. Inspect live native branch `phase-0/release-signing` and confirm current HEAD. The latest source correction is `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
+2. Poll the CI run triggered by that commit. Confirm exact tested SHA, all job conclusions, and both instrumentation test counts/results.
+3. Run #57 (`45441499513`) failed after both tests executed: Room migration passed 1/1; SAF provider integration failed 1/1 with `SecurityException: Document nested-parent is not a descendant of test-root`. The in-memory debug test provider lacked `isChildDocument`; the fix implements ancestor-chain checks. Do not mislabel this as a production SAF defect.
+4. Unit tests/debug build and signed release build/signature verification passed in run #57. Still do not distribute intermediate APKs.
+5. If the new CI run fails, inspect report/XML/textproto/logcat and exact exception before changing source. If both instrumentation tests pass, update native status and continuity docs, then resume Library Browser metadata aggregation/sorting and its regression suite.
+6. Do not begin Library Browser work before SAF instrumentation passes. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain separate unverified gates.
+7. Preserve all eight approved product areas as one coordinated public release; preserve package/signing identity, AMOLED black-and-white direction, exactly three library modes and local-first privacy.
+8. After each successful engineering milestone, update native `PROJECT_STATUS.md` plus continuity master pack, changelog and restart instructions before starting the next milestone. Record failures with exact evidence.
