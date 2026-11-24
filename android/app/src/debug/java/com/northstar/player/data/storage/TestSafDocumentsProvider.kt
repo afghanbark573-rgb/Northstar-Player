@@ -71,6 +71,22 @@ class TestSafDocumentsProvider : DocumentsProvider() {
         }
     }
 
+    /**
+     * DocumentsProvider's tree-URI enforcement asks whether a document is a
+     * descendant of the tree root. Model the complete parent chain rather than
+     * only direct children so nested-folder operations behave like a real provider.
+     */
+    override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
+        synchronized(documents) {
+            var current = documents[documentId] ?: return false
+            while (true) {
+                val ancestorId = current.parentId ?: return false
+                if (ancestorId == parentDocumentId) return true
+                current = documents[ancestorId] ?: return false
+            }
+        }
+    }
+
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
         synchronized(documents) {
             val parent = documents[parentDocumentId]
