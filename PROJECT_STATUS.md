@@ -744,3 +744,22 @@ The approved implementation plan is now in active development on `phase-0/releas
 5. Continue the milestone update cadence and preserve all product/release/device-testing guardrails above.
 
 Standard restart phrase: **“Let's continue the Northstar Player project from the last checkpoint.”** This phrase is a convenience only; all required context is now stored in GitHub.
+
+ 
+## CI run #58 — SAF instrumentation gate passed — 2026-11-24
+
+- Workflow [run #58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) completed with overall conclusion **success** on exact source commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
+- Debug job completed successfully: `:app:testDebugUnitTest`, `:app:assembleDebug`, and `:app:connectedDebugAndroidTest` all succeeded.
+- Instrumentation diagnostics artifact `northstar-instrumentation-diagnostics`, ID `14946877392`, confirms **2 tests, 0 failures, 0 errors, 0 skipped** on Android emulator API 35:
+  - `NorthstarDatabaseMigrationTest.migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable` — PASSED (1/1).
+  - `SafFolderProviderIntegrationTest.createsAndListsDirectoryInsideNestedDocumentProviderFolder` — PASSED (1/1).
+  - Test log ends `OK (2 tests)`; Gradle XML and textproto both report both tests passed.
+- This validates the debug-only test-provider descendant-chain correction. It does not prove real USB/SD provider behavior, real picker/persisted-grant lifecycle, or production SAF compatibility across devices.
+- Release job completed successfully: release keystore restore, `:app:assembleRelease`, APK signature verification with `apksigner`, and signed artifact upload all passed.
+- Signed artifact `northstar-release-apk`: ID `14944179159`, ZIP SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`. This remains a CI verification artifact only; **do not distribute as an intermediate release**.
+- Debug artifact `northstar-debug-apk`: ID `14948455778`, ZIP SHA-256 `826bbccec895b458bda96ca44a0daf79ba7b9e69bf00831715ead1cfe63b93b9`.
+- Room schema artifact ID `14948316137`, SHA-256 `d2404d01b3392284f1a7ffb90c3876bf04ecc7c3fef98f9ae606f871b5546a48`.
+- Instrumentation diagnostics artifact SHA-256 `28c1b4beb37d6008e5d965ddd3d0500ac9a6da56557435cc3b50e9d3966bdfa2`.
+- No production application source changes were part of this validation commit; the code under test is the debug-only in-memory DocumentsProvider fix. No APK was distributed.
+- Separate unverified device gates remain: physical USB/SD storage, actual picker and persisted grant lifecycle, Xiaomi 14 acceptance, and signed install-over-existing upgrade testing.
+- **Next engineering milestone, subject to live-source inspection:** Library Browser folder metadata aggregation and sorting. Before edits, re-inspect current source, establish Main Quest/Side Quests, affected files, risks, acceptance criteria and regression tests. Keep the coordinated eight-area public release and no-intermediate-APK rule.
