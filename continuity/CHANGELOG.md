@@ -38,3 +38,10 @@
 ## 2026-11-24 — Run #58 started for SAF descendant correction
 - Run [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) was triggered by native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
 - Latest poll: debug unit/build and signed release build were active; instrumentation pending. No result claimed. Native status and continuity pack updated with this in-progress gate.
+
+
+## 2026-11-24 — Durable continuity checkpoint / chat-independent project record
+- Declared the native branch and continuity branch as the permanent source of truth; documented authority order, required live-repository inspection and the no-secrets rule.
+- Recorded run #58 exact source SHA `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`: JVM unit tests/debug APK build passed; signed release build, `apksigner` verification and artifact upload passed. Room migration and SAF DocumentsProvider instrumentation remained in progress at the latest poll; no test pass claimed.
+- Recorded signed artifact ID `14944179159` and SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`; artifact is not for intermediate distribution.
+- Added exact restart steps and the rule to update native status plus all continuity files after each milestone. No app source changed by this continuity update.
