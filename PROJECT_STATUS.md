@@ -686,3 +686,16 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Run [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) is testing exact source commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
 - At the latest poll, both `debug-apk` and `release-apk` jobs were `in_progress`. Debug unit tests/build and signed release build were still running; instrumentation had not started. No artifact or test result was available yet.
 - The source correction is the debug provider manifest declaration `android:permission="android.permission.MANAGE_DOCUMENTS"`. Wait for final results; specifically verify that instrumentation runs tests rather than crashing during provider installation.
+
+
+## CI run #57 — SAF tree-descendant contract failure and test-provider fix — 2026-11-24
+
+- Run [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) tested exact commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b` and completed with overall failure.
+- JVM unit tests and debug APK build passed. The Room v1-to-v2 migration instrumentation test passed (1/1). The SAF DocumentsProvider integration test executed but failed (1/1) with:
+  `SecurityException: Document nested-parent is not a descendant of test-root`
+  from `DocumentsProvider.enforceTree`, reached through `DocumentsContract.createDocument` and the production `AndroidSafFolderProvider.createDirectory` adapter.
+- This is now a deterministic test-provider contract defect, not an emulator crash and not evidence that production SAF folder creation is broken. The in-memory debug provider modeled parent IDs and child listing but did not override `DocumentsProvider.isChildDocument`; Android therefore rejected a legitimate nested document URI when enforcing the tree URI.
+- The signed release job passed, including keystore restore, release APK build, `apksigner` verification and artifact upload.
+- Corrected the debug-only test provider in commit [35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4](https://github.com/afghanbark573-rgb/Northstar-Player/commit/35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4): implemented synchronized ancestor-chain traversal in `isChildDocument(parentDocumentId, documentId)`. This reports nested descendants to Android's tree-URI enforcement and returns false for missing/broken parent chains. Production SAF adapter, policy, database and test assertions were not changed.
+- A fresh CI run is required to validate the correction. The SAF instrumentation gate remains open until both instrumentation tests pass on the new source commit.
+- No intermediate APK distribution. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade test remain outstanding.
