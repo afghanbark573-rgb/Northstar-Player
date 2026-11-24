@@ -56,7 +56,12 @@ class RoomMediaLibraryRepository(
         val refreshed = indexed.map { folder ->
             val old = previous[folder.folderKey]
             folder.copy(
-                discoveredAtMillis = old?.discoveredAtMillis ?: completedAtMillis,
+                discoveredAtMillis = FolderNewState.nextDiscoveryTimestamp(
+                    previous = old,
+                    videoCount = folder.videoCount,
+                    childFolderCount = folder.childFolderCount,
+                    observedAtMillis = completedAtMillis
+                ),
                 acknowledgedAtMillis = old?.acknowledgedAtMillis
             )
         }
