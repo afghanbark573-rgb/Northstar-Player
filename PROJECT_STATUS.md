@@ -629,3 +629,13 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Fix commit: [b2f43954f60c666a8ce394e3c8ae6bf3f9fcb3aa](https://github.com/afghanbark573-rgb/Northstar-Player/commit/b2f43954f60c666a8ce394e3c8ae6bf3f9fcb3aa).
 - A fresh full CI run is required. The DocumentsProvider integration test remains unverified until the instrumentation actually executes and passes.
 - No intermediate APK distribution. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding.
+
+
+## DocumentsProvider instrumentation runtime failure and diagnostics — 2026-11-24
+
+- CI run [45356712186](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45356712186) confirms the remaining Kotlin test-source compile error is fixed: JVM unit tests and debug APK build passed, and Android instrumentation launched both tests.
+- The existing Room migration instrumentation test passed. The new `SafFolderProviderIntegrationTest.createsAndListsDirectoryInsideNestedDocumentProviderFolder` failed; Gradle then reported the instrumentation process crashed. The job log did not include the assertion/exception detail needed to identify the root cause.
+- The separate signed release job passed, including keystore restore, release APK build, and `apksigner` verification. Overall workflow remains failed because the debug instrumentation job failed.
+- Added CI diagnostics in commit [e0189d426146150d895ed2b0a045ca1b5f725a10](https://github.com/afghanbark573-rgb/Northstar-Player/commit/e0189d426146150d895ed2b0a045ca1b5f725a10): always upload Android instrumentation reports/results and capture emulator logcat after the instrumentation task, including on test failure.
+- Next step is to inspect the uploaded test report and logcat from the new run, then make a root-cause fix. Do not infer the cause from the current summary.
+- SAF DocumentsProvider integration remains unverified. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding. No intermediate APK distribution.
