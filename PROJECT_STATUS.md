@@ -618,3 +618,14 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Fix commit: [c84d31d8d3b0e5a38cbcd9e8bfbc38a39418d03b](https://github.com/afghanbark573-rgb/Northstar-Player/commit/c84d31d8d3b0e5a38cbcd9e8bfbc38a39418d03b).
 - Fresh validation [run 45224911347](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45224911347) is in progress. Unit-test/debug compilation, instrumentation execution, and release signing must all be checked before marking the integration test verified.
 - Prior run [45186122294](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45186122294) passed both jobs for the provider-policy test seam and migration coverage, but predates the new DocumentsProvider integration test.
+
+
+## DocumentsProvider instrumentation follow-up — remaining compile fix — 2026-11-24
+
+- Validation run [45224911347](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45224911347) completed with overall failure.
+- JVM unit tests and debug APK build passed. Android instrumentation did not execute because `compileDebugAndroidTestKotlin` still found one remaining unresolved `toTypedArray()` at line 62 in `TestSafDocumentsProvider.kt`.
+- The signed release APK build and `apksigner` verification both passed in the separate release job.
+- Corrected the remaining projection handling to use the supplied `Array<out String>` directly (or the default columns), matching the earlier two corrections.
+- Fix commit: [b2f43954f60c666a8ce394e3c8ae6bf3f9fcb3aa](https://github.com/afghanbark573-rgb/Northstar-Player/commit/b2f43954f60c666a8ce394e3c8ae6bf3f9fcb3aa).
+- A fresh full CI run is required. The DocumentsProvider integration test remains unverified until the instrumentation actually executes and passes.
+- No intermediate APK distribution. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding.
