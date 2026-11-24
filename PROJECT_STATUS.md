@@ -669,3 +669,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Root-cause mitigation: move the in-memory test provider from the androidTest APK into the debug-only app source set. The instrumentation test first starts the target app and then exercises the same `DocumentsContract` path, so the provider can share the already-started target-app process instead of requiring a separate test-APK provider process. The provider remains excluded from release builds.
 - This changes test packaging/isolation only; production SAF adapter, folder policy, and assertions remain unchanged. A fresh CI run must confirm whether this removes the startup failure.
 - Latest run: JVM unit tests/debug APK and signed release APK/signature verification passed; Android instrumentation failed. No intermediate APK distribution. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding.
+
+
+## Current CI checkpoint — run #56 in progress — 2026-11-24
+
+- Native branch HEAD: `07b96f31a4cbab9cfcad1e0ccfa4f81232142960` ([commit](https://github.com/afghanbark573-rgb/Northstar-Player/commit/07b96f31a4cbab9cfcad1e0ccfa4f81232142960)).
+- Run [45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45411300973) was still `in_progress` at the checkpoint poll. Release job completed successfully (signed release build, `apksigner` verification and artifact upload). Debug JVM unit tests and debug APK build passed. The debug job remained active in `Run database migration instrumentation tests`; no final instrumentation conclusion was available.
+- Do not mark the SAF DocumentsProvider integration test passed or failed based on this in-progress run. Poll the exact run and inspect diagnostics if it fails.
+- No intermediate APK distribution. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed upgrade test remain outstanding.
