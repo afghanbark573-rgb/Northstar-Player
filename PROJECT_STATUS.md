@@ -659,3 +659,13 @@ The approved implementation plan is now in active development on `phase-0/releas
 - The run again confirms JVM unit tests/debug APK and signed release build/signature verification pass; instrumentation still did not execute.
 - No production code or test logic changed. The next run is the first meaningful retry after correcting the runner script format.
 - The DocumentsProvider integration test remains unverified; no intermediate APK distribution. Physical USB/SD and Xiaomi 14 acceptance remain outstanding.
+
+
+## SAF DocumentsProvider test-process isolation — validation pending — 2026-11-24
+
+- Inspected the full diagnostics artifact from CI run [45408437533](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45408437533), including the HTML test report, XML/textproto results, per-test logcat, emulator logcat, and UTP log.
+- The one-line emulator-runner command is now working: both instrumentation tests actually launched. The Room migration test passed. The SAF DocumentsProvider test failed after Android started the provider in the separate `com.northstar.player.test` process.
+- The emulator log shows repeated system-process ANRs and provider-startup timeouts. ActivityManager then killed the test-APK provider process with `timeout publishing content providers`, reported that its launch process had become null, and the instrumentation process subsequently died. The test report contains no actionable assertion stack trace. This is evidence of a provider process-startup/test-environment failure; it does not prove a defect in production SAF folder creation.
+- Root-cause mitigation: move the in-memory test provider from the androidTest APK into the debug-only app source set. The instrumentation test first starts the target app and then exercises the same `DocumentsContract` path, so the provider can share the already-started target-app process instead of requiring a separate test-APK provider process. The provider remains excluded from release builds.
+- This changes test packaging/isolation only; production SAF adapter, folder policy, and assertions remain unchanged. A fresh CI run must confirm whether this removes the startup failure.
+- Latest run: JVM unit tests/debug APK and signed release APK/signature verification passed; Android instrumentation failed. No intermediate APK distribution. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding.

@@ -3,7 +3,6 @@ package com.northstar.player.data.storage
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
-import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
@@ -11,8 +10,9 @@ import android.provider.DocumentsProvider
 import java.io.FileNotFoundException
 
 /**
- * Test-only in-memory DocumentsProvider. It exercises Android's real DocumentsContract
- * call path without relying on a vendor USB/SD provider.
+ * Debug-only in-memory DocumentsProvider used by instrumentation tests.
+ * It lives in the debug APK so the provider shares the already-started target-app
+ * process instead of requiring Android to launch a second test-APK provider process.
  */
 class TestSafDocumentsProvider : DocumentsProvider() {
     private data class Document(
