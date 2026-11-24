@@ -18,3 +18,9 @@ At each major milestone and before moving to a new chat:
 5. Preserve prior decisions and mark superseded material; do not silently erase history.
 
 Never store signing secrets, keystore bytes, private media, or recovery answers in this branch.
+
+
+## 24 November 2026 checkpoint policy update
+The latest checkpoint diagnoses run #56's instrumentation crash and records the debug-only provider manifest correction in native commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`. The next chat must poll the CI run triggered by that exact source correction before proceeding. The master pack contains the precise failure and verification requirements.
+
+Engineering cadence: after each successful milestone, update native `PROJECT_STATUS.md` and the continuity master pack, changelog and next-chat instructions before moving to the next milestone. Record failures with evidence rather than silently overwriting history.
