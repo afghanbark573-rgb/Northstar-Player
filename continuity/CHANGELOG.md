@@ -25,3 +25,11 @@
 - The debug-only SAF provider manifest correction triggered run [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513), testing source commit `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
 - At the latest poll, debug and release jobs were still running and instrumentation had not started. Result remains pending.
 - Native status and continuity master pack updated with the active run ID and exact verification gate.
+
+
+## 2026-11-24 — Run #57 diagnosis and nested SAF test-provider correction
+- Run [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513) completed failed. JVM unit tests/debug build passed; Room migration instrumentation passed 1/1; SAF DocumentsProvider integration ran and failed 1/1 with `SecurityException: Document nested-parent is not a descendant of test-root` from `DocumentsProvider.enforceTree`.
+- Inspected the XML report, textproto result and per-test logcat. The exact defect was the debug in-memory provider's missing `isChildDocument` implementation; Android could not verify that the nested test document belonged to the root tree. This is test-provider contract behavior, not evidence of a production SAF failure.
+- Signed release APK build, `apksigner` verification and artifact upload passed.
+- Implemented synchronized parent-chain descendant checks in debug-only provider in native commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. Production SAF implementation and test assertions unchanged.
+- Updated native `PROJECT_STATUS.md` with exact failure and correction. New CI validation is required before closing SAF gate; no intermediate APK distribution.
