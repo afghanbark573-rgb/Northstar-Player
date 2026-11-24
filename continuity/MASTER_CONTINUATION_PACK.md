@@ -346,3 +346,40 @@ After each successful engineering milestone, update native `PROJECT_STATUS.md` a
 - Run [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) tests exact source commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
 - At latest poll, debug and release jobs were running; unit/debug build and signed release build steps were active. Android instrumentation had not started; no artifacts were available.
 - Native `PROJECT_STATUS.md` records this state. Poll run #58 and verify both instrumentation tests plus signature verification before proceeding.
+
+
+## 2026-11-24 — durable continuity / chat-independence checkpoint
+
+### Canonical-source-of-truth agreement
+- The GitHub repository is the durable project record. Chat history, assistant memory and downloadable handover documents are convenience layers only; deleting old chats must not erase project decisions or engineering state.
+- Native source of truth: branch `phase-0/release-signing`, especially `NORTHSTAR_PRODUCT_SPEC.md`, `NORTHSTAR_IMPLEMENTATION_PLAN.md`, `PROJECT_STATUS.md`, the Android source tree, Gradle configuration, migrations/schema exports, and `.github/workflows/`.
+- Continuity source of truth: branch `continuity/master-pack`, especially `continuity/MASTER_CONTINUATION_PACK.md`, `continuity/CHANGELOG.md`, `continuity/NEXT_CHAT_INSTRUCTIONS.md`, and `continuity/README.md`. This branch is documentation-only and must not be confused with the app source/release branch.
+- Authority order when records conflict: current native source and current product spec; then current implementation plan and `PROJECT_STATUS.md`; then latest dated continuity checkpoint; then historical changelog/older notes. Historical entries are preserved as history, not treated as current instructions when superseded.
+- A new chat must inspect the live repository and current branch heads before coding. Never assume this pack alone proves GitHub has not changed. Record exact commit SHAs, CI run IDs, test counts, artifact identities/digests and device-test status.
+- After each successful engineering milestone, update native `PROJECT_STATUS.md` and continuity master pack/changelog/next-chat instructions/README before starting the next milestone. Record failures and their evidence too. Keep device verification separate from CI evidence.
+- Never put signing secrets, keystore bytes, private media, passwords, recovery answers or other credentials in tracked documentation.
+
+### Current exact engineering checkpoint — CI run #58
+- Workflow: [#58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837); tested source SHA: `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
+- Latest poll: overall workflow still `in_progress`. Debug JVM unit tests and debug APK build completed successfully. Room migration + SAF DocumentsProvider instrumentation step is still running; no instrumentation result may yet be claimed.
+- Release job completed successfully: release keystore restored, signed release APK built, `apksigner` signature verification passed, and signed artifact uploaded. Artifact: `northstar-release-apk`, artifact ID `14944179159`, SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`. This is a CI artifact only; do not distribute it as an intermediate user release.
+- SAF gate remains OPEN until the debug job finishes and both Room migration and SAF DocumentsProvider integration tests are confirmed with exact counts/results. If failure, inspect diagnostics before changing code.
+- Do not start Library Browser aggregation/sorting until the SAF integration test passes. Once passed, document the verified milestone and then proceed with the planned folder-metadata/sorting work and regression suite.
+- Physical USB/SD provider behavior, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, and signed install-over-existing upgrade remain distinct unverified device gates.
+
+### Product agreements that must survive chat deletion
+- Northstar is a local-first native Android media player, not a browser wrapper. Keep user media local; no automatic cloud upload or cloud-library dependency.
+- Eight approved product areas ship as one coordinated public release; no intermediate APK distribution.
+- AMOLED black-and-white design. Exactly three library modes: Video Folders (default), Files Only, Nested View.
+- Preserve package/application ID `com.northstar.player`, permanent signing identity and release credentials. Never commit or reveal secrets.
+- Product spec is authoritative. Before each coding milestone, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests. No casual Room schema changes: migration, tests and schema artifact are required.
+- User development environment: Xiaomi 14 / Android / GitHub mobile; no desktop or terminal. Use cloud CI and mobile-friendly instructions. Never claim physical-device acceptance without the user's actual test.
+
+### Exact next-chat restart
+1. Read `continuity/README.md`, then the final/current checkpoint in this file and `continuity/NEXT_CHAT_INSTRUCTIONS.md`.
+2. Inspect current refs/heads and recent commits for both `phase-0/release-signing` and `continuity/master-pack`; fetch native `PROJECT_STATUS.md`, product spec and implementation plan.
+3. Poll run #58 above; verify exact SHA, debug job, instrumentation test counts/results, release signature verification and artifact details. If it is still running, continue polling; do not treat this checkpoint as a completed test.
+4. If run #58 fails, inspect its diagnostics and exact exception before modifying code. If it passes, update all continuity records with the final evidence, then begin the already-planned Library Browser metadata aggregation/sorting milestone.
+5. Continue the milestone update cadence and preserve all product/release/device-testing guardrails above.
+
+Standard restart phrase: **“Let's continue the Northstar Player project from the last checkpoint.”** This phrase is a convenience only; all required context is now stored in GitHub.
