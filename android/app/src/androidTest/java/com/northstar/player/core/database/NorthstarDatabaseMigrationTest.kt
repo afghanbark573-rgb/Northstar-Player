@@ -66,6 +66,10 @@ class NorthstarDatabaseMigrationTest {
             assertEquals("content://test/video/1", row?.uri)
             assertEquals(1234L, row?.sizeBytes)
 
+            migrated.folderDao().acknowledge("folder-1")
+            val acknowledgedFolder = migrated.folderDao().findForSource("saf:test-source").single()
+            assertEquals(1000L, acknowledgedFolder.acknowledgedAtMillis)
+
             val db = migrated.openHelper.writableDatabase
             assertCount(db, "favorites", 1)
             assertCount(db, "playback_progress", 1)
