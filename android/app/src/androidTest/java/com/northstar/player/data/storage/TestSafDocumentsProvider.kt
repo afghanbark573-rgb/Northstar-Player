@@ -59,7 +59,7 @@ class TestSafDocumentsProvider : DocumentsProvider() {
         projection: Array<out String>?,
         sortOrder: String?
     ): Cursor {
-        val columns = projection?.toTypedArray() ?: DOCUMENT_COLUMNS
+        val columns = projection ?: DOCUMENT_COLUMNS
         synchronized(documents) {
             if (documents[parentDocumentId]?.mimeType != DocumentsContract.Document.MIME_TYPE_DIR) {
                 throw FileNotFoundException("Parent is not a directory: $parentDocumentId")
