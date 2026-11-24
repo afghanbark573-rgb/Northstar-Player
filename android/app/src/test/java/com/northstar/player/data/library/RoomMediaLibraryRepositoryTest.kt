@@ -47,6 +47,12 @@ class RoomMediaLibraryRepositoryTest {
         override suspend fun deleteForSource(sourceKey: String) {
             folders.removeAll { it.sourceKey == sourceKey }
         }
+        override suspend fun acknowledge(folderKey: String) {
+            val index = folders.indexOfFirst { it.folderKey == folderKey }
+            if (index >= 0) folders[index] = folders[index].copy(
+                acknowledgedAtMillis = folders[index].discoveredAtMillis
+            )
+        }
     }
 
     private class FakeScanStateDao : ScanStateDao {
@@ -96,6 +102,25 @@ class RoomMediaLibraryRepositoryTest {
 
         assertFalse(folders.folders.any { it.relativePath == "Movies/Old" })
         assertTrue(folders.folders.any { it.relativePath == "Movies/New" })
+    }
+
+    @Test
+    fun newDescendantContentAdvancesDiscoveryMarkerAndPreservesAcknowledgement() = kotlinx.coroutines.runBlocking {
+        val media = FakeMediaDao().apply {
+            items += video("old", "Movies/")
+            items += video("new", "Movies/")
+        }
+        val folders = FakeFolderDao().apply {
+            folders += FolderEntity("media|Movies", null, "Movies", "media", "Movies",
+                true, 1, 0, 100L, 100L)
+        }
+
+        repository(media, folders).refreshFolderIndex("media", VideoPermissionScope.FULL, 500L)
+
+        val updated = folders.folders.single()
+        assertEquals(2, updated.videoCount)
+        assertEquals(500L, updated.discoveredAtMillis)
+        assertEquals(100L, updated.acknowledgedAtMillis)
     }
 
     @Test
