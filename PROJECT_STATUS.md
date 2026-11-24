@@ -639,3 +639,14 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Added CI diagnostics in commit [e0189d426146150d895ed2b0a045ca1b5f725a10](https://github.com/afghanbark573-rgb/Northstar-Player/commit/e0189d426146150d895ed2b0a045ca1b5f725a10): always upload Android instrumentation reports/results and capture emulator logcat after the instrumentation task, including on test failure.
 - Next step is to inspect the uploaded test report and logcat from the new run, then make a root-cause fix. Do not infer the cause from the current summary.
 - SAF DocumentsProvider integration remains unverified. Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding. No intermediate APK distribution.
+
+
+## Emulator-runner shell isolation fix — 2026-11-24
+
+- CI run [45371421075](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45371421075) completed with failure, but the failure is now conclusively identified from the complete job log: the emulator-runner executes each line of its multiline `script` in a separate shell. The standalone `cd android` therefore did not persist into the Gradle command.
+- Gradle ran from the repository root and failed immediately with: `Directory '/home/runner/work/Northstar-Player/Northstar-Player' does not contain a Gradle build.` The Android instrumentation tests did **not** execute in this run.
+- The diagnostics upload step ran but found no report/log files, confirming there is no new runtime test result to interpret.
+- The separate release job passed: signed release APK build, signature verification, and artifact upload. The JVM unit tests and debug APK build also passed.
+- Corrected the emulator script so directory change, diagnostics setup, Gradle execution, exit-code capture, and logcat capture run inside one shell block. This preserves the working directory and ensures logcat capture runs after Gradle whether tests pass or fail.
+- This is a CI orchestration fix only; no production SAF code or test assertions were changed. A fresh workflow run must now execute both Android instrumentation tests before the DocumentsProvider integration can be considered validated.
+- Physical USB/SD provider behavior and Xiaomi 14 acceptance remain outstanding. Do not distribute an intermediate APK.
