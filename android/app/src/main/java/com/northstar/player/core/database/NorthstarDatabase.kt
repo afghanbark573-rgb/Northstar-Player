@@ -155,6 +155,9 @@ interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(folders: List<FolderEntity>)
 
+    @Query("UPDATE folders SET acknowledgedAtMillis = discoveredAtMillis WHERE folderKey = :folderKey AND discoveredAtMillis IS NOT NULL")
+    suspend fun acknowledge(folderKey: String)
+
     @Query("DELETE FROM folders WHERE sourceKey = :sourceKey")
     suspend fun deleteForSource(sourceKey: String)
 
