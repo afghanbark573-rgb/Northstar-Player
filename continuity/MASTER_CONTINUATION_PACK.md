@@ -227,3 +227,61 @@ Next approved engineering priority is SAF tree access and recursive indexing for
 
 ---
 **END OF CHECKPOINT — 23 NOVEMBER 2026**
+
+
+---
+
+# CURRENT CHECKPOINT UPDATE — 24 NOVEMBER 2026
+
+This section supersedes earlier "latest state" statements above wherever they conflict. Historical records remain for traceability.
+
+## Repository and branch state
+
+- Native project repository: https://github.com/afghanbark573-rgb/Northstar-Player
+- Active native branch: `phase-0/release-signing`
+- Native branch HEAD at checkpoint: `07b96f31a4cbab9cfcad1e0ccfa4f81232142960` — **Run SAF test provider in debug app process**.
+- Continuity archive branch: `continuity/master-pack` (documentation-only; does not alter native app branch).
+- Product spec and integrated implementation plan remain authoritative. Eight approved product areas remain one coordinated public release. No intermediate APK distribution.
+
+## Recent SAF test work
+
+The production SAF folder-creation policy seam and Android `DocumentsContract` integration test have been added. The integration test invokes the production `AndroidSafFolderProvider` adapter against an in-memory test DocumentsProvider. The test checks creating a directory beneath a nested provider document and finding it in the child listing.
+
+CI run [#55 / 45408437533](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45408437533), commit `0c50b3bbc14573c1ba327cbcdb3e9534f3553493`:
+- JVM unit tests and debug APK build passed.
+- Signed release APK build and `apksigner` verification passed.
+- The Room migration instrumentation test passed.
+- The SAF DocumentsProvider integration test failed and the instrumentation process subsequently crashed.
+- The diagnostics artifact was downloaded and inspected. The log showed provider startup timeouts / `timeout publishing content providers` and provider-process termination. No actionable SAF assertion stack trace was produced. This is evidence of an emulator/test-provider process startup problem, not proof that production SAF folder creation is defective.
+
+Mitigation committed in `07b96f31a4cbab9cfcad1e0ccfa4f81232142960`:
+- Moved the in-memory test provider from `src/androidTest` into `src/debug`.
+- Registered it in the debug manifest. It is excluded from release builds.
+- Removed the old androidTest provider source and androidTest manifest.
+- Kept production SAF adapter, policy and integration assertions unchanged.
+- Updated native `PROJECT_STATUS.md` with the diagnosis and rationale.
+
+## Current CI run — NOT YET COMPLETE
+
+Run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45411300973), exact HEAD `07b96f31a4cbab9cfcad1e0ccfa4f81232142960`:
+- Release job completed successfully: signed release APK built, signature verified, artifact uploaded.
+- Debug job passed JVM unit tests and debug APK build.
+- At the latest check for this checkpoint, the debug job remained in progress at **Run database migration instrumentation tests**. The GitHub Actions run was still `in_progress`; no final debug-job conclusion or instrumentation result was available.
+- Only the release APK artifact was listed at that poll. Do not infer test completion from the successful release job.
+- Check run #56 again before any further status claim. If it is still running, inspect the live job. If it fails, wait for and inspect the diagnostics artifact/report/logcat before changing source. If it passes, verify both instrumentation tests and all jobs before marking this milestone validated.
+
+## Immediate next actions
+
+1. Poll run #56 and record its final result against the exact HEAD.
+2. If instrumentation fails, inspect the newly uploaded report, XML/textproto results and logcat; identify the exact failure before changing code.
+3. If instrumentation passes, record that the in-memory DocumentsProvider adapter integration test passed in the emulator. This still does not prove vendor USB/SD provider behavior or the real picker/persisted-grant lifecycle.
+4. Keep physical USB/SD testing and Xiaomi 14 acceptance explicitly outstanding for the user to perform.
+5. After SAF integration validation is resolved, resume the previously planned Library Browser metadata aggregation/sorting work, with regression tests for source separation, nested descendants, empty folders, unknown dates, equal tie-breaks, root mode, path normalization and video sorting. Do not begin it while this SAF test gate remains unresolved.
+6. Continue to protect the one-coordinated-release strategy; no partial APK distribution.
+
+## Verified versus unverified at this checkpoint
+
+**Verified:** JVM unit tests and debug build for run #56; signed release APK build, signature verification and artifact upload for run #56; earlier run #55 Room migration instrumentation pass; CI evidence that the SAF integration test executes far enough to be discovered and run in run #55.
+
+**Not verified:** Run #56 instrumentation result; SAF DocumentsProvider integration success; complete real-world USB/SD support; Android picker and persisted grant lifecycle on device; Xiaomi 14 acceptance; signed install-over-existing upgrade test; complete eight-area public release.
+

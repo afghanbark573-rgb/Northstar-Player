@@ -1,11 +1,11 @@
 # Next-chat instructions — Northstar Player
 
-1. Read [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md) in this branch.
-2. Inspect the live native branch `phase-0/release-signing`, latest head, recent commits, `PROJECT_STATUS.md`, source tree and CI workflow. The continuity pack is not proof the repository has not changed.
-3. Confirm latest source commit and CI run before repeating status claims.
-4. Do not mix the `main` web prototype branch with native development.
-5. The next approved engineering task is SAF tree selection and persisted grants, followed by recursive SAF directory/video indexing (including empty folders), distinct source identity, disconnect/revocation handling and tests.
-6. Before coding, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests.
-7. Preserve all eight product areas, AMOLED black-and-white direction, exactly three library modes, package/signing identity, local-first privacy and one coordinated release.
-8. Keep CI, signed artifact, installation/upgrade and Xiaomi 14 acceptance evidence separate.
-9. At each major milestone, update native `PROJECT_STATUS.md` and this branch's master pack/changelog. Before a new chat, refresh the checkpoint and record exact commit/CI evidence.
+1. Read the latest **CURRENT CHECKPOINT UPDATE — 24 NOVEMBER 2026** section at the end of [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md), then read the historical decisions above it.
+2. Inspect the live native branch `phase-0/release-signing`, current HEAD, recent commits, `PROJECT_STATUS.md`, source tree and workflow. The pack is a handover, not proof that GitHub has not changed.
+3. First poll CI run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45411300973) for exact commit `07b96f31a4cbab9cfcad1e0ccfa4f81232142960`. At the last checkpoint it was still running Android instrumentation. Do not claim the SAF integration test passed until the final debug job and both instrumentation tests are confirmed.
+4. If run #56 fails, inspect its diagnostics artifact, test report, XML/textproto and logcat before making another code change. Identify the exact cause; do not speculate or change production SAF code without evidence.
+5. If run #56 passes, update native `PROJECT_STATUS.md` and this continuity archive with exact results. Then resume Library Browser folder metadata aggregation/sorting and regression tests: source separation, nested descendants, empty folders, unknown dates, equal tie-breaks, root mode, path normalization and video sorting.
+6. Keep physical USB/SD provider behavior, Android picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade test as separate outstanding gates until actually tested.
+7. Preserve all eight approved product areas, AMOLED black-and-white design, exactly three library modes, package/signing identity, local-first privacy and one coordinated public release. Never distribute intermediate APKs.
+8. Do not mix the `main` web prototype branch with native development. Before coding, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests.
+9. At each major milestone and before a new chat, update native `PROJECT_STATUS.md` plus this branch's master pack and changelog. Keep verified CI evidence separate from device acceptance.
