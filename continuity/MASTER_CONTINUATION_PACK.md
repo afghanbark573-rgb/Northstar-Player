@@ -440,3 +440,21 @@ The folder metadata/sorting subtask is complete for this tested commit. Re-inspe
 3. Select the next internal task only after mapping current implementation to the plan. Candidate areas from the broader Library and Storage foundation include background/incremental MediaStore scanning, full/partial/denied/reselection permission states, persisted SAF grant lifecycle and revocation, and folder hierarchy integration. Do not assume any candidate remains untouched.
 4. Before coding, declare Main Quest, bundled Side Quests, exact affected files, risks, acceptance criteria, and regression tests. Keep Room schema unchanged unless a genuine requirement is identified and migration/tests/schema export are planned.
 5. Maintain one coordinated public release for all eight approved product areas. No intermediate APK distribution. Keep physical device gates separate from CI.
+ 
+
+## CURRENT CHECKPOINT UPDATE — 25 NOVEMBER 2026 — Folder NEW-state lifecycle CI passed
+
+
+## Folder NEW-state lifecycle — CI run #68 passed — 2026-11-25
+
+- Native source commit: `d00f920399d699981532985c5e07a9c4b23035fe` on `phase-0/release-signing`.
+- Workflow [run #68 / 45483698896](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45483698896) completed with overall conclusion **success** on that exact commit.
+- Debug job passed `:app:testDebugUnitTest`, `:app:assembleDebug`, and `:app:connectedDebugAndroidTest`. The unit-test task includes six focused `FolderNewStateTest` cases and the repository discovery/acknowledgement regression test.
+- Emulator API 35 instrumentation diagnostics artifact ID `14964397667`, SHA-256 `606acb2774245aa223605da8217ebf4dcf77067ff421894bb2da20443bd087ab`, confirms **2 tests, 0 failures, 0 errors, 0 skipped**: Room migration/acknowledgement assertion passed; nested SAF DocumentsProvider create/list integration passed. XML reports `tests="2" failures="0" errors="0" skipped="0"`; test log ends `OK (2 tests)`.
+- Release job passed release keystore restoration, `:app:assembleRelease`, `apksigner` verification and signed artifact upload. Release artifact ID `14963031377`, SHA-256 `58f2c260ec92394e8b6a3c93b523925a699c297353a207f9ad5b6026d9a253bb`.
+- Debug artifact ID `14964815811`, SHA-256 `bc15724c02fc50bf63354fd1ab47d31d059a1fa094c6dfe685d5600dce0f4ccc`. Room schema artifact ID `14964681631`, SHA-256 `b18dad2293c8469ac18a972f1b0fb00245848ed3944e354fd032307ae24dd6ce`.
+- Implementation reuses existing `discoveredAtMillis` and `acknowledgedAtMillis` fields. Shared `FolderNewState` logic is used by MediaStore and SAF; new descendant videos or child folders advance discovery state; opening a folder acknowledges it. Same-millisecond discoveries are handled without losing the NEW state. No Room schema migration was introduced.
+- Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain **unverified device gates**. CI artifacts are engineering evidence only. **No APK was distributed**; all eight approved product areas remain one coordinated public release.
+
+### Next-step guardrail
+The folder NEW-state lifecycle is complete for the tested commit. Before choosing another task, inspect the current implementation plan, product spec, native status, and live source. Keep the distinct pull-to-refresh and Private Library long-pull gesture requirements separate; do not implement a gesture that opens Private Library without still requiring authentication. Also assess the remaining background/incremental scanning and permission/SAF lifecycle work against actual code before selecting the next milestone. No casual Room schema changes.
