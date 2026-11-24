@@ -13,6 +13,7 @@ import com.northstar.player.core.database.MediaItemEntity
 import com.northstar.player.core.database.ScanStateDao
 import com.northstar.player.core.database.ScanStateEntity
 import com.northstar.player.core.database.SafStagedMediaEntity
+import com.northstar.player.data.library.FolderNewState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -226,7 +227,12 @@ class SafTreeScanner(
                         containsVideos = folder.directVideoCount > 0,
                         videoCount = folder.totalVideoCount,
                         childFolderCount = folder.childFolderCount,
-                        discoveredAtMillis = old?.discoveredAtMillis ?: scanStartedAt,
+                        discoveredAtMillis = FolderNewState.nextDiscoveryTimestamp(
+                            previous = old,
+                            videoCount = folder.totalVideoCount,
+                            childFolderCount = folder.childFolderCount,
+                            observedAtMillis = scanStartedAt
+                        ),
                         acknowledgedAtMillis = old?.acknowledgedAtMillis
                     )
                 }
