@@ -309,3 +309,9 @@ Run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/ac
 - No production SAF changes were made in this correction.
 - Keep the package/signing identity and local-first privacy requirements intact.
 - From this checkpoint onward, after each successful engineering milestone, update native `PROJECT_STATUS.md` and this continuity archive before starting the next milestone. Record failures with exact evidence as well.
+
+
+## CI run #57 — active after SAF manifest correction
+- New run: [45441499513](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45441499513), exact tested source HEAD `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b`.
+- At the latest poll both debug and release jobs were still running. The debug instrumentation step had not started, so there is no result yet. No artifacts were available at that poll.
+- Next: poll run #57; confirm the debug-only DocumentsProvider now installs and both instrumentation tests execute and pass. Do not start the Library Browser milestone until then.
