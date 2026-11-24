@@ -383,3 +383,29 @@ After each successful engineering milestone, update native `PROJECT_STATUS.md` a
 5. Continue the milestone update cadence and preserve all product/release/device-testing guardrails above.
 
 Standard restart phrase: **“Let's continue the Northstar Player project from the last checkpoint.”** This phrase is a convenience only; all required context is now stored in GitHub.
+
+ 
+## CURRENT CHECKPOINT UPDATE — 25 NOVEMBER 2026 — CI run #58 passed
+
+### Exact verified source and workflow
+- Native source tested: `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4` on `phase-0/release-signing`.
+- Workflow [run #58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) completed **success**.
+- Debug JVM tests/build and connected Android instrumentation passed. Diagnostics artifact ID `14946877392` reports **2 tests, 0 failures, 0 errors, 0 skipped** on Android emulator API 35:
+  1. Room migration `migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable` — passed.
+  2. SAF nested DocumentsProvider integration `createsAndListsDirectoryInsideNestedDocumentProviderFolder` — passed.
+- The instrumentation test log explicitly reports `OK (2 tests)`. Gradle XML, HTML report, and textproto agree.
+- Signed release build and `apksigner` verification passed. Release artifact ID `14944179159`, ZIP SHA-256 `f9a71cc8718d67485a41c3663a194a8dcfd08d68d3548b94e45925fe124dc0eb`. Debug artifact ID `14948455778`; Room schema artifact ID `14948316137`.
+- These are CI artifacts, not an intermediate release. No APK was distributed.
+
+### What this closes — and what it does not
+- The debug test-provider descendant-chain fix is verified; the CI SAF integration gate and Room migration gate are now closed for this tested source commit.
+- This is emulator instrumentation evidence only. It does not establish real USB/SD provider behavior, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, or signed install-over-existing upgrade compatibility.
+- Keep those device gates open until actual device testing is completed. Do not claim user-device acceptance.
+
+### Next engineering step
+- The next planned internal milestone is Library Browser folder metadata aggregation and sorting, after a fresh live-source inspection.
+- Before coding, identify Main Quest, bundled Side Quests, exact affected files, risks, acceptance criteria and regression tests. Preserve the three approved library modes, folder hierarchy, empty-folder semantics, unknown-date handling, stable tie-breaks, source separation and existing behavior.
+- No casual Room schema changes. Any schema change requires a migration, automated tests and checked-in schema artifact.
+- Eight approved product areas remain one coordinated public release. No intermediate APK distribution.
+
+The previous 24 November checkpoint below is retained as history; its "run #58 in progress" statements are superseded by this verified result.
