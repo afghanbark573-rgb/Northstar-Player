@@ -699,3 +699,11 @@ The approved implementation plan is now in active development on `phase-0/releas
 - Corrected the debug-only test provider in commit [35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4](https://github.com/afghanbark573-rgb/Northstar-Player/commit/35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4): implemented synchronized ancestor-chain traversal in `isChildDocument(parentDocumentId, documentId)`. This reports nested descendants to Android's tree-URI enforcement and returns false for missing/broken parent chains. Production SAF adapter, policy, database and test assertions were not changed.
 - A fresh CI run is required to validate the correction. The SAF instrumentation gate remains open until both instrumentation tests pass on the new source commit.
 - No intermediate APK distribution. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade test remain outstanding.
+
+
+## CI run #58 — nested SAF descendant fix under validation — 2026-11-24
+
+- Run [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837) was triggered by source commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`, which implements `DocumentsProvider.isChildDocument` in the debug-only in-memory provider.
+- At the latest poll, the workflow remained `in_progress`. Both debug and release jobs were running; the debug unit-test/build step and signed release build step were active. Android instrumentation had not started and no artifacts were available.
+- Do not infer a pass from the code change or the earlier build results. Verify both instrumentation tests and signed release signature verification against this exact source commit.
+- SAF integration gate remains open. No intermediate APK distribution; physical storage and Xiaomi 14 gates remain separate.
