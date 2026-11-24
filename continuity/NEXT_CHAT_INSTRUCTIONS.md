@@ -41,3 +41,16 @@
 - Poll [45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837), exact source commit `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`.
 - At last check, unit/debug build and signed release build were still running; instrumentation had not started. Verify the SAF integration test and Room migration test results before proceeding.
 - Run #57 diagnosis and source correction are in the latest checkpoint section above.
+
+
+## Current restart checkpoint — 24 November 2026 (chat-independent)
+1. Treat GitHub as the durable project memory; old chats are not required. Read [README](README.md), then the final dated checkpoint in [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md) and this file.
+2. Inspect live native branch `phase-0/release-signing`, continuity branch `continuity/master-pack`, current HEADs, product spec, implementation plan and `PROJECT_STATUS.md`. Do not assume the archive proves current GitHub state.
+3. Poll [CI run #58 / 45444674837](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45444674837), exact source SHA `35bd3cd64ff9ecf7d5269e591dd69c54d5aa4ee4`. Unit tests/debug APK build passed; signed release build and signature verification passed; Room migration and SAF DocumentsProvider instrumentation was still running at last poll. Verify exact final job conclusions and test counts.
+4. If run #58 fails, inspect report/XML/textproto/logcat diagnostics before source edits. If it passes, update native status and all continuity files with exact evidence, then begin Library Browser folder metadata aggregation/sorting and its defined regression suite.
+5. Do not begin Library Browser milestone before SAF instrumentation passes. Physical USB/SD behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain separate device gates.
+6. Preserve eight approved product areas as one coordinated release; AMOLED black-and-white direction; exactly three library modes; local-first privacy; package/signing identity; no intermediate APK distribution.
+7. Before coding, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests. After each successful milestone update native `PROJECT_STATUS.md` and continuity master pack/changelog/README/next-chat instructions. Record failures with evidence.
+8. Never store secrets or keystore bytes in tracked files. Never claim device testing that the user has not performed.
+
+Standard restart phrase: **“Let's continue the Northstar Player project from the last checkpoint.”**
