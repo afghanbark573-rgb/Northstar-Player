@@ -4,6 +4,7 @@
             android:name="com.northstar.player.data.storage.TestSafDocumentsProvider"
             android:authorities="com.northstar.player.test.documents"
             android:exported="true"
-            android:grantUriPermissions="true" />
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS" />
     </application>
 </manifest>
