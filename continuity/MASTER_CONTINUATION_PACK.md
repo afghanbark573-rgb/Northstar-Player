@@ -285,3 +285,27 @@ Run [#56 / 45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/ac
 
 **Not verified:** Run #56 instrumentation result; SAF DocumentsProvider integration success; complete real-world USB/SD support; Android picker and persisted grant lifecycle on device; Xiaomi 14 acceptance; signed install-over-existing upgrade test; complete eight-area public release.
 
+
+
+## CURRENT CHECKPOINT UPDATE — 24 NOVEMBER 2026 (RUN #56 DIAGNOSED; MANIFEST FIX COMMITTED)
+
+### Source and test evidence
+- Native branch source fix: `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b` ([commit](https://github.com/afghanbark573-rgb/Northstar-Player/commit/3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b)). The debug-only `TestSafDocumentsProvider` manifest now declares `android:permission="android.permission.MANAGE_DOCUMENTS"`, which Android requires for a `DocumentsProvider`.
+- Native status documentation update: `8f0a0b19730b9700fde0233816e180c39732832e`.
+- Run #56: [45411300973](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45411300973), tested commit `07b96f31a4cbab9cfcad1e0ccfa4f81232142960`, completed with overall failure.
+- Verified passing in run #56: JVM unit tests/debug APK build; signed release APK build; `apksigner` verification; release artifact upload.
+- Instrumentation failure root cause is now exact: Android crashed the target app while installing the debug test provider, before any instrumentation tests ran. Exception: `SecurityException: Provider must be protected by MANAGE_DOCUMENTS` from `DocumentsProvider.attachInfo`. The instrumentation report said zero tests started. This is a test-provider manifest defect; it is not evidence of a production SAF folder-creation failure.
+- Corrective manifest change was committed as above. Provider remains debug-only; production SAF adapter, policy and assertions are unchanged.
+
+### Immediate next action
+1. Poll the CI run triggered by the manifest fix and confirm its tested HEAD is `3ae4586c6c0753b48001bde8ca2a61fb3c6bba0b` (or a later documentation-only descendant if workflow semantics indicate otherwise).
+2. Verify both Room migration and SAF DocumentsProvider instrumentation tests actually execute and pass. A green job without test counts/results is insufficient.
+3. If it fails, inspect the exact new diagnostics before editing code.
+4. Only after the SAF instrumentation gate passes, resume Library Browser metadata aggregation/sorting and its planned regression suite.
+5. Keep physical USB/SD provider behavior, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, and signed install-over-existing upgrade testing separate and outstanding until actually tested.
+
+### Release and checkpoint safeguards
+- No intermediate APK distribution; the eight approved product areas remain one coordinated public release.
+- No production SAF changes were made in this correction.
+- Keep the package/signing identity and local-first privacy requirements intact.
+- From this checkpoint onward, after each successful engineering milestone, update native `PROJECT_STATUS.md` and this continuity archive before starting the next milestone. Record failures with exact evidence as well.
