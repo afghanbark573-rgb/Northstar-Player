@@ -763,3 +763,24 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 - No production application source changes were part of this validation commit; the code under test is the debug-only in-memory DocumentsProvider fix. No APK was distributed.
 - Separate unverified device gates remain: physical USB/SD storage, actual picker and persisted grant lifecycle, Xiaomi 14 acceptance, and signed install-over-existing upgrade testing.
 - **Next engineering milestone, subject to live-source inspection:** Library Browser folder metadata aggregation and sorting. Before edits, re-inspect current source, establish Main Quest/Side Quests, affected files, risks, acceptance criteria and regression tests. Keep the coordinated eight-area public release and no-intermediate-APK rule.
+
+
+## Library Browser metadata and sorting hardening — CI run #60 passed — 2026-11-25
+
+- Native source commit: `9b84ea24a1f11671aca54c10a339dc161307473d` on `phase-0/release-signing`.
+- Workflow [run #60 / 45479496288](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45479496288) completed with overall conclusion **success** on that exact HEAD.
+- Debug job passed `:app:testDebugUnitTest`, `:app:assembleDebug`, and `:app:connectedDebugAndroidTest`. The unit-test task includes the LibraryBrowser regression suite; its ten LibraryBrowser test cases cover the existing modes/folder behavior plus unknown dates, deterministic equal-value tie-breaks, normalized separators, and source isolation.
+- Instrumentation diagnostics artifact `northstar-instrumentation-diagnostics`, ID `14962565694`, ZIP SHA-256 `41e5f659cf75907379bc4152fe297ee18912c90b3486f1665e78895d9e6e0043`, confirms **2 tests, 0 failures, 0 errors, 0 skipped** on Android emulator API 35:
+  1. `NorthstarDatabaseMigrationTest.migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable` — PASSED.
+  2. `SafFolderProviderIntegrationTest.createsAndListsDirectoryInsideNestedDocumentProviderFolder` — PASSED.
+  The XML report reports `tests="2" failures="0" errors="0" skipped="0"`; textproto marks both cases PASSED and test log ends `OK (2 tests)`.
+- Release job passed release keystore restoration, signed release APK build, `apksigner` signature verification, and artifact upload. Artifact `northstar-release-apk`, ID `14960903935`, ZIP SHA-256 `086e153dbfdaddd2aa0478e9fc2e160e6ffc145e0141dc41088d32b43fc899c5`.
+- Debug artifact `northstar-debug-apk`, ID `14962885359`, ZIP SHA-256 `45a813a101cc58d6e5e0d0483b0825fdf3196f002cf5461678a2e316c09e58c6`.
+- Room schema artifact ID `14961903353`, ZIP SHA-256 `bd3f21aa0d42ab1a5d15220f16d916d60d7200d5755cc0c900baee527ed5a239`. No Room schema migration was introduced by this Library Browser change.
+- Earlier run [#59 / 45479490916](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45479490916) also completed successfully for the intermediate production-code commit `609f6a1028a66a97f6480d69895769fdce82e996`; run #60 is authoritative because it tests the final commit including the regression-test additions.
+- The production change is limited to `LibraryBrowser.kt` and `LibraryBrowserTest.kt`: folder metrics are aggregated in one normalized path-segment traversal rather than rescanning all videos for each folder; sorting has deterministic name/identity tie-breaks; unknown dates remain after known dates; source separation and the three approved library modes are preserved.
+- CI evidence is emulator/JVM evidence only. Real USB/SD provider behavior, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, and signed install-over-existing upgrade remain **unverified device gates**.
+- CI artifacts are for engineering verification only. **No APK was distributed**; all eight approved product areas remain one coordinated public release.
+
+### Next-step guardrail
+The folder metadata/sorting subtask is complete for this tested commit. Re-inspect the live implementation plan, product spec, status, and source before choosing the next internal task. The broader Library and Storage foundation still includes background/incremental MediaStore scanning, permission-scope handling, SAF grants/revocation, and folder hierarchy integration; do not select or implement one until its exact existing code state, dependencies, affected files, risks, and acceptance tests are confirmed. No casual Room schema change.
