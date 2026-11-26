@@ -538,3 +538,46 @@ Physical USB/SD provider behavior, actual Android picker and persisted-grant lif
 
 ### Immediate next-chat instruction
 Confirm live native and continuity branch heads, read the product spec and integrated implementation plan, inspect current source and status, then choose the next internal milestone based on evidence. Before coding, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests. Preserve package/signing identity, local-first privacy, AMOLED black-and-white direction and the no-intermediate-APK rule.
+
+
+---
+
+## CURRENT CHECKPOINT — 26 NOVEMBER 2026 — GENERATION-AWARE INCREMENTAL MEDIASTORE SCANNING (CI PENDING)
+
+### Repository and exact source under test
+- Native repository: https://github.com/afghanbark573-rgb/Northstar-Player
+- Native branch: `phase-0/release-signing`
+- Latest source commit: `49a73222f29b28fba8924210aef5a8b10fe17fdf`
+- CI workflow [run #45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016), run number 111, is testing that exact SHA.
+- At checkpoint creation, the workflow overall status is **in_progress**. The `release-apk` job completed successfully: signed release APK built, `apksigner` signature verification passed, and release artifact uploaded. The `debug-apk` job passed `:app:testDebugUnitTest` and `:app:assembleDebug`; database migration instrumentation is still running. Do not mark this milestone CI-verified until the entire workflow completes successfully and the instrumentation report is inspected.
+- Release artifact ID: `15098767237`; ZIP SHA-256: `cf039350a15537da866882e36ec0ecb4c8e9fcc26456b328b78c07b0b404ad49`. This is a CI artifact only; do not distribute it.
+
+### Main Quest implemented
+Generation-aware incremental MediaStore reconciliation is implemented in source, pending final CI verification:
+- Room database version advanced from 2 to 3, with `MIGRATION_2_3` adding nullable MediaStore version and generation checkpoint columns to scan state. Existing v1→v2 migration remains registered.
+- Added a scan policy that permits incremental queries only on API 30+, with full permission scope, matching MediaStore version, a valid previous checkpoint, nondecreasing generation, and no forced-full request.
+- Incremental query uses `GENERATION_MODIFIED > previousGeneration AND <= capturedCurrentGeneration`. Capturing the upper generation before the query ensures later changes remain eligible for the next scan.
+- Full and incremental results are staged in batches of 400 and published with the checkpoint in a Room transaction. Failed/cancelled delta scans discard partial staging and fall back to a full snapshot (except cancellation); failed scans must preserve the last known-good visible library.
+- Full snapshot fallback is used for older Android, partial permissions, permission-scope transitions, MediaStore version changes, missing checkpoints, generation rollback, and forced-full scans.
+- Manual refresh defaults to a full reconciliation. The 12-hour periodic worker explicitly forces a full scan; ordinary one-time foreground work can use incremental scanning.
+- SAF remains isolated from MediaStore. Denied MediaStore access preserves historical records/checkpoint while reconciling availability.
+- Room migration/instrumentation and schema v3 validation are part of the current CI gate. The generated schema artifact has not yet been downloaded/inspected or checked into the repository.
+
+### Important known limitation — deletions
+Android's broad MediaStore generation query does not provide generic deleted-row tracking for this supported implementation. Incremental scans upsert new/modified rows; deletions are detected by complete manual and 12-hour periodic full snapshots. Do not describe incremental runs as immediately detecting deletions. `MediaStore.queryDeletedFiles` is not a general fallback for the supported API range (it requires newer S Extensions/library support and is limited to external volumes).
+
+### Immediate next-chat actions
+1. Inspect live native HEAD and poll [CI run #45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016). Confirm it tests exact SHA `49a73222f29b28fba8924210aef5a8b10fe17fdf`.
+2. Check debug job `139780302055` and release job `139780302340`. At checkpoint time, release was successful; debug instrumentation was still running.
+3. If CI fails, inspect exact job logs and instrumentation diagnostics before changing code. If CI succeeds, inspect XML/HTML reports and confirm test counts, download and inspect Room schema v3, and check in the exact generated v2 and v3 schema snapshots under the configured Room schema path.
+4. Record artifact IDs and SHA-256 values separately for ZIPs and extracted APKs; do not confuse them.
+5. Only after exact-HEAD CI passes and schema artifacts are reconciled, update native `PROJECT_STATUS.md` and revise this pending checkpoint to a verified milestone in all four continuity records.
+6. Do not begin another engineering milestone until that validation/documentation work is complete.
+
+### Unchanged product and release guardrails
+- Package/application ID: `com.northstar.player`; preserve permanent signing identity.
+- Local-first; no automatic cloud upload.
+- AMOLED black-and-white design; exactly three library modes.
+- All eight approved product areas ship together in one coordinated public release. No intermediate APK distribution.
+- Physical USB/SD provider behavior, actual Android picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing, and manual pull gesture behavior remain unverified device gates. CI is not physical-device acceptance.
+- No signing secrets or keystore bytes in source or continuity files.
