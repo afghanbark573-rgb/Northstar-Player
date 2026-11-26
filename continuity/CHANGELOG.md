@@ -113,3 +113,12 @@
 - Diagnostics artifact `15096549503`; release artifact `15096530730`; debug artifact `15096619296`; Room schema artifact `15097206733`. Release ZIP SHA-256: `7efceb79324d0d250afc019f1dcd1f4d932d6ff49a8b7414b3dd9dd33328fe01`; extracted APK SHA-256: `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`. Diagnostics ZIP SHA-256: `8c8888439932a14614e81e50368eb0c909492b4dace52ca880d500e43024e3be`; debug ZIP SHA-256: `a56c5dedb43426b841d0c86bac2d8abb5c70951ff5bba07a948afbb58b02f19f`; Room schema ZIP SHA-256: `890eaf76897b3ea5e926b684bfe5999db2ceca6c15165d2aa8f9d279873e5f97`.
 - No Room schema migration; no APK distributed.
 - Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture remain device gates.
+
+
+## 2026-11-26 — Generation-aware incremental MediaStore scanning (CI pending)
+- Native source commit under test: `49a73222f29b28fba8924210aef5a8b10fe17fdf`; workflow [#45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016).
+- Implementation adds Room v3 scan checkpoints (MediaStore version/generation), eligibility policy for incremental scans, staged delta publication with atomic checkpoint commit, and full-snapshot fallbacks for unsupported/unsafe states.
+- Unit tests and debug build passed. Signed release build and `apksigner` verification passed.
+- At checkpoint time, emulator database migration instrumentation was still running; overall CI is **in progress**, not passed. Release artifact ID `15098767237`, ZIP SHA-256 `cf039350a15537da866882e36ec0ecb4c8e9fcc26456b328b78c07b0b404ad49`.
+- Known deletion limitation: generation-based deltas do not generically report deleted rows; complete manual and 12-hour periodic full scans reconcile deletions.
+- Do not call this milestone verified or update native status as complete until exact-HEAD CI, instrumentation report and generated Room schema v3 are inspected.
