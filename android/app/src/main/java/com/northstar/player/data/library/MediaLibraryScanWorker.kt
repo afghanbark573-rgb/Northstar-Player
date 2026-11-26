@@ -35,7 +35,8 @@ class MediaLibraryScanWorker(
         val app = applicationContext as NorthstarApplication
         val scope = app.videoPermissionChecker.currentScope()
 
-        val mediaStoreScan = app.mediaStoreVideoScanner.scan(scope)
+        val forceFull = inputData.getBoolean(MediaLibraryScanScheduler.INPUT_FORCE_FULL, false)
+        val mediaStoreScan = app.mediaStoreVideoScanner.scan(scope, allowIncremental = !forceFull)
         if (app.videoPermissionChecker.currentScope() != scope) return Result.retry()
 
         val safReconciliation = runSafReconciliation {
