@@ -91,16 +91,20 @@ class MediaStoreVideoScanner(
                     snapshotDao.publishMediaStoreSnapshot(sourceKey, generation)
 
                     val completedAt = clock()
-                    repository.refreshFolderIndex(sourceKey, permissionScope, completedAt)
-                    repository.saveScanState(
-                        ScanStateEntity(
-                            sourceKey = sourceKey,
-                            lastSuccessfulScanMillis = generation,
-                            permissionScope = permissionScope.name,
-                            inProgressSinceMillis = null,
-                            lastError = null
+                    // Once the media snapshot commits, finish its folder projection and
+                    // success marker even if the caller is cancelled during UI teardown.
+                    withContext(NonCancellable) {
+                        repository.refreshFolderIndex(sourceKey, permissionScope, completedAt)
+                        repository.saveScanState(
+                            ScanStateEntity(
+                                sourceKey = sourceKey,
+                                lastSuccessfulScanMillis = generation,
+                                permissionScope = permissionScope.name,
+                                inProgressSinceMillis = null,
+                                lastError = null
+                            )
                         )
-                    )
+                    }
                     Result.success(MediaScanResult(count, permissionScope, completedAt))
                 } catch (cancelled: CancellationException) {
                     withContext(NonCancellable) {
