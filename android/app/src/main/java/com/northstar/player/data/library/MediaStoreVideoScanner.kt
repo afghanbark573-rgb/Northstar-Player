@@ -4,8 +4,9 @@ import android.content.ContentUris
 import android.content.ContentResolver
 import android.database.Cursor
 import android.provider.MediaStore
-import com.northstar.player.core.database.MediaItemEntity
+import com.northstar.player.core.database.SafStagedMediaEntity
 import com.northstar.player.core.database.ScanStateEntity
+import com.northstar.player.core.database.SafSnapshotDao
 import com.northstar.player.core.permissions.VideoPermissionScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -24,85 +25,117 @@ data class MediaScanResult(
 )
 
 /**
- * Reads Android's indexed video collection and streams bounded batches into Room.
- * It never writes to or deletes source media.
- *
- * Partial-access scans are additive/upsert-only. A partial result is not proof that
- * unreturned media was deleted or became unavailable.
+ * Reads Android's indexed video collection and stages bounded batches in Room.
+ * A complete query is published atomically; failed or cancelled queries leave the
+ * previous visible snapshot intact. PARTIAL means the exact set currently visible
+ * under Android's selected-media grant, not an additive hint.
  */
 class MediaStoreVideoScanner(
     private val resolver: ContentResolver,
     private val repository: MediaLibraryRepository,
+    private val snapshotDao: SafSnapshotDao,
     private val clock: () -> Long = System::currentTimeMillis
 ) {
-    // Refresh and periodic WorkManager requests use different unique names. Serialize
-    // them here so overlapping workers cannot interleave cursor batches or scan state.
     private val scanMutex = Mutex()
 
     suspend fun scan(permissionScope: VideoPermissionScope): Result<MediaScanResult> =
         scanMutex.withLock {
             withContext(Dispatchers.IO) {
-            if (permissionScope == VideoPermissionScope.DENIED) {
-                return@withContext Result.failure(SecurityException("Video permission is not granted"))
-            }
+                val sourceKey = SOURCE_KEY
+                val previousState = repository.getScanState(sourceKey)
+                val previousSuccess = previousState?.lastSuccessfulScanMillis
 
-            val sourceKey = SOURCE_KEY
-            val previousSuccess = repository.getScanState(sourceKey)?.lastSuccessfulScanMillis
-            repository.saveScanState(
-                ScanStateEntity(
-                    sourceKey = sourceKey,
-                    lastSuccessfulScanMillis = previousSuccess,
-                    permissionScope = permissionScope.name,
-                    inProgressSinceMillis = clock(),
-                    lastError = null
-                )
-            )
-
-            try {
-                val count = queryAndPersist()
-                val completedAt = clock()
-                repository.refreshFolderIndex(sourceKey, permissionScope, completedAt)
-                repository.saveScanState(
-                    ScanStateEntity(
-                        sourceKey = sourceKey,
-                        lastSuccessfulScanMillis = completedAt,
-                        permissionScope = permissionScope.name,
-                        inProgressSinceMillis = null,
-                        lastError = null
+                if (permissionScope == VideoPermissionScope.DENIED) {
+                    repository.markSourceUnavailable(sourceKey)
+                    repository.refreshFolderIndex(
+                        sourceKey,
+                        VideoPermissionScope.PARTIAL,
+                        clock()
                     )
-                )
-                Result.success(MediaScanResult(count, permissionScope, completedAt))
-            } catch (cancelled: CancellationException) {
-                // The scan context is already cancelled. Persist cleanup in a
-                // non-cancellable section so the in-progress marker is cleared.
-                withContext(NonCancellable) {
                     repository.saveScanState(
                         ScanStateEntity(
                             sourceKey = sourceKey,
                             lastSuccessfulScanMillis = previousSuccess,
                             permissionScope = permissionScope.name,
                             inProgressSinceMillis = null,
-                            lastError = "Scan cancelled"
+                            lastError = "Video permission is not granted"
                         )
                     )
+                    return@withContext Result.failure(
+                        SecurityException("Video permission is not granted")
+                    )
                 }
-                throw cancelled
-            } catch (error: Exception) {
+
+                val latestStaged = snapshotDao.latestStagedGenerationMillis(sourceKey) ?: 0L
+                val generation = maxOf(
+                    clock(),
+                    nextTimestamp(previousSuccess),
+                    nextTimestamp(latestStaged)
+                )
                 repository.saveScanState(
                     ScanStateEntity(
                         sourceKey = sourceKey,
                         lastSuccessfulScanMillis = previousSuccess,
                         permissionScope = permissionScope.name,
-                        inProgressSinceMillis = null,
-                        lastError = error.message ?: error.javaClass.simpleName
+                        inProgressSinceMillis = generation,
+                        lastError = null
                     )
                 )
-                Result.failure(error)
+
+                try {
+                    val count = queryAndStage(generation)
+                    currentCoroutineContext().ensureActive()
+
+                    // The staged set is the exact accessible snapshot for both FULL
+                    // and PARTIAL permission. Missing rows are hidden, never deleted.
+                    snapshotDao.publishMediaStoreSnapshot(sourceKey, generation)
+
+                    val completedAt = clock()
+                    repository.refreshFolderIndex(sourceKey, permissionScope, completedAt)
+                    repository.saveScanState(
+                        ScanStateEntity(
+                            sourceKey = sourceKey,
+                            lastSuccessfulScanMillis = generation,
+                            permissionScope = permissionScope.name,
+                            inProgressSinceMillis = null,
+                            lastError = null
+                        )
+                    )
+                    Result.success(MediaScanResult(count, permissionScope, completedAt))
+                } catch (cancelled: CancellationException) {
+                    withContext(NonCancellable) {
+                        runCatching { snapshotDao.clearStagedForSource(sourceKey) }
+                        runCatching {
+                            repository.saveScanState(
+                                ScanStateEntity(
+                                    sourceKey, previousSuccess, permissionScope.name,
+                                    null, "Scan cancelled"
+                                )
+                            )
+                        }
+                    }
+                    throw cancelled
+                } catch (error: Exception) {
+                    withContext(NonCancellable) {
+                        runCatching { snapshotDao.clearStagedForSource(sourceKey) }
+                        runCatching {
+                            repository.saveScanState(
+                                ScanStateEntity(
+                                    sourceKey,
+                                    previousSuccess,
+                                    permissionScope.name,
+                                    null,
+                                    error.message ?: error.javaClass.simpleName
+                                )
+                            )
+                        }
+                    }
+                    Result.failure(error)
+                }
             }
         }
-        }
 
-    private suspend fun queryAndPersist(): Int {
+    private suspend fun queryAndStage(generationMillis: Long): Int {
         val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
@@ -115,7 +148,7 @@ class MediaStoreVideoScanner(
             MediaStore.Video.Media.RELATIVE_PATH
         )
         var discovered = 0
-        val batch = ArrayList<MediaItemEntity>(BATCH_SIZE)
+        val batch = ArrayList<SafStagedMediaEntity>(BATCH_SIZE)
 
         resolver.query(collection, projection, null, null, null)?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
@@ -130,7 +163,9 @@ class MediaStoreVideoScanner(
             while (cursor.moveToNext()) {
                 currentCoroutineContext().ensureActive()
                 val uri = ContentUris.withAppendedId(collection, cursor.getLong(idColumn))
-                batch += MediaItemEntity(
+                batch += SafStagedMediaEntity(
+                    sourceKey = SOURCE_KEY,
+                    generationMillis = generationMillis,
                     mediaKey = uri.toString(),
                     uri = uri.toString(),
                     displayName = cursor.stringOrNull(nameColumn) ?: "Untitled video",
@@ -140,22 +175,25 @@ class MediaStoreVideoScanner(
                     dateAddedSeconds = cursor.longOrNull(addedColumn),
                     dateModifiedSeconds = cursor.longOrNull(modifiedColumn),
                     sourceType = SOURCE_TYPE,
-                    sourceKey = SOURCE_KEY,
-                    relativePath = cursor.stringOrNull(pathColumn)?.trimEnd('/'),
-                    isAvailable = true,
-                    indexedAtMillis = clock()
+                    relativePath = cursor.stringOrNull(pathColumn)?.trimEnd('/')
                 )
                 discovered++
                 if (batch.size >= BATCH_SIZE) {
-                    repository.saveVideos(batch.toList())
+                    snapshotDao.stageMedia(batch.toList())
                     batch.clear()
                 }
             }
         } ?: throw IOException("Android MediaStore did not return a video cursor")
 
         currentCoroutineContext().ensureActive()
-        if (batch.isNotEmpty()) repository.saveVideos(batch)
+        if (batch.isNotEmpty()) snapshotDao.stageMedia(batch)
         return discovered
+    }
+
+    private fun nextTimestamp(value: Long?): Long = when {
+        value == null || value <= 0L -> 0L
+        value == Long.MAX_VALUE -> Long.MAX_VALUE
+        else -> value + 1L
     }
 
     private fun Cursor.stringOrNull(index: Int): String? =
