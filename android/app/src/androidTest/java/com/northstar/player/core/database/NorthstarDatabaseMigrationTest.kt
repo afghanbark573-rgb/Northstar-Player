@@ -94,6 +94,96 @@ class NorthstarDatabaseMigrationTest {
         }
     }
 
+    @Test
+    fun mediaStoreSnapshotPublicationHidesMissingRowsWithoutDeletingTheirMetadata() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val database = Room.inMemoryDatabaseBuilder(
+            context, NorthstarDatabase::class.java
+        ).allowMainThreadQueries().build()
+        try {
+            val sourceKey = "mediastore:external"
+            fun media(key: String, name: String) = MediaItemEntity(
+                mediaKey = key,
+                uri = "content://media/$key",
+                displayName = name,
+                mimeType = "video/mp4",
+                durationMs = 1000L,
+                sizeBytes = 100L,
+                dateAddedSeconds = 10L,
+                dateModifiedSeconds = 20L,
+                sourceType = "MEDIA_STORE",
+                sourceKey = sourceKey,
+                relativePath = "Movies",
+                isAvailable = true,
+                indexedAtMillis = 100L
+            )
+
+            database.mediaItemDao().upsertAll(
+                listOf(media("kept", "kept.mp4"), media("removed", "removed.mp4"))
+            )
+            database.safSnapshotDao().stageMedia(
+                listOf(
+                    SafStagedMediaEntity(
+                        sourceKey, 200L, "kept", "content://media/kept", "kept.mp4",
+                        "video/mp4", 1000L, 100L, 10L, 20L, "MEDIA_STORE", "Movies"
+                    ),
+                    SafStagedMediaEntity(
+                        sourceKey, 200L, "added", "content://media/added", "added.mp4",
+                        "video/mp4", 1000L, 100L, 10L, 20L, "MEDIA_STORE", "Movies"
+                    )
+                )
+            )
+
+            database.safSnapshotDao().publishMediaStoreSnapshot(sourceKey, 200L)
+
+            val visible = database.mediaItemDao().availableForSource(sourceKey).map { it.mediaKey }.toSet()
+            assertEquals(setOf("kept", "added"), visible)
+            val removed = database.mediaItemDao().findByKey("removed")
+            assertNotNull("Inaccessible media metadata must be retained", removed)
+            assertEquals(false, removed?.isAvailable)
+            database.openHelper.writableDatabase.query(
+                "SELECT COUNT(*) FROM saf_staged_media WHERE sourceKey = '$sourceKey'"
+            ).use {
+                assertTrue(it.moveToFirst())
+                assertEquals(0, it.getInt(0))
+            }
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun abandonedMediaStoreStageCanBeDiscardedWithoutChangingVisibleSnapshot() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val database = Room.inMemoryDatabaseBuilder(
+            context, NorthstarDatabase::class.java
+        ).allowMainThreadQueries().build()
+        try {
+            val sourceKey = "mediastore:external"
+            val original = MediaItemEntity(
+                "original", "content://media/original", "original.mp4", "video/mp4",
+                1000L, 100L, 10L, 20L, "MEDIA_STORE", sourceKey, "Movies", true, 100L
+            )
+            database.mediaItemDao().upsertAll(listOf(original))
+            database.safSnapshotDao().stageMedia(
+                listOf(
+                    SafStagedMediaEntity(
+                        sourceKey, 300L, "incomplete", "content://media/incomplete",
+                        "incomplete.mp4", "video/mp4", 1000L, 100L, 10L, 20L,
+                        "MEDIA_STORE", "Movies"
+                    )
+                )
+            )
+
+            database.safSnapshotDao().clearStagedForSource(sourceKey)
+
+            assertEquals(true, database.mediaItemDao().findByKey("original")?.isAvailable)
+            assertEquals(null, database.mediaItemDao().findByKey("incomplete"))
+        } finally {
+            database.close()
+        }
+    }
+
     private fun assertCount(db: androidx.sqlite.db.SupportSQLiteDatabase, table: String, expected: Int) {
         db.query("SELECT COUNT(*) FROM `$table`").use {
             assertTrue(it.moveToFirst())
