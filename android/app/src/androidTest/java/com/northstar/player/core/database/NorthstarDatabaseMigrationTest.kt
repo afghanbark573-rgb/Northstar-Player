@@ -140,7 +140,7 @@ class NorthstarDatabaseMigrationTest {
             assertEquals(setOf("kept", "added"), visible)
             val removed = database.mediaItemDao().findByKey("removed")
             assertNotNull("Inaccessible media metadata must be retained", removed)
-            assertEquals(false, removed?.isAvailable)
+            assertEquals(false, removed?.isAvailable == true)
             database.openHelper.writableDatabase.query(
                 "SELECT COUNT(*) FROM saf_staged_media WHERE sourceKey = '$sourceKey'"
             ).use {
@@ -178,7 +178,7 @@ class NorthstarDatabaseMigrationTest {
             database.safSnapshotDao().clearStagedForSource(sourceKey)
 
             assertEquals(true, database.mediaItemDao().findByKey("original")?.isAvailable)
-            assertEquals(null, database.mediaItemDao().findByKey("incomplete"))
+            assertTrue(database.mediaItemDao().findByKey("incomplete") == null)
         } finally {
             database.close()
         }
