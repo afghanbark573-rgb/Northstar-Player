@@ -486,7 +486,7 @@ The folder NEW-state lifecycle is complete for the tested commit. Before choosin
 - Native source commit: `87183de1d23ebede848d6c59eae9106358e9093e` on `phase-0/release-signing`.
 - Workflow [run #45764030633](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45764030633) completed with overall conclusion **success** on that exact SHA. Both debug and signed release jobs passed.
 - JVM unit tests and debug APK build passed. Emulator API 35 instrumentation reports **4 passed, 0 failures, 0 errors, 0 skipped**. The four tests cover atomic MediaStore snapshot publication preserving metadata for missing rows, discarding abandoned staging without changing the visible snapshot, Room v1 migration, and nested SAF DocumentsProvider create/list integration. Exact XML: `tests="4" failures="0" errors="0" skipped="0"`.
-- Diagnostics artifact ID `15092115234`, ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`. Test XML/HTML reports were downloaded and inspected.
+- Diagnostics artifact ID `15092115234`, ZIP SHA-256 `8c8888439932a14614e81e50368eb0c909492b4dace52ca880d500e43024e3be`. Test XML/HTML reports were downloaded and inspected.
 - Signed release build restored the permanent signing key, built the APK and passed `apksigner` verification. Release artifact ID `15091590357`, ZIP SHA-256 `f5589bc6578fb8aae8c39699b15d674e9520a1387090e51a1d3cf615ea0aafff`; extracted APK SHA-256 `b35e9a7cf6fa1d3e18c890e5086d6c76bb9b05ec334d63954a2c92135a558c56`. Debug artifact ID `15092045614`, ZIP SHA-256 `b81a04a8a0167dedbf1b702462fa635302bc8300e946ac0078e347200ad8fefd`. Room schema artifact ID `15092055600`, ZIP SHA-256 `b3a12163e43dcc0b7701c0e9ed6f822634dc6477a864c33a4aa1b36d332fc528`.
 - The scanner stages query results in batches and publishes only after a complete query. Failed/cancelled scans discard staging and preserve the last successful visible snapshot. Denied permission marks MediaStore unavailable without deleting historical records or user metadata. Stale folders are hidden/deactivated while identity and NEW-state history are retained. Permission changes are reconciled on permission callbacks and app foreground; SAF remains source-isolated. No Room schema migration was added.
 - CI evidence is not physical-device acceptance. USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing upgrade, and manual pull gesture behavior remain outstanding. **No APK was distributed**; the eight approved product areas remain one coordinated public release.
@@ -512,7 +512,7 @@ The folder NEW-state lifecycle is complete for the tested commit. Before choosin
 - Release job passed: signed release APK built, `apksigner` signature verification passed, release artifact uploaded.
 
 ### Instrumentation evidence
-Diagnostics artifact ID `15096549503`, ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`.
+Diagnostics artifact ID `15096549503`, ZIP SHA-256 `8c8888439932a14614e81e50368eb0c909492b4dace52ca880d500e43024e3be`.
 XML report: **4 tests, 0 failures, 0 errors, 0 skipped**:
 1. `mediaStoreSnapshotPublicationHidesMissingRowsWithoutDeletingTheirMetadata`
 2. `abandonedMediaStoreStageCanBeDiscardedWithoutChangingVisibleSnapshot`
@@ -523,8 +523,8 @@ The SAF reconciliation policy's four JVM unit tests cover new disconnection, per
 
 ### Build artifacts
 - Signed release artifact ID `15096530730`; ZIP SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`; extracted `app-release.apk` SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`.
-- Debug artifact ID `15096619296`; ZIP SHA-256 `5ac2cc07448b37ea40aaec34c3da244c3441b9534ed3fe84dca2aa20fa05e3d7`.
-- Room schema artifact ID `15097206733`. No Room schema change/migration was introduced.
+- Debug artifact ID `15096619296`; ZIP SHA-256 `a56c5dedb43426b841d0c86bac2d8abb5c70951ff5bba07a948afbb58b02f19f`.
+- Room schema artifact ID `15097206733`; ZIP SHA-256 `890eaf76897b3ea5e926b684bfe5999db2ceca6c15165d2aa8f9d279873e5f97`. No Room schema change/migration was introduced.
 
 ### Implemented behavior
 - Reconcile persisted SAF read grants by checking provider-root reachability.
