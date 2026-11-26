@@ -92,6 +92,30 @@ class SafTreeScanner(
         var childFolderCount: Int = 0
     )
 
+    /**
+     * Hides a source whose persisted grant was revoked or whose removable provider is
+     * currently unreachable. Historical rows and folder identity remain stored.
+     */
+    suspend fun markUnavailable(grant: ExternalTreeGrantEntity, reason: String) =
+        scanMutex.withLock {
+            withContext(Dispatchers.IO) {
+                val sourceKey = SafSourceIdentity.key(grant.treeUri)
+                grantDao.setAvailability(grant.treeUri, false)
+                mediaDao.markSourceUnavailable(sourceKey)
+                snapshotDao.clearStagedForSource(sourceKey)
+                val previousState = scanStateDao.get(sourceKey)
+                scanStateDao.save(
+                    ScanStateEntity(
+                        sourceKey,
+                        previousState?.lastSuccessfulScanMillis,
+                        SOURCE_TYPE,
+                        null,
+                        reason
+                    )
+                )
+            }
+        }
+
     suspend fun scan(grant: ExternalTreeGrantEntity): Result<SafTreeScanResult> =
         scanMutex.withLock {
         withContext(Dispatchers.IO) {
