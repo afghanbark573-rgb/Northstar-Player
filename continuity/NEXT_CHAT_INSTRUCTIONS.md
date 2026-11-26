@@ -111,3 +111,16 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 6. Re-read current product spec, implementation plan, native status and live source before choosing the next task. Explicitly map background/incremental scan work, SAF grant/revocation lifecycle and hierarchy integration to actual code; do not assume gaps.
 7. Keep USB/SD provider behavior, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture as unverified device gates until physically tested. CI is not device acceptance.
 8. Preserve local-first privacy, package ID/signing identity, AMOLED black-and-white direction, exactly three library modes, all eight approved product areas as one coordinated public release, and no intermediate APK distribution. Before coding, state Main Quest, bundled Side Quests, files, risks, acceptance criteria and tests. No casual Room schema changes.
+
+
+
+
+## Latest restart instruction — 26 November 2026, after SAF grant reconciliation CI run #97
+1. Confirm native branch HEAD is `e37544cd19294774846e19dbd72657cb4307d7d4` or inspect any newer commit. Check live continuity branch HEAD as well.
+2. CI [run #97 / 45775813217](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45775813217) completed success on exact source SHA `e37544cd19294774846e19dbd72657cb4307d7d4`. Both jobs passed: JVM unit tests/debug build, emulator instrumentation, signed release build and `apksigner` verification.
+3. Diagnostics artifact `15096549503` confirms 4 instrumentation tests passed / 0 failures / 0 errors / 0 skipped. The four SAF reconciliation policy JVM tests also passed in `:app:testDebugUnitTest`.
+4. Release artifact `15096530730`; ZIP and extracted APK SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`. Debug artifact `15096619296`; Room schema artifact `15097206733`. No Room schema migration was introduced.
+5. SAF grant lifecycle reconciliation is CI-verified: unreachable/revoked grants mark sources unavailable while preserving historical metadata; newly reachable grants trigger a rescan; continuously available grants are not recursively rescanned by periodic/foreground reconciliation.
+6. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull/Private Library long-pull behavior remain unverified device gates. Do not claim device acceptance. No APK distributed.
+7. Before selecting the next task, inspect the live product spec, integrated implementation plan, native source/status, and both branch heads. Declare Main Quest, bundled Side Quests, files, risks, acceptance criteria and regression tests before coding.
+8. Preserve package ID `com.northstar.player`, permanent signing identity, local-first privacy, AMOLED black-and-white direction, exactly three library modes, all eight product areas as one coordinated public release, and no intermediate APK distribution. No casual Room schema changes.
