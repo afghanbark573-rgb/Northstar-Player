@@ -61,3 +61,9 @@ Native source commit `7925d39b466897c23b74d76c9a8f08112185ec68` passed [workflow
 
 ## 26 November 2026 — Permission-aware MediaStore reconciliation passed CI
 Native commit `87183de1d23ebede848d6c59eae9106358e9093e` passed [workflow #45764030633](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45764030633). Unit tests/debug build, emulator instrumentation (4/4, 0 failures/errors/skips), signed release build and `apksigner` verification passed. Diagnostics artifact ID `15092115234`; release artifact ID `15091590357`. The implementation validates atomic MediaStore snapshot publication, abandoned-stage discard, metadata preservation and permission-aware reconciliation. No APK was distributed. Physical-device gates remain open. See the latest checkpoint in the master pack and native `PROJECT_STATUS.md` for exact evidence and next steps.
+
+
+
+
+## Latest checkpoint — 26 November 2026
+The automatic SAF grant reconciliation milestone is CI-verified on exact native source commit `e37544cd19294774846e19dbd72657cb4307d7d4`. See the final dated checkpoint in [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md), the corresponding [CHANGELOG.md](CHANGELOG.md) entry, and [NEXT_CHAT_INSTRUCTIONS.md](NEXT_CHAT_INSTRUCTIONS.md). CI run [#97 / 45775813217](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45775813217) passed, including four emulator instrumentation tests and signed-release signature verification. Physical USB/SD, actual picker/grant lifecycle, Xiaomi 14, upgrade and manual gesture checks remain outstanding.
