@@ -147,6 +147,39 @@ class LibraryBrowserTest {
         assertEquals(listOf("a-video", "z-video"), videosBySize.videos.map { it.mediaKey })
     }
 
+    @Test fun staleMediaStoreFoldersAreHiddenButEmptySafFoldersRemainInNestedView() {
+        val visibleVideo = video(
+            "visible", "visible.mp4", "Movies/Current/", 10, 10, 100, "mediastore:external"
+        )
+        val folders = listOf(
+            folder("movies", null, "Movies", "Movies", 1, "mediastore:external"),
+            folder("stale", "movies", "Old selection", "Movies/Old", 2, "mediastore:external"),
+            folder("usb-empty", null, "Empty USB folder", "", 0, "saf:usb")
+        )
+
+        val root = LibraryBrowser.build(
+            listOf(visibleVideo), folders, LibraryViewMode.NESTED_VIEW, LibrarySort.NAME
+        )
+        assertEquals(
+            listOf("Empty USB folder", "Movies"),
+            root.folders.map { it.displayName }
+        )
+
+        val movies = LibraryBrowser.build(
+            listOf(visibleVideo), folders, LibraryViewMode.NESTED_VIEW, LibrarySort.NAME,
+            currentFolderKey = "movies"
+        )
+        assertEquals(listOf("Current"), movies.folders.map { it.displayName })
+    }
+
+    @Test fun videoFoldersIgnoreStalePersistedCountsWhenNoCurrentMediaIsAccessible() {
+        val stale = folder("stale", null, "Old selection", "Old selection", 4, "mediastore:external")
+        val result = LibraryBrowser.build(
+            emptyList(), listOf(stale), LibraryViewMode.VIDEO_FOLDERS, LibrarySort.NAME
+        )
+        assertEquals(emptyList<FolderEntity>(), result.folders)
+    }
+
     @Test fun folderMetricsStayIsolatedBySourceAndNormalizePathSeparators() {
         val allVideos = listOf(
             video("usb", "clip.mp4", "Movies//Trips\\", 10, 10, 200, "usb-source"),
