@@ -829,3 +829,16 @@ The folder metadata/sorting subtask is complete for this tested commit. Re-inspe
 
 ### Next-step guardrail
 This permission-aware MediaStore reconciliation milestone is CI-verified for the tested commit. Re-inspect the current product specification, integrated implementation plan, native source, and live branch heads before choosing the next internal milestone. In particular, map remaining background/incremental scan behavior, SAF grant/revocation lifecycle, and hierarchy integration to actual code; do not assume they are unimplemented. Declare Main Quest, bundled Side Quests, files, risks, acceptance criteria, and regression tests before coding. No casual Room schema changes.
+
+
+## Verified milestone — automatic SAF grant reconciliation (2026-11-26)
+
+- Exact tested source HEAD: `e37544cd19294774846e19dbd72657cb4307d7d4`.
+- CI [run #97 / 45775813217](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45775813217) completed success on that exact HEAD. Both jobs passed: `:app:testDebugUnitTest :app:assembleDebug`, emulator instrumentation, signed release build and `apksigner` signature verification.
+- The emulator instrumentation report confirms 4 passed, 0 failures, 0 errors, 0 skipped: MediaStore snapshot publication hides missing rows without deleting metadata; abandoned MediaStore staging can be discarded without changing the visible snapshot; Room v1 migration preserves the library and creates isolated staging; nested SAF DocumentsProvider directory creation/listing works.
+- The SAF reconciliation policy has four unit tests covering newly disconnected, persistently unavailable, reconnected, and continuously mounted trees. The unit-test task completed successfully.
+- Artifacts: diagnostics ID `15096549503` (ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`); signed release ZIP ID `15096530730` (ZIP SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`; extracted APK SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`); debug artifact ID `15096619296` (ZIP SHA-256 `5ac2cc07448b37ea40aaec34c3da244c3441b9534ed3fe84dca2aa20fa05e3d7`); Room schema artifact ID `15097206733`.
+- The Room schema artifact is a schema snapshot; no Room schema migration was introduced by this milestone.
+- Implementation: persisted SAF grants are checked for provider-root reachability; inaccessible/revoked sources are marked unavailable without deleting historical media/folder metadata; a source transitioning from unavailable to reachable is rescanned; continuously available trees are not recursively rescanned by the periodic/foreground reconciliation worker. SAF remains isolated from MediaStore. Periodic reconciliation remains battery-conscious.
+- Outstanding device gates: physical USB/SD provider behavior; actual picker and persisted-grant lifecycle; Xiaomi 14 acceptance; signed install-over-existing; manual pull-to-refresh and Private Library long-pull gesture behavior. CI is not physical-device acceptance. No APK distributed; all eight approved product areas remain one coordinated public release.
+- Next: inspect live product spec, integrated plan, native source and branch heads before selecting the next internal milestone. Keep physical-device gates explicit; no casual Room schema changes.
