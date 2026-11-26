@@ -25,23 +25,26 @@ object LibraryBrowser {
     private data class FolderIdentity(val sourceKey: String, val relativePath: String)
 
     private data class FolderMetrics(
+        val videoCount: Int,
         val totalBytes: Long,
         val newestAdded: Long?,
         val newestModified: Long?
     )
 
     private class MutableFolderMetrics {
+        var videoCount: Int = 0
         var totalBytes: Long = 0L
         var newestAdded: Long? = null
         var newestModified: Long? = null
 
         fun include(video: MediaItemEntity) {
+            videoCount++
             totalBytes += video.sizeBytes
             newestAdded = newest(newestAdded, video.dateAddedSeconds)
             newestModified = newest(newestModified, video.dateModifiedSeconds)
         }
 
-        fun freeze() = FolderMetrics(totalBytes, newestAdded, newestModified)
+        fun freeze() = FolderMetrics(videoCount, totalBytes, newestAdded, newestModified)
     }
 
     private fun newest(current: Long?, candidate: Long?): Long? = when {
@@ -96,7 +99,7 @@ object LibraryBrowser {
 
         return allFolders.associate { folder ->
             val identity = FolderIdentity(folder.sourceKey, normalizePath(folder.relativePath))
-            folder.folderKey to (byIdentity[identity]?.freeze() ?: FolderMetrics(0L, null, null))
+            folder.folderKey to (byIdentity[identity]?.freeze() ?: FolderMetrics(0, 0L, null, null))
         }
     }
 
@@ -137,6 +140,8 @@ object LibraryBrowser {
         return if (byName != 0) byName else left.mediaKey.compareTo(right.mediaKey)
     }
 
+    private const val MEDIA_STORE_SOURCE_KEY = "mediastore:external"
+
     fun build(
         allVideos: List<MediaItemEntity>,
         allFolders: List<FolderEntity>,
@@ -162,11 +167,16 @@ object LibraryBrowser {
 
         val folders = when (mode) {
             LibraryViewMode.VIDEO_FOLDERS -> allFolders.filter {
-                it.parentFolderKey == null && it.videoCount > 0 && matchesFolder(it)
+                it.parentFolderKey == null &&
+                    folderMetrics.getValue(it.folderKey).videoCount > 0 &&
+                    matchesFolder(it)
             }
             LibraryViewMode.FILES_ONLY -> emptyList()
             LibraryViewMode.NESTED_VIEW -> allFolders.filter {
-                it.parentFolderKey == currentFolderKey && matchesFolder(it)
+                it.parentFolderKey == currentFolderKey &&
+                    (it.sourceKey != MEDIA_STORE_SOURCE_KEY ||
+                        folderMetrics.getValue(it.folderKey).videoCount > 0) &&
+                    matchesFolder(it)
             }
         }.sortedWith { left, right -> compareFolders(left, right, sort, folderMetrics) }
 
