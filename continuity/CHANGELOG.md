@@ -122,3 +122,28 @@
 - At checkpoint time, emulator database migration instrumentation was still running; overall CI is **in progress**, not passed. Release artifact ID `15098767237`, ZIP SHA-256 `cf039350a15537da866882e36ec0ecb4c8e9fcc26456b328b78c07b0b404ad49`.
 - Known deletion limitation: generation-based deltas do not generically report deleted rows; complete manual and 12-hour periodic full scans reconcile deletions.
 - Do not call this milestone verified or update native status as complete until exact-HEAD CI, instrumentation report and generated Room schema v3 are inspected.
+## VERIFIED CHECKPOINT — 26 NOVEMBER 2026 — GENERATION-AWARE INCREMENTAL MEDIASTORE SCANNING
+
+### Exact source and CI result
+- Native branch: `phase-0/release-signing`
+- Exact source SHA tested: `49a73222f29b28fba8924210aef5a8b10fe17fdf`
+- GitHub Actions [run #45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016) is now **success**, testing that exact SHA.
+- Debug job `139780302055` and release job `139780302340` both completed successfully.
+- Debug unit tests/build and emulator migration instrumentation passed. Instrumentation XML confirms **5 passed, 0 failures, 0 errors, 0 skipped**. Tests cover delta update/checkpoint commit, v1-to-v3 migration, complete snapshot publication, abandoned staging cleanup, and nested SAF DocumentsProvider directory create/list.
+- Diagnostics artifact ID `15099592389`, ZIP SHA-256 `341b2cd1186dad0e68c97d5959457cdb69b45e6891629360be75db305935b7e3`.
+- Signed release build and `apksigner` verification passed. Release artifact ID `15098767237`, ZIP SHA-256 `cf039350a15537da866882e36ec0ecb4c8e9fcc26456b328b78c07b0b404ad49`. Debug artifact ID `15099692177`, ZIP SHA-256 `0beac279091ab7d8914222e09fc73dd709542e4fbbda77ef99090da21052ca4d`.
+- Room schema v3 artifact ID `15099991005`, ZIP SHA-256 `f0e05b986fde24e0efab95f0cafe1518e4edd4cdb1bf639b6c6e368176bd03fb`; prior v2 schema artifact ID `15097206733`. Both snapshots were downloaded and parsed. v3 adds nullable `mediaStoreVersion` and `mediaStoreGeneration` checkpoint columns to `scan_states`.
+- **Schema snapshots still need to be checked into the native repository** at `android/app/schemas/com.northstar.player.core.database.NorthstarDatabase/2.json` and `3.json`. Neither path currently exists on the native branch. The exact v2 snapshot is in artifact `15097206733`; exact v3 is in artifact `15099991005`. Preserve these artifacts as source evidence; do not reconstruct schema v2.
+
+### Verified implementation and limitation
+Generation-aware incremental MediaStore scanning is now CI-verified. Incremental eligibility requires supported API, FULL permission scope, matching MediaStore version, valid checkpoint, nondecreasing generation and no force-full request. The delta query is bounded by a captured current generation; staged changes and checkpoint publish atomically. Unsafe/unsupported states fall back to full scans. Manual refresh and 12-hour periodic reconciliation force full scans.
+
+**Deletion limitation:** generation-based deltas do not generically detect deleted rows. Deletions are found by complete manual and 12-hour periodic full snapshots. Do not claim immediate deletion detection.
+
+### Immediate next task
+1. Check in the exact generated schema v2 and v3 JSON snapshots at the paths above.
+2. Update native `PROJECT_STATUS.md` and verify native/continuity branch heads after the schema commit.
+3. Do not start another engineering milestone until the schema files and status records are reconciled.
+
+### Unchanged gates
+No APK was distributed. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture behavior remain unverified device gates. Preserve package ID/signing identity, local-first privacy, AMOLED black-and-white theme, exactly three Library modes, all eight areas in one coordinated public release, and no intermediate APK distribution.
