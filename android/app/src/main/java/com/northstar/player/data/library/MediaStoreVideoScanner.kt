@@ -46,6 +46,7 @@ class MediaStoreVideoScanner(
                 val previousSuccess = previousState?.lastSuccessfulScanMillis
 
                 if (permissionScope == VideoPermissionScope.DENIED) {
+                    snapshotDao.clearStagedForSource(sourceKey)
                     repository.markSourceUnavailable(sourceKey)
                     repository.refreshFolderIndex(
                         sourceKey,
