@@ -56,3 +56,8 @@ Native commit `d00f920399d699981532985c5e07a9c4b23035fe` passed CI run [#68 / 45
 ## 26 November 2026 — Pull-to-refresh milestone passed CI
 
 Native source commit `7925d39b466897c23b74d76c9a8f08112185ec68` passed [workflow run #74](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45494565813) on retry attempt 2. Unit tests/debug build, emulator instrumentation (2/2), signed release build and signature verification passed. Four refresh-target unit tests passed; instrumentation diagnostics artifact ID `15089184886`. Pull-to-refresh is CI-verified, not yet physically accepted on Xiaomi 14 or real USB/SD providers. The Private Library long-pull shortcut remains a separate authenticated behavior. See the latest dated checkpoint in the master pack.
+
+
+
+## 26 November 2026 — Permission-aware MediaStore reconciliation passed CI
+Native commit `87183de1d23ebede848d6c59eae9106358e9093e` passed [workflow #45764030633](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45764030633). Unit tests/debug build, emulator instrumentation (4/4, 0 failures/errors/skips), signed release build and `apksigner` verification passed. Diagnostics artifact ID `15092115234`; release artifact ID `15091590357`. The implementation validates atomic MediaStore snapshot publication, abandoned-stage discard, metadata preservation and permission-aware reconciliation. No APK was distributed. Physical-device gates remain open. See the latest checkpoint in the master pack and native `PROJECT_STATUS.md` for exact evidence and next steps.
