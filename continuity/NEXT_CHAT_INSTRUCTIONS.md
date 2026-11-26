@@ -128,7 +128,7 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 
 ---
 
-## LATEST RESTART CHECKPOINT — 26 NOVEMBER 2026 — INCREMENTAL MEDIASTORE CI PENDING
+## HISTORICAL RESTART CHECKPOINT — 26 NOVEMBER 2026 — INCREMENTAL MEDIASTORE CI PENDING AT THE TIME (SUPERSEDED BY VERIFIED RESTART INSTRUCTION BELOW)
 
 1. Read the latest checkpoint in `MASTER_CONTINUATION_PACK.md`.
 2. Inspect live native branch `phase-0/release-signing`; current source commit at checkpoint is `49a73222f29b28fba8924210aef5a8b10fe17fdf`.
