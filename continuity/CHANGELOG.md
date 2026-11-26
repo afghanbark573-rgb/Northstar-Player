@@ -101,3 +101,15 @@
 - Atomic completed-snapshot publication, abandoned-stage discard, preservation of historical metadata on missing/denied media, stale-folder deactivation with identity retention, and permission reconciliation on callback/foreground are CI-verified. No Room schema migration was introduced; SAF remains isolated.
 - Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture remain unverified. No APK distributed; all eight product areas remain one coordinated release.
 - Next: inspect current plan/spec/source and live heads before selecting the next Library/Storage milestone. No casual schema changes.
+
+
+## 2026-11-26 — Automatic SAF grant reconciliation (CI-verified)
+- Source commit: `e37544cd19294774846e19dbd72657cb4307d7d4`.
+- CI run [#97 / 45775813217](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45775813217) passed on the exact commit.
+- Persisted SAF grant reachability reconciliation, unavailable-source preservation, reconnect-triggered rescan, and battery-conscious avoidance of recursive rescans for continuously mounted trees.
+- Four SAF reconciliation policy unit tests passed as part of `:app:testDebugUnitTest`.
+- Emulator instrumentation: 4 passed / 0 failed / 0 errors / 0 skipped, including Room migration and nested SAF provider integration.
+- Signed release build and `apksigner` verification passed.
+- Diagnostics artifact `15096549503`; release artifact `15096530730`; debug artifact `15096619296`; Room schema artifact `15097206733`. Release ZIP and extracted APK SHA-256: `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`.
+- No Room schema migration; no APK distributed.
+- Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture remain device gates.
