@@ -100,7 +100,12 @@ class MainActivity : ComponentActivity() {
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         loadLibrary()
-        (application as NorthstarApplication).mediaLibraryScanScheduler.enqueueRefresh()
+        val app = application as NorthstarApplication
+        if (app.videoPermissionChecker.currentScope() == com.northstar.player.core.permissions.VideoPermissionScope.DENIED) {
+            lifecycleScope.launch { app.mediaStoreVideoScanner.scan(com.northstar.player.core.permissions.VideoPermissionScope.DENIED) }
+        } else {
+            app.mediaLibraryScanScheduler.enqueueRefresh()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -814,9 +819,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Re-check the current grant scope whenever the Activity returns to foreground.
-        // The worker handles denied access by hiding the source without deleting records.
-        (application as NorthstarApplication).mediaLibraryScanScheduler.enqueueRefresh()
+        // Re-check permission scope whenever the Activity returns to foreground.
+        // Run the denied transition directly so a permission prompt's grant callback
+        // cannot be swallowed by WorkManager's KEEP policy for an in-flight refresh.
+        val app = application as NorthstarApplication
+        if (app.videoPermissionChecker.currentScope() == com.northstar.player.core.permissions.VideoPermissionScope.DENIED) {
+            lifecycleScope.launch { app.mediaStoreVideoScanner.scan(com.northstar.player.core.permissions.VideoPermissionScope.DENIED) }
+        } else {
+            app.mediaLibraryScanScheduler.enqueueRefresh()
+        }
     }
 
     override fun onStop() {
