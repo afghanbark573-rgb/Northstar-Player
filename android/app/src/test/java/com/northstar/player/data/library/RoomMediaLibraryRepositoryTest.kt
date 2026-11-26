@@ -84,6 +84,8 @@ class RoomMediaLibraryRepositoryTest {
 
         val byPath = folders.folders.associateBy { it.relativePath }
         assertTrue(byPath.containsKey("Movies/Old"))
+        assertEquals(0, byPath.getValue("Movies/Old").videoCount)
+        assertFalse(byPath.getValue("Movies/Old").containsVideos)
         assertEquals(200L, byPath.getValue("Movies/Old").acknowledgedAtMillis)
         assertEquals(100L, byPath.getValue("Movies").discoveredAtMillis)
         assertTrue(byPath.containsKey("Movies/New"))
@@ -91,7 +93,7 @@ class RoomMediaLibraryRepositoryTest {
     }
 
     @Test
-    fun fullRefreshReplacesFoldersThatAreNoLongerPresent() = kotlinx.coroutines.runBlocking {
+    fun fullRefreshDeactivatesFoldersThatAreNoLongerPresentButRetainsIdentity() = kotlinx.coroutines.runBlocking {
         val media = FakeMediaDao().apply { items += video("new", "Movies/New/") }
         val folders = FakeFolderDao().apply {
             folders += FolderEntity("media|Movies/Old", "media|Movies", "Old", "media", "Movies/Old",
@@ -100,7 +102,9 @@ class RoomMediaLibraryRepositoryTest {
 
         repository(media, folders).refreshFolderIndex("media", VideoPermissionScope.FULL, 600L)
 
-        assertFalse(folders.folders.any { it.relativePath == "Movies/Old" })
+        val old = folders.folders.single { it.relativePath == "Movies/Old" }
+        assertEquals(0, old.videoCount)
+        assertFalse(old.containsVideos)
         assertTrue(folders.folders.any { it.relativePath == "Movies/New" })
     }
 
@@ -134,5 +138,6 @@ class RoomMediaLibraryRepositoryTest {
         repository(media, folders).refreshFolderIndex("media", VideoPermissionScope.PARTIAL, 700L)
 
         assertEquals(listOf("Existing"), folders.folders.map { it.relativePath })
+        assertEquals(0, folders.folders.single().videoCount)
     }
 }
