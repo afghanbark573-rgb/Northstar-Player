@@ -458,3 +458,21 @@ The folder metadata/sorting subtask is complete for this tested commit. Re-inspe
 
 ### Next-step guardrail
 The folder NEW-state lifecycle is complete for the tested commit. Before choosing another task, inspect the current implementation plan, product spec, native status, and live source. Keep the distinct pull-to-refresh and Private Library long-pull gesture requirements separate; do not implement a gesture that opens Private Library without still requiring authentication. Also assess the remaining background/incremental scanning and permission/SAF lifecycle work against actual code before selecting the next milestone. No casual Room schema changes.
+
+
+## 2026-11-26 — Library pull-to-refresh implementation verified in CI
+
+- Native source commit: `7925d39b466897c23b74d76c9a8f08112185ec68` on `phase-0/release-signing` (corrective import for `LibraryRefreshTargets`; pull-to-refresh implementation is included in the tested source).
+- Workflow [run #74 / 45494565813](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45494565813) completed with overall conclusion **success** on that exact source SHA, retry attempt 2.
+- Debug job passed `:app:testDebugUnitTest`, `:app:assembleDebug`, and `:app:connectedDebugAndroidTest`. The four focused `LibraryRefreshTargetsTest` cases are included in the successful JVM unit-test task:
+  - `mainLibraryRefreshSelectsAllAvailableSafTrees`
+  - `safFolderRefreshSelectsOnlyItsOwningTree`
+  - `mediaStoreFolderRefreshDoesNotRescanSafTrees`
+  - `externalStoragePageRefreshesAllAvailableTrees`
+- Emulator API 35 instrumentation diagnostics artifact ID `15089184886`, SHA-256 `7c9731584722b1bf4a1bbf18974eabd6a1669acc9259c38131dbd287225088f3`, confirms **2 tests, 0 failures, 0 errors, 0 skipped**. Room v1 migration passed 1/1; nested SAF DocumentsProvider create/list integration passed 1/1. XML reports `tests="2" failures="0" errors="0" skipped="0"`; test log ends `OK (2 tests)`.
+- Debug APK artifact ID `15089374232`, SHA-256 `1df67ac1d0387179eba3f5d27fae1253ed9e9f3d46783284f7c086146a6c703b`. Room schema artifact ID `15090132138`, SHA-256 `c968ed5b4188c5a74a723daf50ebba810280e48177b8611325e236b61fac8c34`.
+- Signed release job passed keystore restoration, release build, `apksigner` verification and upload in the original attempt; it was not rerun because that job had already succeeded. Release artifact ID `14967587841`, SHA-256 `c06460e0db3e8d132be0eac7adc0cd136c42014f183a8089cb9f8f03f4ea4dba`. The overall retry run is green on the same exact source SHA.
+- Implementation wraps the library ScrollView in `SwipeRefreshLayout`; refresh scans MediaStore unless viewing external storage, refreshes available SAF grants, selects relevant SAF trees by current page/source, avoids rescanning unrelated SAF trees for a MediaStore folder, keeps the spinner active through scan work, and reports failures without adding a destructive clear-before-scan path. The current folder and selected view mode remain represented by the existing activity state/observers.
+- First attempt failed before instrumentation because the CI emulator/ADB repeatedly reported `device offline` and broken-pipe errors. Retry attempt 2 completed successfully; no application-code change was needed to address that infrastructure failure.
+- This is CI validation, not physical-device acceptance. Pull gesture behavior, real USB/SD providers, picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain unverified device gates. No APK was distributed. All eight approved product areas remain one coordinated public release.
+- Next: inspect the live implementation plan and current source before selecting the next internal Library/Storage task. Keep the Private Library pull-past-threshold-and-hold shortcut separate from ordinary refresh; authentication remains mandatory. No casual Room schema changes.
