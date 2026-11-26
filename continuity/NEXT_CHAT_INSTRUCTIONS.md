@@ -139,3 +139,11 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 7. Keep SAF isolated. Preserve package ID/signing identity, local-first privacy, AMOLED black-and-white design, exactly three library modes, eight-area coordinated public release, and no intermediate APK distribution.
 8. Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing, and manual pull gesture remain unverified device gates. No device acceptance claims.
 9. Do not start the next milestone until this CI/schema verification and documentation update are complete. Never include signing secrets or keystore bytes.
+## Latest restart instruction — 26 November 2026 — incremental MediaStore CI passed
+
+1. Read the latest verified checkpoint in `MASTER_CONTINUATION_PACK.md` and native `PROJECT_STATUS.md`.
+2. CI run [45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016) passed on exact source SHA `49a73222f29b28fba8924210aef5a8b10fe17fdf`. Both debug and signed-release jobs passed. Emulator instrumentation XML: 5 tests, 0 failures, 0 errors, 0 skipped.
+3. Next task: check in exact generated Room schema snapshots v2 and v3 under `android/app/schemas/com.northstar.player.core.database.NorthstarDatabase/`. Version 2 artifact ID `15097206733`; version 3 artifact ID `15099991005`. Both were downloaded and parsed; v3 adds nullable MediaStore version/generation checkpoint fields. Neither schema file is currently in the native repository. Do not reconstruct v2.
+4. After schema check-in, verify live branch heads and update native status plus all four continuity records. Do not begin another engineering milestone before this housekeeping is complete.
+5. Incremental generation scans do not generically detect deletions; full manual and 12-hour periodic scans reconcile deletions.
+6. No APK was distributed. Physical USB/SD, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture remain unverified device gates. Preserve all project guardrails and do not claim device acceptance.
