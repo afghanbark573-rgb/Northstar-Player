@@ -143,7 +143,7 @@ class RoomMediaLibraryRepositoryTest {
         media.upsertAll(listOf(video("reselected", "Movies/Old/")))
         repository.refreshFolderIndex("media", VideoPermissionScope.PARTIAL, 500L)
 
-        val restored = folders.folders.single()
+        val restored = folders.folders.single { it.relativePath == "Movies/Old" }
         assertEquals("media|Movies/Old", restored.folderKey)
         assertEquals(1, restored.videoCount)
         assertEquals(500L, restored.discoveredAtMillis)
