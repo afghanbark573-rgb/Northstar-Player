@@ -522,7 +522,7 @@ XML report: **4 tests, 0 failures, 0 errors, 0 skipped**:
 The SAF reconciliation policy's four JVM unit tests cover new disconnection, persistent unavailability, reconnection-triggered rescan, and avoiding recursive rescans of continuously mounted trees. The `:app:testDebugUnitTest` task passed.
 
 ### Build artifacts
-- Signed release artifact ID `15096530730`; ZIP SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`; extracted `app-release.apk` SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`.
+- Signed release artifact ID `15096530730`; ZIP SHA-256 `7efceb79324d0d250afc019f1dcd1f4d932d6ff49a8b7414b3dd9dd33328fe01`; extracted `app-release.apk` SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`.
 - Debug artifact ID `15096619296`; ZIP SHA-256 `a56c5dedb43426b841d0c86bac2d8abb5c70951ff5bba07a948afbb58b02f19f`.
 - Room schema artifact ID `15097206733`; ZIP SHA-256 `890eaf76897b3ea5e926b684bfe5999db2ceca6c15165d2aa8f9d279873e5f97`. No Room schema change/migration was introduced.
 
