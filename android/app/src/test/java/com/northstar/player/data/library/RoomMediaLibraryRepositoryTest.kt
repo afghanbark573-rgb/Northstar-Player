@@ -128,6 +128,29 @@ class RoomMediaLibraryRepositoryTest {
     }
 
     @Test
+    fun reselectedFolderRestoresItsIdentityAndAdvancesNewMarker() = kotlinx.coroutines.runBlocking {
+        val media = FakeMediaDao().apply { items += video("old", "Movies/Old/") }
+        val folders = FakeFolderDao().apply {
+            folders += FolderEntity("media|Movies/Old", "media|Movies", "Old", "media", "Movies/Old",
+                true, 1, 0, 100L, 100L)
+        }
+        val repository = repository(media, folders)
+
+        media.markSourceUnavailable("media")
+        repository.refreshFolderIndex("media", VideoPermissionScope.PARTIAL, 300L)
+        assertEquals(0, folders.folders.single().videoCount)
+
+        media.upsertAll(listOf(video("reselected", "Movies/Old/")))
+        repository.refreshFolderIndex("media", VideoPermissionScope.PARTIAL, 500L)
+
+        val restored = folders.folders.single()
+        assertEquals("media|Movies/Old", restored.folderKey)
+        assertEquals(1, restored.videoCount)
+        assertEquals(500L, restored.discoveredAtMillis)
+        assertEquals(100L, restored.acknowledgedAtMillis)
+    }
+
+    @Test
     fun emptyPartialRefreshDoesNotEraseExistingFolders() = kotlinx.coroutines.runBlocking {
         val media = FakeMediaDao()
         val folders = FakeFolderDao().apply {
