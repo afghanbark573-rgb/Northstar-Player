@@ -542,7 +542,7 @@ Confirm live native and continuity branch heads, read the product spec and integ
 
 ---
 
-## CURRENT CHECKPOINT — 26 NOVEMBER 2026 — GENERATION-AWARE INCREMENTAL MEDIASTORE SCANNING (CI PENDING)
+## HISTORICAL CHECKPOINT — 26 NOVEMBER 2026 — GENERATION-AWARE INCREMENTAL MEDIASTORE SCANNING (PENDING AT THE TIME; SUPERSEDED BY VERIFIED CHECKPOINT BELOW)
 
 ### Repository and exact source under test
 - Native repository: https://github.com/afghanbark573-rgb/Northstar-Player
