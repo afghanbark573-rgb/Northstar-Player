@@ -98,3 +98,16 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 7. Before next coding milestone, declare Main Quest, bundled Side Quests, exact files, risks, acceptance criteria and regression tests. No casual Room schema changes.
 8. Preserve local-first privacy, package ID `com.northstar.player`, permanent signing identity, AMOLED black-and-white direction, exactly three library modes, all eight approved product areas as one coordinated public release, and no intermediate APK distribution.
 9. After each successful milestone, update native `PROJECT_STATUS.md` and all four continuity records before proceeding. Never include signing secrets or keystore bytes.
+
+
+
+## Latest restart instruction — 26 November 2026, after MediaStore reconciliation CI run #45764030633
+
+1. Confirm native HEAD and inspect the live branch; this checkpoint tests exact source SHA `87183de1d23ebede848d6c59eae9106358e9093e`.
+2. Workflow [#45764030633](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45764030633) completed success. JVM unit tests/debug build, emulator instrumentation (4/4; 0 failures/errors/skips), signed release build and `apksigner` verification passed.
+3. Instrumentation XML confirms: `mediaStoreSnapshotPublicationHidesMissingRowsWithoutDeletingTheirMetadata`; `abandonedMediaStoreStageCanBeDiscardedWithoutChangingVisibleSnapshot`; `migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable`; `createsAndListsDirectoryInsideNestedDocumentProviderFolder`. Diagnostics artifact ID `15092115234`, ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`.
+4. Release artifact ID `15091590357`, ZIP SHA-256 `f5589bc6578fb8aae8c39699b15d674e9520a1387090e51a1d3cf615ea0aafff`; extracted APK SHA-256 `b35e9a7cf6fa1d3e18c890e5086d6c76bb9b05ec334d63954a2c92135a558c56`. Debug artifact ID `15092045614`; Room schema artifact ID `15092055600`.
+5. The milestone implements permission-aware full/partial/denied reconciliation, atomic staging/publication, preservation of historical metadata on missing/denied media, stale MediaStore folder deactivation with identity retention, and permission checks on callback/app foreground. No Room schema migration; SAF remains isolated.
+6. Re-read current product spec, implementation plan, native status and live source before choosing the next task. Explicitly map background/incremental scan work, SAF grant/revocation lifecycle and hierarchy integration to actual code; do not assume gaps.
+7. Keep USB/SD provider behavior, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture as unverified device gates until physically tested. CI is not device acceptance.
+8. Preserve local-first privacy, package ID/signing identity, AMOLED black-and-white direction, exactly three library modes, all eight approved product areas as one coordinated public release, and no intermediate APK distribution. Before coding, state Main Quest, bundled Side Quests, files, risks, acceptance criteria and tests. No casual Room schema changes.
