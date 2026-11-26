@@ -146,8 +146,15 @@ class NorthstarDatabaseMigrationTest {
                 )
             )
 
-            database.safSnapshotDao().publishMediaStoreSnapshot(sourceKey, 200L)
+            database.safSnapshotDao().publishMediaStoreFullSnapshot(
+                sourceKey,
+                200L,
+                ScanStateEntity(sourceKey, 200L, "FULL", null, null, "volume-v1", 22L)
+            )
 
+            val committedState = database.scanStateDao().get(sourceKey)
+            assertEquals("volume-v1", committedState?.mediaStoreVersion)
+            assertEquals(22L, committedState?.mediaStoreGeneration)
             val visible = database.mediaItemDao().availableForSource(sourceKey).map { it.mediaKey }.toSet()
             assertEquals(setOf("kept", "added"), visible)
             val removed = database.mediaItemDao().findByKey("removed")
