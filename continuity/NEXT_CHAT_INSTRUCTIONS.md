@@ -124,3 +124,18 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 6. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull/Private Library long-pull behavior remain unverified device gates. Do not claim device acceptance. No APK distributed.
 7. Before selecting the next task, inspect the live product spec, integrated implementation plan, native source/status, and both branch heads. Declare Main Quest, bundled Side Quests, files, risks, acceptance criteria and regression tests before coding.
 8. Preserve package ID `com.northstar.player`, permanent signing identity, local-first privacy, AMOLED black-and-white direction, exactly three library modes, all eight product areas as one coordinated public release, and no intermediate APK distribution. No casual Room schema changes.
+
+
+---
+
+## LATEST RESTART CHECKPOINT — 26 NOVEMBER 2026 — INCREMENTAL MEDIASTORE CI PENDING
+
+1. Read the latest checkpoint in `MASTER_CONTINUATION_PACK.md`.
+2. Inspect live native branch `phase-0/release-signing`; current source commit at checkpoint is `49a73222f29b28fba8924210aef5a8b10fe17fdf`.
+3. Poll CI [run #45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016), which tests that exact SHA. At checkpoint time: unit tests/debug build passed; signed release build and `apksigner` verification passed; emulator database migration instrumentation remained in progress. Release artifact ID `15098767237`, ZIP SHA-256 `cf039350a15537da866882e36ec0ecb4c8e9fcc26456b328b78c07b0b404ad49`.
+4. If CI fails, inspect logs and instrumentation diagnostics before edits. If it succeeds, inspect instrumentation XML/HTML, download and inspect Room schema v3, and check in exact schema v2 and v3 snapshots. Then update native `PROJECT_STATUS.md` and all continuity records with verified evidence.
+5. Incremental scanning uses MediaStore version/generation checkpoints and atomic staged delta publication. Full scans are fallback for older API, partial permissions, version/checkpoint changes, generation rollback, and forced reconciliation. Manual refresh and the 12-hour periodic worker force full snapshots.
+6. Important: incremental generation queries do not generically track deletions. Complete manual and 12-hour periodic full snapshots detect deletions; do not claim immediate deletion detection.
+7. Keep SAF isolated. Preserve package ID/signing identity, local-first privacy, AMOLED black-and-white design, exactly three library modes, eight-area coordinated public release, and no intermediate APK distribution.
+8. Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing, and manual pull gesture remain unverified device gates. No device acceptance claims.
+9. Do not start the next milestone until this CI/schema verification and documentation update are complete. Never include signing secrets or keystore bytes.
