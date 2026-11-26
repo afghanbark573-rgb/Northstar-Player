@@ -21,10 +21,18 @@ class MediaLibraryScanWorker(
         // accessible set while retaining local metadata; denial is not a retryable error.
         if (scope == VideoPermissionScope.DENIED) {
             app.mediaStoreVideoScanner.scan(scope)
-            return Result.success()
+            return if (app.videoPermissionChecker.currentScope() == scope) {
+                Result.success()
+            } else {
+                Result.retry()
+            }
         }
 
         val scan = app.mediaStoreVideoScanner.scan(scope)
+        // If Android's selected-media set changed during the scan, do not treat the
+        // just-published visibility set as current; retry against the new grant scope.
+        if (app.videoPermissionChecker.currentScope() != scope) return Result.retry()
+
         return scan.fold(
             onSuccess = { Result.success() },
             onFailure = {
