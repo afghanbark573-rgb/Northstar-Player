@@ -28,7 +28,7 @@ class MediaLibraryScanScheduler(context: Context) {
 
         workManager.enqueueUniquePeriodicWork(
             MediaLibraryScanWorker.UNIQUE_PERIODIC_WORK,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             request
         )
     }
