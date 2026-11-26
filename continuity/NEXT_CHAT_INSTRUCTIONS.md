@@ -85,3 +85,16 @@ Standard restart phrase: **“Let's continue the Northstar Player project from t
 5. Before coding, declare Main Quest, bundled Side Quests, exact files, risks, acceptance criteria and regression tests. No casual Room schema changes.
 6. Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing remain unverified device gates. No intermediate APK distribution; all eight product areas remain one coordinated public release.
 7. After each successful milestone, update native `PROJECT_STATUS.md` and all four continuity records before proceeding. Never include signing secrets or keystore bytes.
+
+
+## Latest restart instruction — 26 November 2026, after pull-to-refresh CI run #74
+
+1. Confirm native branch `phase-0/release-signing` and inspect live HEAD; tested source commit is `7925d39b466897c23b74d76c9a8f08112185ec68`.
+2. CI [run #74 / 45494565813](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45494565813) completed success on retry attempt 2. Unit tests/debug build, emulator instrumentation (2/2), signed release build and signature verification passed.
+3. Pull-to-refresh target selection has four passing JVM tests. Instrumentation diagnostics artifact `15089184886` confirms Room migration and nested SAF provider integration, 2 passed / 0 failed / 0 errors / 0 skipped. Debug artifact `15089374232`; Room schema artifact `15090132138`; signed release artifact `14967587841` (release job passed in original attempt and was retained during retry).
+4. Read the latest dated checkpoint in `MASTER_CONTINUATION_PACK.md` and native `PROJECT_STATUS.md`. Inspect the current product spec, implementation plan, source and live branch heads before choosing the next internal task.
+5. Pull-to-refresh milestone is CI-verified. Do not confuse CI with Xiaomi 14/physical-device acceptance. Outstanding device gates: physical USB/SD providers, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing upgrade, and manual pull gesture behavior.
+6. Ordinary pull-to-refresh is separate from the Private Library pull-past-threshold-and-hold shortcut. Private Library must always require authentication; do not implement or describe any authentication bypass.
+7. Before next coding milestone, declare Main Quest, bundled Side Quests, exact files, risks, acceptance criteria and regression tests. No casual Room schema changes.
+8. Preserve local-first privacy, package ID `com.northstar.player`, permanent signing identity, AMOLED black-and-white direction, exactly three library modes, all eight approved product areas as one coordinated public release, and no intermediate APK distribution.
+9. After each successful milestone, update native `PROJECT_STATUS.md` and all four continuity records before proceeding. Never include signing secrets or keystore bytes.
