@@ -110,6 +110,6 @@
 - Four SAF reconciliation policy unit tests passed as part of `:app:testDebugUnitTest`.
 - Emulator instrumentation: 4 passed / 0 failed / 0 errors / 0 skipped, including Room migration and nested SAF provider integration.
 - Signed release build and `apksigner` verification passed.
-- Diagnostics artifact `15096549503`; release artifact `15096530730`; debug artifact `15096619296`; Room schema artifact `15097206733`. Release ZIP and extracted APK SHA-256: `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`.
+- Diagnostics artifact `15096549503`; release artifact `15096530730`; debug artifact `15096619296`; Room schema artifact `15097206733`. Release ZIP SHA-256: `7efceb79324d0d250afc019f1dcd1f4d932d6ff49a8b7414b3dd9dd33328fe01`; extracted APK SHA-256: `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`. Diagnostics ZIP SHA-256: `8c8888439932a14614e81e50368eb0c909492b4dace52ca880d500e43024e3be`; debug ZIP SHA-256: `a56c5dedb43426b841d0c86bac2d8abb5c70951ff5bba07a948afbb58b02f19f`; Room schema ZIP SHA-256: `890eaf76897b3ea5e926b684bfe5999db2ceca6c15165d2aa8f9d279873e5f97`.
 - No Room schema migration; no APK distributed.
 - Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture remain device gates.
