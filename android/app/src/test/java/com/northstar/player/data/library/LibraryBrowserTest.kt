@@ -153,6 +153,7 @@ class LibraryBrowserTest {
         )
         val folders = listOf(
             folder("movies", null, "Movies", "Movies", 1, "mediastore:external"),
+            folder("current", "movies", "Current", "Movies/Current", 1, "mediastore:external"),
             folder("stale", "movies", "Old selection", "Movies/Old", 2, "mediastore:external"),
             folder("usb-empty", null, "Empty USB folder", "", 0, "saf:usb")
         )
