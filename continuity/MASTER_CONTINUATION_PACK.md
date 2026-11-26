@@ -476,3 +476,25 @@ The folder NEW-state lifecycle is complete for the tested commit. Before choosin
 - First attempt failed before instrumentation because the CI emulator/ADB repeatedly reported `device offline` and broken-pipe errors. Retry attempt 2 completed successfully; no application-code change was needed to address that infrastructure failure.
 - This is CI validation, not physical-device acceptance. Pull gesture behavior, real USB/SD providers, picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain unverified device gates. No APK was distributed. All eight approved product areas remain one coordinated public release.
 - Next: inspect the live implementation plan and current source before selecting the next internal Library/Storage task. Keep the Private Library pull-past-threshold-and-hold shortcut separate from ordinary refresh; authentication remains mandatory. No casual Room schema changes.
+
+
+
+## CURRENT CHECKPOINT UPDATE — 26 NOVEMBER 2026 — Permission-aware MediaStore reconciliation CI passed
+
+### Permission-aware MediaStore reconciliation — CI run #45764030633 passed
+
+- Native source commit: `87183de1d23ebede848d6c59eae9106358e9093e` on `phase-0/release-signing`.
+- Workflow [run #45764030633](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45764030633) completed with overall conclusion **success** on that exact SHA. Both debug and signed release jobs passed.
+- JVM unit tests and debug APK build passed. Emulator API 35 instrumentation reports **4 passed, 0 failures, 0 errors, 0 skipped**. The four tests cover atomic MediaStore snapshot publication preserving metadata for missing rows, discarding abandoned staging without changing the visible snapshot, Room v1 migration, and nested SAF DocumentsProvider create/list integration. Exact XML: `tests="4" failures="0" errors="0" skipped="0"`.
+- Diagnostics artifact ID `15092115234`, ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`. Test XML/HTML reports were downloaded and inspected.
+- Signed release build restored the permanent signing key, built the APK and passed `apksigner` verification. Release artifact ID `15091590357`, ZIP SHA-256 `f5589bc6578fb8aae8c39699b15d674e9520a1387090e51a1d3cf615ea0aafff`; extracted APK SHA-256 `b35e9a7cf6fa1d3e18c890e5086d6c76bb9b05ec334d63954a2c92135a558c56`. Debug artifact ID `15092045614`, ZIP SHA-256 `b81a04a8a0167dedbf1b702462fa635302bc8300e946ac0078e347200ad8fefd`. Room schema artifact ID `15092055600`, ZIP SHA-256 `b3a12163e43dcc0b7701c0e9ed6f822634dc6477a864c33a4aa1b36d332fc528`.
+- The scanner stages query results in batches and publishes only after a complete query. Failed/cancelled scans discard staging and preserve the last successful visible snapshot. Denied permission marks MediaStore unavailable without deleting historical records or user metadata. Stale folders are hidden/deactivated while identity and NEW-state history are retained. Permission changes are reconciled on permission callbacks and app foreground; SAF remains source-isolated. No Room schema migration was added.
+- CI evidence is not physical-device acceptance. USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing upgrade, and manual pull gesture behavior remain outstanding. **No APK was distributed**; the eight approved product areas remain one coordinated public release.
+
+### Next chat / engineering sequence
+1. Confirm the live native branch and source HEAD; this checkpoint validates exact SHA `87183de1d23ebede848d6c59eae9106358e9093e`.
+2. Read current product spec, integrated implementation plan, and native `PROJECT_STATUS.md`; inspect the current source before selecting the next task.
+3. Map remaining background/incremental scanning, SAF persisted-grant/revocation lifecycle, and hierarchy integration to actual implementation. Do not assume these are outstanding without checking.
+4. Before coding, declare Main Quest, bundled Side Quests, affected files, risks, acceptance criteria, and regression tests. Avoid casual Room schema changes.
+5. Preserve local-first privacy, package ID `com.northstar.player`, permanent signing identity, AMOLED black-and-white direction, exactly three library modes, and one coordinated public release for all eight product areas. No intermediate APK distribution.
+6. Physical USB/SD, real picker/persisted grants, Xiaomi 14 acceptance, signed install-over-existing upgrade and manual pull gesture remain device gates until tested on real hardware.
