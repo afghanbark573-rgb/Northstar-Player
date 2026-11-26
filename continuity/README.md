@@ -67,3 +67,7 @@ Native commit `87183de1d23ebede848d6c59eae9106358e9093e` passed [workflow #45764
 
 ## Latest checkpoint — 26 November 2026
 The automatic SAF grant reconciliation milestone is CI-verified on exact native source commit `e37544cd19294774846e19dbd72657cb4307d7d4`. See the final dated checkpoint in [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md), the corresponding [CHANGELOG.md](CHANGELOG.md) entry, and [NEXT_CHAT_INSTRUCTIONS.md](NEXT_CHAT_INSTRUCTIONS.md). CI run [#97 / 45775813217](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45775813217) passed, including four emulator instrumentation tests and signed-release signature verification. Physical USB/SD, actual picker/grant lifecycle, Xiaomi 14, upgrade and manual gesture checks remain outstanding.
+
+
+## Latest checkpoint — 26 November 2026
+The current native milestone is generation-aware incremental MediaStore scanning, implemented at source commit `49a73222f29b28fba8924210aef5a8b10fe17fdf`. CI run [#45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016) is still **in progress**: unit tests/debug build and signed release/signature verification passed, but database migration instrumentation had not completed at checkpoint time. Read the latest checkpoint section in [MASTER_CONTINUATION_PACK.md](MASTER_CONTINUATION_PACK.md) and follow [NEXT_CHAT_INSTRUCTIONS.md](NEXT_CHAT_INSTRUCTIONS.md) before continuing. Do not mark the milestone verified until the workflow and Room schema v3 checks are complete.
