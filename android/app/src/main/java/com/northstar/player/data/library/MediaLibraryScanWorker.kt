@@ -7,6 +7,20 @@ import com.northstar.player.NorthstarApplication
 import com.northstar.player.core.permissions.VideoPermissionScope
 import com.northstar.player.data.storage.SafGrantReconciliationAction
 import com.northstar.player.data.storage.SafGrantReconciliationPolicy
+import kotlinx.coroutines.CancellationException
+
+/**
+ * Converts ordinary reconciliation errors into a retry signal, but never consumes coroutine
+ * cancellation. WorkManager cancellation must remain cooperative and stop this worker promptly.
+ */
+internal suspend fun <T> runSafReconciliation(block: suspend () -> T): Result<T> =
+    try {
+        Result.success(block())
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        Result.failure(error)
+    }
 
 /**
  * Deferrable, process-safe reconciliation entry point. WorkManager owns retry and lifecycle.
@@ -24,7 +38,7 @@ class MediaLibraryScanWorker(
         val mediaStoreScan = app.mediaStoreVideoScanner.scan(scope)
         if (app.videoPermissionChecker.currentScope() != scope) return Result.retry()
 
-        val safNeedsRetry = try {
+        val safReconciliation = runSafReconciliation {
             val changes = app.safTreeGrantManager.refreshGrantAvailabilityChanges()
             var needsRetry = false
             changes.forEach { change ->
@@ -53,9 +67,8 @@ class MediaLibraryScanWorker(
                 }
             }
             needsRetry
-        } catch (_: Exception) {
-            true
         }
+        val safNeedsRetry = safReconciliation.getOrElse { true }
 
         if (safNeedsRetry) {
             return if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
