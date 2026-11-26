@@ -96,7 +96,7 @@
 
 - Native source commit `87183de1d23ebede848d6c59eae9106358e9093e`; workflow [#45764030633](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45764030633) completed success on the exact SHA. Debug and release jobs passed.
 - JVM unit tests/debug build passed. Emulator API 35 instrumentation XML confirms 4 passed, 0 failures/errors/skips: two MediaStore snapshot/staging regression cases, Room v1 migration, and nested SAF provider integration.
-- Diagnostics artifact ID `15092115234`, ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`.
+- Diagnostics artifact ID `15092115234`, ZIP SHA-256 `8c8888439932a14614e81e50368eb0c909492b4dace52ca880d500e43024e3be`.
 - Signed release build and `apksigner` verification passed. Release artifact ID `15091590357`, ZIP SHA-256 `f5589bc6578fb8aae8c39699b15d674e9520a1387090e51a1d3cf615ea0aafff`; extracted APK SHA-256 `b35e9a7cf6fa1d3e18c890e5086d6c76bb9b05ec334d63954a2c92135a558c56`. Debug artifact ID `15092045614`; Room schema artifact ID `15092055600`.
 - Atomic completed-snapshot publication, abandoned-stage discard, preservation of historical metadata on missing/denied media, stale-folder deactivation with identity retention, and permission reconciliation on callback/foreground are CI-verified. No Room schema migration was introduced; SAF remains isolated.
 - Physical USB/SD, real picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture remain unverified. No APK distributed; all eight product areas remain one coordinated release.
