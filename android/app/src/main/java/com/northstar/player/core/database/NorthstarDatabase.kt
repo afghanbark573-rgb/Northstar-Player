@@ -80,7 +80,9 @@ data class ScanStateEntity(
     val lastSuccessfulScanMillis: Long?,
     val permissionScope: String,
     val inProgressSinceMillis: Long?,
-    val lastError: String?
+    val lastError: String?,
+    val mediaStoreVersion: String? = null,
+    val mediaStoreGeneration: Long? = null
 )
 
 @Entity(tableName = "new_content_states", indices = [Index("folderKey")])
@@ -266,7 +268,32 @@ interface SafSnapshotDao {
         clearStagedForSource(sourceKey)
     }
 
-    /** Atomically publishes a complete MediaStore visibility snapshot. */
+    /** Atomically publishes a complete MediaStore visibility snapshot and its checkpoint. */
+    @Transaction
+    suspend fun publishMediaStoreFullSnapshot(
+        sourceKey: String,
+        generationMillis: Long,
+        successfulState: ScanStateEntity
+    ) {
+        publishStagedMedia(sourceKey, generationMillis)
+        markMissingMediaUnavailable(sourceKey, generationMillis)
+        saveSuccessfulScan(successfulState)
+        clearStagedForSource(sourceKey)
+    }
+
+    /** Atomically applies changed rows and advances the generation checkpoint. */
+    @Transaction
+    suspend fun publishMediaStoreDelta(
+        sourceKey: String,
+        generationMillis: Long,
+        successfulState: ScanStateEntity
+    ) {
+        publishStagedMedia(sourceKey, generationMillis)
+        saveSuccessfulScan(successfulState)
+        clearStagedForSource(sourceKey)
+    }
+
+    /** Kept for focused DAO tests and legacy callers that publish without a checkpoint. */
     @Transaction
     suspend fun publishMediaStoreSnapshot(sourceKey: String, generationMillis: Long) {
         publishStagedMedia(sourceKey, generationMillis)
@@ -308,7 +335,7 @@ interface ExternalTreeGrantDao {
         ExternalTreeGrantEntity::class,
         SafStagedMediaEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class NorthstarDatabase : RoomDatabase() {
@@ -346,13 +373,20 @@ abstract class NorthstarDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE scan_states ADD COLUMN mediaStoreVersion TEXT")
+                db.execSQL("ALTER TABLE scan_states ADD COLUMN mediaStoreGeneration INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): NorthstarDatabase =
             instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     NorthstarDatabase::class.java,
                     "northstar.db"
-                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
             }
     }
 }
