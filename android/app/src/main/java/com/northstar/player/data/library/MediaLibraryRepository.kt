@@ -66,12 +66,19 @@ class RoomMediaLibraryRepository(
             )
         }
 
-        if (permissionScope == VideoPermissionScope.FULL) {
-            // A complete library scan is the only evidence that a folder disappeared.
-            folderDao.replaceForSource(sourceKey, refreshed)
-        } else {
-            // Partial visibility cannot prove that previously indexed folders vanished.
-            if (refreshed.isNotEmpty()) folderDao.upsertAll(refreshed)
-        }
+        // Keep historical folder identity and NEW acknowledgement, but deactivate
+        // folders that have no videos in the currently visible MediaStore snapshot.
+        // If Android later grants access again, the same folder key restores its state.
+        val refreshedKeys = refreshed.mapTo(mutableSetOf()) { it.folderKey }
+        val inactive = previous.values
+            .filterNot { it.folderKey in refreshedKeys }
+            .map { old ->
+                old.copy(
+                    containsVideos = false,
+                    videoCount = 0,
+                    childFolderCount = 0
+                )
+            }
+        folderDao.replaceForSource(sourceKey, refreshed + inactive)
     }
 }
