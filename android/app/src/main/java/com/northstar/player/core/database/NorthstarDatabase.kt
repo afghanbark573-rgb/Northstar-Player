@@ -265,6 +265,14 @@ interface SafSnapshotDao {
         saveSuccessfulScan(successfulState)
         clearStagedForSource(sourceKey)
     }
+
+    /** Atomically publishes a complete MediaStore visibility snapshot. */
+    @Transaction
+    suspend fun publishMediaStoreSnapshot(sourceKey: String, generationMillis: Long) {
+        publishStagedMedia(sourceKey, generationMillis)
+        markMissingMediaUnavailable(sourceKey, generationMillis)
+        clearStagedForSource(sourceKey)
+    }
 }
 
 @Dao
