@@ -17,8 +17,12 @@ class MediaLibraryScanWorker(
         val app = applicationContext as NorthstarApplication
         val scope = app.videoPermissionChecker.currentScope()
 
-        // Permission is user-controlled. Do not retry indefinitely while it is denied.
-        if (scope == VideoPermissionScope.DENIED) return Result.success()
+        // Permission is user-controlled. Reconcile the visible library to an empty
+        // accessible set while retaining local metadata; denial is not a retryable error.
+        if (scope == VideoPermissionScope.DENIED) {
+            app.mediaStoreVideoScanner.scan(scope)
+            return Result.success()
+        }
 
         val scan = app.mediaStoreVideoScanner.scan(scope)
         return scan.fold(
