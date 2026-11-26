@@ -9,6 +9,11 @@ import com.northstar.player.core.database.ExternalTreeGrantEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+data class SafGrantAvailabilityChange(
+    val grant: ExternalTreeGrantEntity,
+    val wasAvailable: Boolean
+)
+
 /**
  * Owns persistable SAF permissions and the Room record describing each selected tree.
  * The actual tree URI is kept locally because Android requires it to reopen the provider.
@@ -49,17 +54,28 @@ class SafTreeGrantManager(
     }
 
     suspend fun refreshGrantAvailability(): List<ExternalTreeGrantEntity> =
+        refreshGrantAvailabilityChanges().map { it.grant }
+
+    /**
+     * Returns the previous state alongside the refreshed state so background work can
+     * distinguish a newly reconnected tree (which needs a fresh index) from a tree that
+     * remained mounted. No media rows are touched here.
+     */
+    suspend fun refreshGrantAvailabilityChanges(): List<SafGrantAvailabilityChange> =
         withContext(Dispatchers.IO) {
             val persisted = resolver.persistedUriPermissions
                 .filter { it.isReadPermission }
                 .map { it.uri.toString() }
                 .toSet()
-            dao.all().forEach { grant ->
+            dao.all().map { grant ->
                 val available = grant.treeUri in persisted &&
                     canReachTree(Uri.parse(grant.treeUri))
                 dao.setAvailability(grant.treeUri, available)
+                SafGrantAvailabilityChange(
+                    grant = grant.copy(isAvailable = available),
+                    wasAvailable = grant.isAvailable
+                )
             }
-            dao.all()
         }
 
     /** A persisted grant alone does not prove a removable USB/SD provider is still mounted. */
