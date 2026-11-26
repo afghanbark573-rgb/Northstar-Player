@@ -51,3 +51,8 @@ Native commit `9b84ea24a1f11671aca54c10a339dc161307473d` passed CI run [#60 / 45
 
 ## 25 November 2026 — Folder NEW-state lifecycle passed
 Native commit `d00f920399d699981532985c5e07a9c4b23035fe` passed CI run [#68 / 45483698896](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45483698896). Unit tests/debug build, emulator instrumentation (2/2, no failures), signed release build and APK signature verification passed. Diagnostics artifact ID `14964397667`; release artifact ID `14963031377`. Folder NEW markers now persist until acknowledgement and update for new descendant content using existing Room fields; no schema migration. Artifacts were not distributed. Physical-device gates remain open. See the latest master-pack checkpoint for exact evidence.
+
+
+## 26 November 2026 — Pull-to-refresh milestone passed CI
+
+Native source commit `7925d39b466897c23b74d76c9a8f08112185ec68` passed [workflow run #74](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45494565813) on retry attempt 2. Unit tests/debug build, emulator instrumentation (2/2), signed release build and signature verification passed. Four refresh-target unit tests passed; instrumentation diagnostics artifact ID `15089184886`. Pull-to-refresh is CI-verified, not yet physically accepted on Xiaomi 14 or real USB/SD providers. The Private Library long-pull shortcut remains a separate authenticated behavior. See the latest dated checkpoint in the master pack.
