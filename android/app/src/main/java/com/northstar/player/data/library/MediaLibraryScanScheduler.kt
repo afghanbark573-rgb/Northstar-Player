@@ -2,6 +2,7 @@ package com.northstar.player.data.library
 
 import android.content.Context
 import androidx.work.BackoffPolicy
+import androidx.work.Data
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -49,6 +50,7 @@ class MediaLibraryScanScheduler(context: Context) {
         .build()
 
     companion object {
+        const val INPUT_FORCE_FULL = "force_full_reconciliation"
         private const val PERIODIC_INTERVAL_HOURS = 12L
     }
 }
