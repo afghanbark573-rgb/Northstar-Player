@@ -22,6 +22,7 @@ class MediaLibraryScanScheduler(context: Context) {
             TimeUnit.HOURS
         )
             .setConstraints(localScanConstraints())
+            .setInputData(Data.Builder().putBoolean(INPUT_FORCE_FULL, true).build())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
 
