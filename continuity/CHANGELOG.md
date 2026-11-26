@@ -76,3 +76,16 @@
 - Debug artifact ID `14964815811`, SHA-256 `bc15724c02fc50bf63354fd1ab47d31d059a1fa094c6dfe685d5600dce0f4ccc`. Room schema artifact ID `14964681631`, SHA-256 `b18dad2293c8469ac18a972f1b0fb00245848ed3944e354fd032307ae24dd6ce`.
 - Implementation reuses existing `discoveredAtMillis` and `acknowledgedAtMillis` fields. Shared `FolderNewState` logic is used by MediaStore and SAF; new descendant videos or child folders advance discovery state; opening a folder acknowledges it. Same-millisecond discoveries are handled without losing the NEW state. No Room schema migration was introduced.
 - Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance and signed install-over-existing upgrade remain **unverified device gates**. CI artifacts are engineering evidence only. **No APK was distributed**; all eight approved product areas remain one coordinated public release.
+
+
+## 2026-11-26 — Library pull-to-refresh CI run #74 passed
+
+- Native source SHA: `7925d39b466897c23b74d76c9a8f08112185ec68`.
+- Workflow [run #74 / 45494565813](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45494565813) completed success on retry attempt 2. Unit tests/debug build, emulator instrumentation, signed release build and signature verification passed.
+- Four `LibraryRefreshTargetsTest` unit cases passed as part of `:app:testDebugUnitTest`; they cover all available SAF trees on the main/external-storage pages, only the owning tree for a SAF folder, and no unrelated SAF rescan for a MediaStore folder.
+- Diagnostics artifact ID `15089184886`, SHA-256 `7c9731584722b1bf4a1bbf18974eabd6a1669acc9259c38131dbd287225088f3`: emulator API 35 XML and test log confirm 2/2 instrumentation tests passed, 0 failures/errors/skips (Room migration and nested SAF provider create/list).
+- Debug artifact ID `15089374232`, SHA-256 `1df67ac1d0387179eba3f5d27fae1253ed9e9f3d46783284f7c086146a6c703b`; Room schema artifact ID `15090132138`, SHA-256 `c968ed5b4188c5a74a723daf50ebba810280e48177b8611325e236b61fac8c34`.
+- Signed release artifact ID `14967587841`, SHA-256 `c06460e0db3e8d132be0eac7adc0cd136c42014f183a8089cb9f8f03f4ea4dba`; release build and `apksigner` verification passed in the original run attempt and were retained during the debug-only retry.
+- Initial attempt's instrumentation stage was blocked by transient emulator/ADB offline/broken-pipe errors; retry attempt 2 passed without an application-code change for that infrastructure issue.
+- CI evidence only. Physical pull gesture behavior, real USB/SD, picker/persisted grants, Xiaomi 14 acceptance and signed upgrade-over-existing remain unverified. No APK distributed; eight approved areas remain one coordinated release.
+- Next milestone selection must re-inspect the live implementation plan/source. Keep ordinary pull-to-refresh distinct from the Private Library long-pull authentication shortcut.
