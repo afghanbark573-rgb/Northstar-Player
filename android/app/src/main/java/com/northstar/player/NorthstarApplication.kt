@@ -40,7 +40,8 @@ class NorthstarApplication : Application() {
     val mediaStoreVideoScanner: MediaStoreVideoScanner by lazy {
         MediaStoreVideoScanner(
             contentResolver,
-            mediaLibraryRepository
+            mediaLibraryRepository,
+            database.safSnapshotDao()
         )
     }
 
