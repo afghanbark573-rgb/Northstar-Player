@@ -2,7 +2,9 @@ package com.northstar.player.data.library
 
 import android.content.ContentUris
 import android.content.ContentResolver
+import android.content.Context
 import android.database.Cursor
+import android.os.Build
 import android.provider.MediaStore
 import com.northstar.player.core.database.SafStagedMediaEntity
 import com.northstar.player.core.database.ScanStateEntity
@@ -21,16 +23,26 @@ import java.io.IOException
 data class MediaScanResult(
     val discoveredCount: Int,
     val permissionScope: VideoPermissionScope,
-    val completedAtMillis: Long
+    val completedAtMillis: Long,
+    val incremental: Boolean = false
+)
+
+private data class MediaStoreGeneration(
+    val version: String,
+    val generation: Long
 )
 
 /**
  * Reads Android's indexed video collection and stages bounded batches in Room.
- * A complete query is published atomically; failed or cancelled queries leave the
- * previous visible snapshot intact. PARTIAL means the exact set currently visible
- * under Android's selected-media grant, not an additive hint.
+ *
+ * API 30+ can use GENERATION_MODIFIED when full permission and a matching MediaStore
+ * version/checkpoint are available. Partial access, older Android versions, periodic
+ * reconciliation, and invalidated checkpoints always use a complete accessible snapshot.
+ * Complete snapshots are what reconcile deletions; incremental runs upsert additions and
+ * modifications, while the scheduled full reconciliation catches removals.
  */
 class MediaStoreVideoScanner(
+    private val context: Context,
     private val resolver: ContentResolver,
     private val repository: MediaLibraryRepository,
     private val snapshotDao: SafSnapshotDao,
@@ -38,124 +50,210 @@ class MediaStoreVideoScanner(
 ) {
     private val scanMutex = Mutex()
 
-    suspend fun scan(permissionScope: VideoPermissionScope): Result<MediaScanResult> =
-        scanMutex.withLock {
-            withContext(Dispatchers.IO) {
-                val sourceKey = SOURCE_KEY
-                val previousState = repository.getScanState(sourceKey)
-                val previousSuccess = previousState?.lastSuccessfulScanMillis
+    suspend fun scan(
+        permissionScope: VideoPermissionScope,
+        allowIncremental: Boolean = false
+    ): Result<MediaScanResult> = scanMutex.withLock {
+        withContext(Dispatchers.IO) {
+            val sourceKey = SOURCE_KEY
+            val previousState = repository.getScanState(sourceKey)
+            val previousSuccess = previousState?.lastSuccessfulScanMillis
 
-                if (permissionScope == VideoPermissionScope.DENIED) {
-                    snapshotDao.clearStagedForSource(sourceKey)
-                    repository.markSourceUnavailable(sourceKey)
-                    repository.refreshFolderIndex(
-                        sourceKey,
-                        VideoPermissionScope.PARTIAL,
-                        clock()
-                    )
-                    repository.saveScanState(
-                        ScanStateEntity(
-                            sourceKey = sourceKey,
-                            lastSuccessfulScanMillis = previousSuccess,
-                            permissionScope = permissionScope.name,
-                            inProgressSinceMillis = null,
-                            lastError = "Video permission is not granted"
-                        )
-                    )
-                    return@withContext Result.failure(
-                        SecurityException("Video permission is not granted")
-                    )
-                }
-
-                val latestStaged = snapshotDao.latestStagedGenerationMillis(sourceKey) ?: 0L
-                val generation = maxOf(
-                    clock(),
-                    nextTimestamp(previousSuccess),
-                    nextTimestamp(latestStaged)
+            if (permissionScope == VideoPermissionScope.DENIED) {
+                snapshotDao.clearStagedForSource(sourceKey)
+                repository.markSourceUnavailable(sourceKey)
+                repository.refreshFolderIndex(
+                    sourceKey,
+                    VideoPermissionScope.PARTIAL,
+                    clock()
                 )
                 repository.saveScanState(
                     ScanStateEntity(
                         sourceKey = sourceKey,
                         lastSuccessfulScanMillis = previousSuccess,
                         permissionScope = permissionScope.name,
-                        inProgressSinceMillis = generation,
-                        lastError = null
+                        inProgressSinceMillis = null,
+                        lastError = "Video permission is not granted",
+                        mediaStoreVersion = previousState?.mediaStoreVersion,
+                        mediaStoreGeneration = previousState?.mediaStoreGeneration
                     )
                 )
+                return@withContext Result.failure(
+                    SecurityException("Video permission is not granted")
+                )
+            }
 
-                try {
-                    val count = queryAndStage(generation)
-                    currentCoroutineContext().ensureActive()
+            val generationSnapshot = readGenerationSnapshot()
+            val incremental = MediaStoreScanPolicy.shouldUseIncremental(
+                apiLevel = Build.VERSION.SDK_INT,
+                permissionScope = permissionScope,
+                previousState = previousState,
+                currentVersion = generationSnapshot?.version,
+                currentGeneration = generationSnapshot?.generation,
+                forceFull = !allowIncremental
+            )
+            val scanTimestamp = nextTimestamp(
+                maxOf(
+                    clock(),
+                    previousSuccess ?: 0L,
+                    snapshotDao.latestStagedGenerationMillis(sourceKey) ?: 0L
+                )
+            )
 
-                    // The staged set is the exact accessible snapshot for both FULL
-                    // and PARTIAL permission. Missing rows are hidden, never deleted.
-                    snapshotDao.publishMediaStoreSnapshot(sourceKey, generation)
+            repository.saveScanState(
+                ScanStateEntity(
+                    sourceKey = sourceKey,
+                    lastSuccessfulScanMillis = previousSuccess,
+                    permissionScope = permissionScope.name,
+                    inProgressSinceMillis = scanTimestamp,
+                    lastError = null,
+                    mediaStoreVersion = previousState?.mediaStoreVersion,
+                    mediaStoreGeneration = previousState?.mediaStoreGeneration
+                )
+            )
 
-                    val completedAt = clock()
-                    // Once the media snapshot commits, finish its folder projection and
-                    // success marker even if the caller is cancelled during UI teardown.
-                    withContext(NonCancellable) {
+            try {
+                var usedIncremental = incremental
+                val count = if (usedIncremental) {
+                    try {
+                        queryAndStage(
+                            generationMillis = scanTimestamp,
+                            modifiedAfterGeneration = previousState!!.mediaStoreGeneration,
+                            modifiedThroughGeneration = generationSnapshot!!.generation
+                        )
+                    } catch (incrementalError: Exception) {
+                        if (incrementalError is CancellationException) throw incrementalError
+                        // A provider may advertise generation support but reject the delta
+                        // query. Discard its partial stage and recover with a full snapshot.
+                        snapshotDao.clearStagedForSource(sourceKey)
+                        usedIncremental = false
+                        queryAndStage(scanTimestamp)
+                    }
+                } else {
+                    queryAndStage(scanTimestamp)
+                }
+                currentCoroutineContext().ensureActive()
+
+                val completedAt = clock()
+                val successfulState = ScanStateEntity(
+                    sourceKey = sourceKey,
+                    lastSuccessfulScanMillis = scanTimestamp,
+                    permissionScope = permissionScope.name,
+                    inProgressSinceMillis = null,
+                    lastError = null,
+                    mediaStoreVersion = generationSnapshot?.version,
+                    // The token is captured before querying. Any media changes during the
+                    // query therefore remain newer than this checkpoint and are picked up
+                    // by the next incremental reconciliation.
+                    mediaStoreGeneration = generationSnapshot?.generation
+                )
+
+                if (usedIncremental) {
+                    if (count > 0) {
+                        snapshotDao.publishMediaStoreDelta(
+                            sourceKey,
+                            scanTimestamp,
+                            successfulState
+                        )
+                    } else {
+                        snapshotDao.clearStagedForSource(sourceKey)
+                        repository.saveScanState(successfulState)
+                    }
+                } else {
+                    snapshotDao.publishMediaStoreFullSnapshot(
+                        sourceKey,
+                        scanTimestamp,
+                        successfulState
+                    )
+                }
+
+                // Once the media snapshot/delta commits, finish its folder projection even
+                // if the Activity or WorkManager caller is cancelled during teardown.
+                withContext(NonCancellable) {
+                    if (!usedIncremental || count > 0) {
                         repository.refreshFolderIndex(sourceKey, permissionScope, completedAt)
+                    }
+                }
+                Result.success(
+                    MediaScanResult(count, permissionScope, completedAt, usedIncremental)
+                )
+            } catch (cancelled: CancellationException) {
+                withContext(NonCancellable) {
+                    runCatching { snapshotDao.clearStagedForSource(sourceKey) }
+                    runCatching {
                         repository.saveScanState(
                             ScanStateEntity(
-                                sourceKey = sourceKey,
-                                lastSuccessfulScanMillis = generation,
-                                permissionScope = permissionScope.name,
-                                inProgressSinceMillis = null,
-                                lastError = null
+                                sourceKey, previousSuccess, permissionScope.name,
+                                null, "Scan cancelled",
+                                previousState?.mediaStoreVersion,
+                                previousState?.mediaStoreGeneration
                             )
                         )
                     }
-                    Result.success(MediaScanResult(count, permissionScope, completedAt))
-                } catch (cancelled: CancellationException) {
-                    withContext(NonCancellable) {
-                        runCatching { snapshotDao.clearStagedForSource(sourceKey) }
-                        runCatching {
-                            repository.saveScanState(
-                                ScanStateEntity(
-                                    sourceKey, previousSuccess, permissionScope.name,
-                                    null, "Scan cancelled"
-                                )
-                            )
-                        }
-                    }
-                    throw cancelled
-                } catch (error: Exception) {
-                    withContext(NonCancellable) {
-                        runCatching { snapshotDao.clearStagedForSource(sourceKey) }
-                        runCatching {
-                            repository.saveScanState(
-                                ScanStateEntity(
-                                    sourceKey,
-                                    previousSuccess,
-                                    permissionScope.name,
-                                    null,
-                                    error.message ?: error.javaClass.simpleName
-                                )
-                            )
-                        }
-                    }
-                    Result.failure(error)
                 }
+                throw cancelled
+            } catch (error: Exception) {
+                withContext(NonCancellable) {
+                    runCatching { snapshotDao.clearStagedForSource(sourceKey) }
+                    runCatching {
+                        repository.saveScanState(
+                            ScanStateEntity(
+                                sourceKey,
+                                previousSuccess,
+                                permissionScope.name,
+                                null,
+                                error.message ?: error.javaClass.simpleName,
+                                previousState?.mediaStoreVersion,
+                                previousState?.mediaStoreGeneration
+                            )
+                        )
+                    }
+                }
+                Result.failure(error)
             }
         }
+    }
 
-    private suspend fun queryAndStage(generationMillis: Long): Int {
+    private fun readGenerationSnapshot(): MediaStoreGeneration? {
+        if (Build.VERSION.SDK_INT < 30) return null
+        return runCatching {
+            MediaStoreGeneration(
+                version = MediaStore.getVersion(context, MediaStore.VOLUME_EXTERNAL),
+                generation = MediaStore.getGeneration(context, MediaStore.VOLUME_EXTERNAL)
+            )
+        }.getOrNull()
+    }
+
+    private suspend fun queryAndStage(
+        generationMillis: Long,
+        modifiedAfterGeneration: Long? = null,
+        modifiedThroughGeneration: Long? = null
+    ): Int {
         val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(
-            MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.MIME_TYPE,
-            MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE,
-            MediaStore.Video.Media.DATE_ADDED,
-            MediaStore.Video.Media.DATE_MODIFIED,
-            MediaStore.Video.Media.RELATIVE_PATH
-        )
+        val incremental = modifiedAfterGeneration != null && modifiedThroughGeneration != null
+        val projection = buildList {
+            add(MediaStore.Video.Media._ID)
+            add(MediaStore.Video.Media.DISPLAY_NAME)
+            add(MediaStore.Video.Media.MIME_TYPE)
+            add(MediaStore.Video.Media.DURATION)
+            add(MediaStore.Video.Media.SIZE)
+            add(MediaStore.Video.Media.DATE_ADDED)
+            add(MediaStore.Video.Media.DATE_MODIFIED)
+            add(MediaStore.Video.Media.RELATIVE_PATH)
+            if (incremental) add(MediaStore.MediaColumns.GENERATION_MODIFIED)
+        }.toTypedArray()
+        val selection = if (incremental) {
+            "${MediaStore.MediaColumns.GENERATION_MODIFIED} > ? AND " +
+                "${MediaStore.MediaColumns.GENERATION_MODIFIED} <= ?"
+        } else null
+        val selectionArgs = if (incremental) {
+            arrayOf(modifiedAfterGeneration.toString(), modifiedThroughGeneration.toString())
+        } else null
+
         var discovered = 0
         val batch = ArrayList<SafStagedMediaEntity>(BATCH_SIZE)
 
-        resolver.query(collection, projection, null, null, null)?.use { cursor ->
+        resolver.query(collection, projection, selection, selectionArgs, null)?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
             val nameColumn = cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)
             val mimeColumn = cursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE)
@@ -195,11 +293,8 @@ class MediaStoreVideoScanner(
         return discovered
     }
 
-    private fun nextTimestamp(value: Long?): Long = when {
-        value == null || value <= 0L -> 0L
-        value == Long.MAX_VALUE -> Long.MAX_VALUE
-        else -> value + 1L
-    }
+    private fun nextTimestamp(value: Long): Long =
+        if (value == Long.MAX_VALUE) Long.MAX_VALUE else value + 1L
 
     private fun Cursor.stringOrNull(index: Int): String? =
         if (index < 0 || isNull(index)) null else getString(index)
