@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NorthstarDatabaseMigrationTest {
     @Test
-    fun migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable() = runBlocking {
+    fun migrationFromV1ToV3PreservesLibraryAndAddsIncrementalCheckpointColumns() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val databaseName = "northstar-migration-${System.nanoTime()}.db"
         val databaseFile = context.getDatabasePath(databaseName)
@@ -56,7 +56,7 @@ class NorthstarDatabaseMigrationTest {
         }
 
         val migrated = Room.databaseBuilder(context, NorthstarDatabase::class.java, databaseName)
-            .addMigrations(NorthstarDatabase.MIGRATION_1_2)
+            .addMigrations(NorthstarDatabase.MIGRATION_1_2, NorthstarDatabase.MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
         try {
@@ -78,6 +78,18 @@ class NorthstarDatabaseMigrationTest {
             assertCount(db, "scan_states", 1)
             assertCount(db, "new_content_states", 1)
             assertCount(db, "external_tree_grants", 1)
+            db.query("PRAGMA table_info(scan_states)").use { cursor ->
+                val names = buildSet {
+                    val nameColumn = cursor.getColumnIndexOrThrow("name")
+                    while (cursor.moveToNext()) add(cursor.getString(nameColumn))
+                }
+                assertTrue("MediaStore version checkpoint column must exist", "mediaStoreVersion" in names)
+                assertTrue("MediaStore generation checkpoint column must exist", "mediaStoreGeneration" in names)
+            }
+            val migratedScanState = migrated.scanStateDao().get("saf:test-source")
+            assertNotNull("Existing scan state must survive migration", migratedScanState)
+            assertEquals(null, migratedScanState?.mediaStoreVersion)
+            assertEquals(null, migratedScanState?.mediaStoreGeneration)
 
             db.query(
                 "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'saf_staged_media'"
@@ -179,6 +191,61 @@ class NorthstarDatabaseMigrationTest {
 
             assertEquals(true, database.mediaItemDao().findByKey("original")?.isAvailable)
             assertTrue(database.mediaItemDao().findByKey("incomplete") == null)
+        } finally {
+            database.close()
+        }
+    }
+
+    
+    @Test
+    fun mediaStoreDeltaUpdatesChangedRowsWithoutHidingUnchangedRowsAndCommitsCheckpoint() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val database = Room.inMemoryDatabaseBuilder(
+            context, NorthstarDatabase::class.java
+        ).allowMainThreadQueries().build()
+        try {
+            val sourceKey = "mediastore:external"
+            fun media(key: String, name: String) = MediaItemEntity(
+                key, "content://media/$key", name, "video/mp4", 1000L, 100L,
+                10L, 20L, "MEDIA_STORE", sourceKey, "Movies", true, 100L
+            )
+            database.mediaItemDao().upsertAll(
+                listOf(media("unchanged", "unchanged.mp4"), media("changed", "old-name.mp4"))
+            )
+            database.safSnapshotDao().stageMedia(
+                listOf(
+                    SafStagedMediaEntity(
+                        sourceKey, 400L, "changed", "content://media/changed",
+                        "new-name.mp4", "video/mp4", 1000L, 100L, 10L, 30L,
+                        "MEDIA_STORE", "Movies"
+                    ),
+                    SafStagedMediaEntity(
+                        sourceKey, 400L, "added", "content://media/added",
+                        "added.mp4", "video/mp4", 1000L, 100L, 10L, 30L,
+                        "MEDIA_STORE", "Movies"
+                    )
+                )
+            )
+            val checkpoint = ScanStateEntity(
+                sourceKey, 500L, "FULL", null, null, "volume-v1", 55L
+            )
+
+            database.safSnapshotDao().publishMediaStoreDelta(sourceKey, 400L, checkpoint)
+
+            val available = database.mediaItemDao().availableForSource(sourceKey)
+                .associateBy { it.mediaKey }
+            assertEquals(setOf("unchanged", "changed", "added"), available.keys)
+            assertEquals("new-name.mp4", available["changed"]?.displayName)
+            assertEquals("unchanged.mp4", available["unchanged"]?.displayName)
+            val saved = database.scanStateDao().get(sourceKey)
+            assertEquals("volume-v1", saved?.mediaStoreVersion)
+            assertEquals(55L, saved?.mediaStoreGeneration)
+            database.openHelper.writableDatabase.query(
+                "SELECT COUNT(*) FROM saf_staged_media WHERE sourceKey = '$sourceKey'"
+            ).use {
+                assertTrue(it.moveToFirst())
+                assertEquals(0, it.getInt(0))
+            }
         } finally {
             database.close()
         }
