@@ -5,9 +5,13 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.northstar.player.NorthstarApplication
 import com.northstar.player.core.permissions.VideoPermissionScope
+import com.northstar.player.data.storage.SafGrantReconciliationAction
+import com.northstar.player.data.storage.SafGrantReconciliationPolicy
 
 /**
- * Deferrable, process-safe scan entry point. WorkManager owns retry and lifecycle handling.
+ * Deferrable, process-safe reconciliation entry point. WorkManager owns retry and lifecycle.
+ * SAF is reconciled without repeatedly walking every mounted tree: unavailable sources are
+ * hidden, and a tree is fully re-indexed when it transitions back to reachable.
  */
 class MediaLibraryScanWorker(
     appContext: Context,
@@ -17,26 +21,54 @@ class MediaLibraryScanWorker(
         val app = applicationContext as NorthstarApplication
         val scope = app.videoPermissionChecker.currentScope()
 
-        // Permission is user-controlled. Reconcile the visible library to an empty
-        // accessible set while retaining local metadata; denial is not a retryable error.
-        if (scope == VideoPermissionScope.DENIED) {
-            app.mediaStoreVideoScanner.scan(scope)
-            return if (app.videoPermissionChecker.currentScope() == scope) {
-                Result.success()
-            } else {
-                Result.retry()
-            }
-        }
-
-        val scan = app.mediaStoreVideoScanner.scan(scope)
-        // If Android's selected-media set changed during the scan, do not treat the
-        // just-published visibility set as current; retry against the new grant scope.
+        val mediaStoreScan = app.mediaStoreVideoScanner.scan(scope)
         if (app.videoPermissionChecker.currentScope() != scope) return Result.retry()
 
-        return scan.fold(
+        val safNeedsRetry = try {
+            val changes = app.safTreeGrantManager.refreshGrantAvailabilityChanges()
+            var needsRetry = false
+            changes.forEach { change ->
+                when (SafGrantReconciliationPolicy.action(
+                    wasAvailable = change.wasAvailable,
+                    isAvailable = change.grant.isAvailable
+                )) {
+                    SafGrantReconciliationAction.MARK_UNAVAILABLE -> {
+                        app.safTreeScanner.markUnavailable(
+                            change.grant,
+                            "External storage is disconnected or its folder permission is unavailable"
+                        )
+                    }
+                    SafGrantReconciliationAction.RESCAN -> {
+                        val result = app.safTreeScanner.scan(change.grant)
+                        if (result.isFailure) {
+                            app.safTreeScanner.markUnavailable(
+                                change.grant,
+                                "External storage could not be re-indexed: " +
+                                    (result.exceptionOrNull()?.message ?: "provider unavailable")
+                            )
+                            needsRetry = true
+                        }
+                    }
+                    SafGrantReconciliationAction.NONE -> Unit
+                }
+            }
+            needsRetry
+        } catch (_: Exception) {
+            true
+        }
+
+        if (safNeedsRetry) {
+            return if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
+        }
+
+        return mediaStoreScan.fold(
             onSuccess = { Result.success() },
             onFailure = {
-                if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
+                // DENIED is a valid permission state after the scanner has reconciled the
+                // visible set to empty. A permission change during this work is retried above.
+                if (scope == VideoPermissionScope.DENIED) Result.success()
+                else if (runAttemptCount < MAX_RETRIES) Result.retry()
+                else Result.failure()
             }
         )
     }
