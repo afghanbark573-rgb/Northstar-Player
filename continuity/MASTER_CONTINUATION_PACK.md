@@ -498,3 +498,43 @@ The folder NEW-state lifecycle is complete for the tested commit. Before choosin
 4. Before coding, declare Main Quest, bundled Side Quests, affected files, risks, acceptance criteria, and regression tests. Avoid casual Room schema changes.
 5. Preserve local-first privacy, package ID `com.northstar.player`, permanent signing identity, AMOLED black-and-white direction, exactly three library modes, and one coordinated public release for all eight product areas. No intermediate APK distribution.
 6. Physical USB/SD, real picker/persisted grants, Xiaomi 14 acceptance, signed install-over-existing upgrade and manual pull gesture remain device gates until tested on real hardware.
+
+
+
+
+## CURRENT CHECKPOINT UPDATE — 26 NOVEMBER 2026 — AUTOMATIC SAF GRANT RECONCILIATION VERIFIED
+
+### Exact source and CI
+- Native branch: `phase-0/release-signing`
+- Exact final source HEAD tested: `e37544cd19294774846e19dbd72657cb4307d7d4`
+- CI run [#97 / 45775813217](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45775813217) completed **success** on the exact final commit. Live native branch HEAD was confirmed to match.
+- Debug job passed: `:app:testDebugUnitTest :app:assembleDebug`; emulator instrumentation completed successfully; diagnostic, Room schema and debug APK artifacts uploaded.
+- Release job passed: signed release APK built, `apksigner` signature verification passed, release artifact uploaded.
+
+### Instrumentation evidence
+Diagnostics artifact ID `15096549503`, ZIP SHA-256 `f032950c5600d4ebe966aa9e6f3418ad8b20de1f8e5b696fe3c3a4c748ed05d1`.
+XML report: **4 tests, 0 failures, 0 errors, 0 skipped**:
+1. `mediaStoreSnapshotPublicationHidesMissingRowsWithoutDeletingTheirMetadata`
+2. `abandonedMediaStoreStageCanBeDiscardedWithoutChangingVisibleSnapshot`
+3. `migrationFromV1PreservesLibraryAndCreatesIsolatedStagingTable`
+4. `createsAndListsDirectoryInsideNestedDocumentProviderFolder`
+
+The SAF reconciliation policy's four JVM unit tests cover new disconnection, persistent unavailability, reconnection-triggered rescan, and avoiding recursive rescans of continuously mounted trees. The `:app:testDebugUnitTest` task passed.
+
+### Build artifacts
+- Signed release artifact ID `15096530730`; ZIP SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`; extracted `app-release.apk` SHA-256 `3c714faaadfa1ffd73aa9b004dba6569b6ba64f1cdd5ddf8a2cd260c0232bfb2`.
+- Debug artifact ID `15096619296`; ZIP SHA-256 `5ac2cc07448b37ea40aaec34c3da244c3441b9534ed3fe84dca2aa20fa05e3d7`.
+- Room schema artifact ID `15097206733`. No Room schema change/migration was introduced.
+
+### Implemented behavior
+- Reconcile persisted SAF read grants by checking provider-root reachability.
+- Mark revoked/unreachable sources unavailable while preserving historical media metadata and folder identity.
+- When a previously unavailable source becomes reachable, perform a full SAF rescan to restore its current snapshot.
+- Do not recursively rescan a continuously reachable tree during background/foreground availability checks.
+- Preserve SAF/MediaStore source isolation; no Room schema change.
+
+### Remaining verification gates
+Physical USB/SD provider behavior, actual Android picker and persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing, and manual pull gesture behavior remain unverified until tested on the physical device. CI success does not close these gates. No APK distributed. All eight approved product areas remain one coordinated public release.
+
+### Immediate next-chat instruction
+Confirm live native and continuity branch heads, read the product spec and integrated implementation plan, inspect current source and status, then choose the next internal milestone based on evidence. Before coding, state Main Quest, bundled Side Quests, affected files, risks, acceptance criteria and regression tests. Preserve package/signing identity, local-first privacy, AMOLED black-and-white direction and the no-intermediate-APK rule.
