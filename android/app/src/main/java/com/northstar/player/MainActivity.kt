@@ -30,7 +30,12 @@ import com.northstar.player.data.library.LibraryRefreshTargets
 import com.northstar.player.data.library.LibraryViewMode
 import com.northstar.player.core.database.ExternalTreeGrantEntity
 import com.northstar.player.data.storage.SafSourceIdentity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -65,6 +70,8 @@ class MainActivity : ComponentActivity() {
     private var showingExternalStorage = false
     private var externalGrants = emptyList<ExternalTreeGrantEntity>()
     private var player: ExoPlayer? = null
+    private val thumbnailLoader by lazy { com.northstar.player.data.library.VideoThumbnailLoader(applicationContext) }
+    private val thumbnailScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var playerView: PlayerView? = null
     private var libraryObservation: Job? = null
     private var folderObservation: Job? = null
@@ -327,6 +334,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun render() {
+        thumbnailScope.coroutineContext.cancelChildren()
         if (!::content.isInitialized) return
         content.removeAllViews()
 
@@ -713,28 +721,32 @@ class MainActivity : ComponentActivity() {
 
     private fun addRow(video: LocalVideo) {
         val card = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(12, 11, 12, 11)
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(12, 10, 12, 10)
             setBackgroundColor(0xFF151515.toInt())
-            val params = LinearLayout.LayoutParams(-1, -2)
-            params.bottomMargin = 2
-            layoutParams = params
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = 2 }
             isClickable = true
             isFocusable = true
             setOnClickListener { play(video) }
         }
-        card.addView(TextView(this).apply {
+        card.addView(videoThumbnail(video, 104, 64), LinearLayout.LayoutParams(104, 64).apply {
+            marginEnd = 12
+        })
+        val details = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        details.addView(TextView(this).apply {
             text = video.name
             textSize = 14f
             maxLines = 2
             setTextColor(0xFFFFFFFF.toInt())
         })
-        card.addView(TextView(this).apply {
+        details.addView(TextView(this).apply {
             text = "${duration(video.duration)}  •  ${size(video.size)}"
             textSize = 11f
             setTextColor(0xFF999999.toInt())
             setPadding(0, 4, 0, 0)
         })
+        card.addView(details, LinearLayout.LayoutParams(0, -2, 1f))
         content.addView(card)
     }
 
@@ -749,17 +761,34 @@ class MainActivity : ComponentActivity() {
                 orientation = LinearLayout.VERTICAL
                 setPadding(10, 12, 10, 12)
                 setBackgroundColor(0xFF151515.toInt())
-                layoutParams = LinearLayout.LayoutParams(0, 112, 1f).apply { marginEnd = 5 }
+                layoutParams = LinearLayout.LayoutParams(0, 164, 1f).apply { marginEnd = 5 }
                 isClickable = true
                 isFocusable = true
                 setOnClickListener { play(video) }
             }
-            tile.addView(TextView(this).apply { text = "▶ VIDEO"; textSize = 10f; setTextColor(0xFFBBBBBB.toInt()) })
+            tile.addView(videoThumbnail(video, -1, 88), LinearLayout.LayoutParams(-1, 88))
             tile.addView(TextView(this).apply { text = video.name; textSize = 12f; maxLines = 2; setTextColor(0xFFFFFFFF.toInt()); setPadding(0, 7, 0, 3) })
             tile.addView(TextView(this).apply { text = duration(video.duration); textSize = 10f; setTextColor(0xFF999999.toInt()) })
             row?.addView(tile)
         }
         if (items.size % 2 != 0) row?.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+    }
+
+    private fun videoThumbnail(video: LocalVideo, width: Int, height: Int): ImageView {
+        val image = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(width, height)
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setBackgroundColor(0xFF242424.toInt())
+            contentDescription = "Video thumbnail: ${video.name}"
+            tag = video.uri.toString()
+        }
+        thumbnailScope.launch {
+            val bitmap = runCatching { thumbnailLoader.load(video.uri) }.getOrNull()
+            if (bitmap != null && image.tag == video.uri.toString()) {
+                image.setImageBitmap(bitmap)
+            }
+        }
+        return image
     }
 
     private fun play(video: LocalVideo) {
@@ -836,6 +865,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        thumbnailScope.cancel()
         libraryObservation?.cancel()
         folderObservation?.cancel()
         grantObservation?.cancel()
