@@ -182,3 +182,12 @@ Package/application ID `com.northstar.player`; preserve permanent signing identi
 - UI integration commit: `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`.
 - GitHub Actions run [45952500122](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45952500122) was triggered for exact source HEAD `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; at this checkpoint both debug and release jobs are still in progress. Do not claim build/test/signature success until the run completes and reports are inspected.
 - No APK has been distributed. Physical-device acceptance remains outstanding.
+
+
+## Thumbnail loader hardening — 27 November 2026
+
+- Corrective source commit: `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`. Android 10+ provider thumbnail calls now propagate coroutine cancellation to Android `CancellationSignal`; Android 8.1+ legacy extraction requests aspect-ratio-preserving scaled frames within 480×270, and Android 8.0 scales the extracted frame before caching.
+- Existing limits remain: two concurrent decode operations and an 8 MB LRU cache; work stays off the main thread; both MediaStore and SAF URIs are supported; failed thumbnails remain non-fatal.
+- Authoritative corrected-source CI: [run #116 / 45953446757](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45953446757), exact source SHA `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`. At this update, debug unit-test/build and signed release build steps are still running. Await overall completion and inspect instrumentation diagnostics before marking CI verified.
+- Earlier run #115 / 45952500122 is for pre-hardening source `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; release job succeeded and debug unit/build step passed, but migration instrumentation remains in progress. It does not certify the corrected source.
+- No APK distribution. Device acceptance, including Xiaomi 14, actual MediaStore/SAF provider thumbnails, scrolling/memory performance, remains outstanding. Preserve one coordinated public release and all existing package, signing, privacy, three-mode Library and design guardrails.
