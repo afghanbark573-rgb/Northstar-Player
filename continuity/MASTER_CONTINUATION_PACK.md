@@ -606,3 +606,21 @@ Generation-aware incremental MediaStore scanning is now CI-verified. Incremental
 
 ### Unchanged gates
 No APK was distributed. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing and manual pull gesture behavior remain unverified device gates. Preserve package ID/signing identity, local-first privacy, AMOLED black-and-white theme, exactly three Library modes, all eight areas in one coordinated public release, and no intermediate APK distribution.
+
+
+## VERIFIED CHECKPOINT — 27 NOVEMBER 2026 — ROOM SCHEMA V2/V3 CHECK-IN COMPLETE
+
+- Native branch: `phase-0/release-signing`.
+- Generated Room schema snapshots are now committed under `android/app/schemas/com.northstar.player.core.database.NorthstarDatabase/`:
+  - `2.json` — database version 2, identity hash `48608d98b3b10817ec5775638633296d`; source artifact ID `15097206733`, ZIP SHA-256 `890eaf76897b3ea5e926b684bfe5999db2ceca6c15165d2aa8f9d279873e5f97`; schema commit `4b61bf709e318eb45c30403aa2704c2b46fb1f6e`.
+  - `3.json` — database version 3, identity hash `9a446e872052b86ac50b30160a496191`; source artifact ID `15099991005`, ZIP SHA-256 `f0e05b986fde24e0efab95f0cafe1518e4edd4cdb1bf639b6c6e368176bd03fb`; schema commit `19a4287a831599471be33b6e1b4f2573e76621c6`.
+- Both committed JSON files were fetched back from GitHub and parsed. Each reports the expected database version, identity hash and nine entities. Version 2 `scan_states` has the original five fields; version 3 adds nullable `mediaStoreVersion` (TEXT) and `mediaStoreGeneration` (INTEGER). No historical v2 schema was regenerated from v3.
+- The schema files were copied from their exact CI artifact JSON payloads; JSON formatting is compacted, but schema content/identity is retained. Artifact ZIP digests above identify the original CI evidence.
+- CI remains the prior exact-source verification: Actions run [45782253016](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45782253016), source SHA `49a73222f29b28fba8924210aef5a8b10fe17fdf`; debug and signed-release jobs passed, with 5 emulator instrumentation tests passing (0 failures/errors/skips). The schema-only commits do not change application code and have not yet been independently rebuilt.
+- Native branch head after schema check-in: `19a4287a831599471be33b6e1b4f2573e76621c6` before the status-document commit(s). Verify the live head again after documentation updates.
+- Incremental MediaStore deltas upsert new/changed rows; generic deletions are reconciled by complete manual refresh and the 12-hour forced full scan. Do not imply immediate deletion detection.
+- No APK was distributed. Physical USB/SD provider behavior, actual picker/persisted-grant lifecycle, Xiaomi 14 acceptance, signed install-over-existing, and manual pull/Private Library long-pull behavior remain unverified device gates.
+- No new engineering milestone has been started. Next: inspect the current product spec, integrated implementation plan and native source/branch heads, then declare the next Main Quest, bundled Side Quests, files, risks, acceptance criteria and regression tests before coding.
+
+### Preserved product and release guardrails
+Package/application ID `com.northstar.player`; preserve permanent signing identity; local-first with no automatic cloud upload; AMOLED black-and-white design; exactly three Library modes; all eight approved product areas ship together in one coordinated public release; no intermediate APK distribution; never commit signing secrets or keystore bytes.
