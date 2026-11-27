@@ -894,3 +894,14 @@ Package/application ID `com.northstar.player`; preserve permanent signing identi
 - UI integration commit: `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`.
 - GitHub Actions run [45952500122](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45952500122) was triggered for exact source HEAD `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; at this checkpoint both debug and release jobs are still in progress. Do not claim build/test/signature success until the run completes and reports are inspected.
 - No APK has been distributed. Physical-device acceptance remains outstanding.
+
+
+## Thumbnail loader hardening — 27 November 2026
+
+- Follow-up source commit: `e7fa4077d9213b6e6fc8288a1529030cb8c7c251` (`fix(library): cancel obsolete thumbnail provider requests`).
+- The Android 10+ `ContentResolver.loadThumbnail` call now runs on `Dispatchers.IO` through a cancellable continuation. Coroutine cancellation calls the Android `CancellationSignal`, allowing stale provider work to stop and release one of the two decode permits.
+- Android 8.1+ uses `MediaMetadataRetriever.getScaledFrameAtTime` with dimensions bounded by the 480×270 target while preserving source aspect ratio. Android 8.0 uses the available frame API and scales the result before caching.
+- The 8 MB LRU cache, two-operation decode limit, off-main-thread processing, MediaStore/SAF URI support, stale-view guard, and neutral placeholder behavior remain in place. No Room schema change.
+- Corrected-source CI: Actions [run #116 / 45953446757](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45953446757), exact HEAD `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`. At documentation time, both jobs are in progress: debug unit-test/build step and signed release build step. Do not mark the milestone CI-verified until both jobs complete and emulator instrumentation reports are inspected.
+- Earlier run #115 / 45952500122 tested pre-hardening source `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; its release job passed signature verification and uploaded an artifact, and its debug unit-test/build step passed, but its migration instrumentation step remains in progress. It is not the authoritative run for the corrected source.
+- No APK has been distributed. Physical MediaStore/SAF thumbnail behavior, scrolling/memory performance, and Xiaomi 14 acceptance remain device gates. All eight product areas remain one coordinated public release.
