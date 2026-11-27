@@ -191,3 +191,10 @@ Package/application ID `com.northstar.player`; preserve permanent signing identi
 - Authoritative corrected-source CI: [run #116 / 45953446757](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45953446757), exact source SHA `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`. At this update, debug unit-test/build and signed release build steps are still running. Await overall completion and inspect instrumentation diagnostics before marking CI verified.
 - Earlier run #115 / 45952500122 is for pre-hardening source `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; release job succeeded and debug unit/build step passed, but migration instrumentation remains in progress. It does not certify the corrected source.
 - No APK distribution. Device acceptance, including Xiaomi 14, actual MediaStore/SAF provider thumbnails, scrolling/memory performance, remains outstanding. Preserve one coordinated public release and all existing package, signing, privacy, three-mode Library and design guardrails.
+
+
+### CI update — corrected thumbnail source, 27 November 2026
+
+- Run #116 / `45953446757`, exact source `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`: debug unit tests and debug APK compilation passed; emulator migration instrumentation remains in progress.
+- Release keystore restoration passed, but `:app:assembleRelease` stopped at Maven dependency resolution after Maven Central returned HTTP 429 for `kotlinx-coroutines-android:1.10.2`. Signature verification and artifact upload were skipped. This is a transient external repository rate limit, not evidence of a source compile failure.
+- GitHub would not rerun the failed release job while this workflow run was still active. Retry it after the run completes; do not claim CI green until the retry and instrumentation both pass.
