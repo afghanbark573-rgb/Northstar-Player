@@ -488,3 +488,20 @@ The approved implementation plan is now in active development on `phase-0/releas
 
 ### Preserved product and release guardrails
 Package/application ID `com.northstar.player`; preserve permanent signing identity; local-first with no automatic cloud upload; AMOLED black-and-white design; exactly three Library modes; all eight approved product areas ship together in one coordinated public release; no intermediate APK distribution; never commit signing secrets or keystore bytes.
+
+
+## IN-PROGRESS MILESTONE — 27 NOVEMBER 2026 — ASYNCHRONOUS LIBRARY THUMBNAILS
+
+### Scope declared before implementation
+- **Main Quest:** replace text-only video placeholders with real, asynchronously loaded video thumbnails in both List and Grid layouts.
+- **Bundled Side Quests:** use the same loader for MediaStore and SAF content URIs; bound decode concurrency and memory use; cancel obsolete view-load requests during re-render and Activity destruction; keep thumbnail failure non-fatal with a neutral placeholder.
+- **Files:** `android/app/src/main/java/com/northstar/player/data/library/VideoThumbnailLoader.kt`; `android/app/src/main/java/com/northstar/player/MainActivity.kt`.
+- **Risks:** provider thumbnail support varies; SAF URIs can become unavailable; decoding must never run on the main thread; fast search/render changes must not leave stale images attached to the wrong row.
+- **Acceptance criteria:** Android 10+ uses `ContentResolver.loadThumbnail`; Android 8/9 uses a MediaMetadataRetriever fallback; decode work is off-main-thread and limited to two concurrent operations; an 8 MB LRU cache bounds retained previews; both layouts display previews when providers can supply them; missing/unavailable thumbnails leave a safe placeholder; old requests are cancelled and cannot update a stale view.
+- **Regression gates:** existing unit tests, debug build, emulator Room/SAF instrumentation, signed release build and `apksigner` verification. No Room schema change.
+
+### Source and CI state
+- Helper implementation commit: `0e25e7d1a24a439b9fe1423e5078fa9fd3d17837`.
+- UI integration commit: `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`.
+- GitHub Actions run [45952500122](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45952500122) was triggered for exact source HEAD `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; at this checkpoint both debug and release jobs are still in progress. Do not claim build/test/signature success until the run completes and reports are inspected.
+- No APK has been distributed. Physical-device acceptance remains outstanding.
