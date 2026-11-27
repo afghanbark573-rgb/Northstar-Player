@@ -905,3 +905,10 @@ Package/application ID `com.northstar.player`; preserve permanent signing identi
 - Corrected-source CI: Actions [run #116 / 45953446757](https://github.com/afghanbark573-rgb/Northstar-Player/actions/runs/45953446757), exact HEAD `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`. At documentation time, both jobs are in progress: debug unit-test/build step and signed release build step. Do not mark the milestone CI-verified until both jobs complete and emulator instrumentation reports are inspected.
 - Earlier run #115 / 45952500122 tested pre-hardening source `3cc1eee0290b6f7e486badefbfa5cbadb9c6ff43`; its release job passed signature verification and uploaded an artifact, and its debug unit-test/build step passed, but its migration instrumentation step remains in progress. It is not the authoritative run for the corrected source.
 - No APK has been distributed. Physical MediaStore/SAF thumbnail behavior, scrolling/memory performance, and Xiaomi 14 acceptance remain device gates. All eight product areas remain one coordinated public release.
+
+
+### CI update — corrected thumbnail source, 27 November 2026
+
+- For run #116 / `45953446757` on `e7fa4077d9213b6e6fc8288a1529030cb8c7c251`, the debug `:app:testDebugUnitTest` and `:app:assembleDebug` step has completed successfully. `:app:connectedDebugAndroidTest` is still running; instrumentation results are not yet available.
+- The release keystore restore succeeded. `:app:assembleRelease` failed at dependency resolution because Maven Central returned HTTP 429 (Too Many Requests) for `org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2`; signature verification and artifact upload were skipped. This is a repository rate-limit failure, not a Kotlin compile error.
+- A release-job retry was attempted while the debug job kept the workflow run active; GitHub rejected it with 403 because the workflow run was still running. Retry the failed release job once the workflow run completes. Do not mark this run green until both jobs and emulator tests pass.
